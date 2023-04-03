@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS `ccj`.`users` (
   `point` INT,
   `rank_diff` INT DEFAULT NULL,
   `point_diff` INT DEFAULT NULL,
-  `create_date` DATETIME NULL DEFAULT CURRENT_TIMESTAMP
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS `ccj`.`timeline` (
@@ -17,5 +18,5 @@ CREATE TABLE IF NOT EXISTS `ccj`.`timeline` (
   `achievement` TEXT,
   `chara` TEXT,
   `point` INT,
-  `create_date` DATETIME NULL DEFAULT CURRENT_TIMESTAMP
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 );

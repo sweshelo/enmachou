@@ -78,20 +78,21 @@ const main = async() => {
     return new Promise((resolve, reject) => {
       connection.query(`SELECT * FROM users WHERE user_name = ?;`, data[0], (err, result) => {
         if(result){
-          if(result.length === 0){
-            console.log(data[0])
+          if([...result].length === 0){
             create.push(data)
+            resolve()
           }else{
-            const updateUserQuery = "UPDATE users SET ranking = ?, achievement = ?, chara = ?, point = ?, rank_diff = ?, point_diff = ? WHERE user_name = ?;"
+            const updateUserQuery = "UPDATE users SET ranking = ?, achievement = ?, chara = ?, point = ?, rank_diff = ?, point_diff = ?, updated_at = ? WHERE user_name = ?;"
             const diff = (data[0] == 'プレーヤー') ? null : data[4] - result[0].point
             const rank = (data[0] == 'プレーヤー') ? null : data[1] - result[0].ranking
-            connection.query(updateUserQuery, [data[1], data[2], data[3], data[4], rank, diff, data[0]], (err, result) => {
-              console.log('updated: ', data[0])
+            const date = (diff > 0) ? (new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' })) : result[0].updated_at
+            connection.query(updateUserQuery, [data[1], data[2], data[3], data[4], rank, diff, date, data[0]], (err, result) => {
+              resolve()
             })
           }
-          resolve()
         }
         if(err){
+          console.log(err)
           reject()
         }
       })
