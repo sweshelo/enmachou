@@ -1,0 +1,12 @@
+{
+  "name": "ccj",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^21.1.1"
+  },
+  "scripts":{
+    "start": "node index.js"
+  }
+}

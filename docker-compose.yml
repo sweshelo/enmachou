@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  app:
+    build: ./api
+    ports:
+      - "4400:4400"
+    volumes:
+      - ./api:/app
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=ccj
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=mydb
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=mydb
