@@ -12,6 +12,7 @@ services:
       - MYSQL_PASSWORD=password
       - MYSQL_DATABASE=ccj
     command: --default-authentication-plugin=mysql_native_password
+    restart: always
   app:
     build: ./api
     ports:
@@ -25,3 +26,4 @@ services:
       - MYSQL_DATABASE=ccj
     depends_on:
       - mysql
+    restart: always
