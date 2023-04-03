@@ -1,6 +1,17 @@
 version: "3"
 
 services:
+  mysql:
+    image: mysql:latest
+    volumes:
+      - ./docker/mysql:/docker-entrypoint-initdb.d
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=ccj
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=ccj
+    command: --default-authentication-plugin=mysql_native_password
   app:
     build: ./api
     ports:
@@ -11,11 +22,6 @@ services:
       - MYSQL_HOST=mysql
       - MYSQL_USER=ccj
       - MYSQL_PASSWORD=password
-      - MYSQL_DATABASE=mydb
+      - MYSQL_DATABASE=ccj
     depends_on:
       - mysql
-  mysql:
-    image: mysql:latest
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=mydb
