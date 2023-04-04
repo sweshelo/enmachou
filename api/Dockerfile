@@ -19,4 +19,4 @@ COPY . .
 EXPOSE 4400
 
 # 起動コマンド
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]
