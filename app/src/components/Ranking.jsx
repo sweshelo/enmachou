@@ -19,7 +19,7 @@ const Ranking = () => {
   const [ rankingData, setRankingData ] = useState([])
   useEffect(() => {
     const fetchRankingData = async() => {
-      const response = await fetch('http://192.168.1.10:4400/api/ranking')
+      const response = await fetch('https://enmachou.sweshelo.jp/api/ranking')
       const rankingArray = await response.json()
       setRankingData(rankingArray)
     }

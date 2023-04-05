@@ -28,6 +28,18 @@ services:
     depends_on:
       - mysql
     restart: always
+  front:
+    build: ./app
+    ports:
+      - "5500:5500"
+    volumes:
+      - ./app:/app
+    depends_on:
+      - app
+    restart: always
+    environment:
+      - PORT=5500
+
 volumes:
   mysql-data:
     driver: local

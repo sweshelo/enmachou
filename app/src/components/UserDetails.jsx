@@ -72,7 +72,7 @@ const UserDetails = ({props}) => {
   const { username } = useParams();
   useEffect(() => {
     const fetchUserDetailData = async() => {
-      const response = await fetch(`http://192.168.1.10:4400/api/users/${username}`)
+      const response = await fetch(`https://enmachou.sweshelo.jp/api/users/${username}`)
       const rankingArray = await response.json()
       setUserDetailData(rankingArray)
     }
