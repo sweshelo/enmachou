@@ -1,0 +1,38 @@
+.ranking{
+  min-width: 350px;
+  max-width: 1000px;
+  margin: 8px;
+}
+
+#ranking-wrapper{
+  display: flex;
+  justify-content: center;
+}
+
+.player{
+  display: block;
+  height: 60px;
+  margin: 8px 0;
+  border-radius: 5px;
+  background-color: white;
+  overflow: hidden;
+}
+
+.player:hover{
+  background-color: rgb(255, 240, 240);
+}
+
+.character{
+  margin-right: 8px;
+  float: left;
+}
+
+.userinfo-wrapper{
+  text-align: left;
+  float: left;
+  padding: 0px 5px;
+}
+
+a {
+  color: inherit;
+}

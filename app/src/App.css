@@ -1,0 +1,10 @@
+.App {
+  text-align: center;
+}
+
+header{
+  background: linear-gradient(to bottom, navy, rgb(20, 50, 90), navy);
+  color: white;
+  padding: 5px;
+}
+
