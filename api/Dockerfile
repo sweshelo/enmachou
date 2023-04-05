@@ -11,5 +11,7 @@ WORKDIR /app
 # ポートのエクスポート
 EXPOSE 4400
 
+ENV TZ=Asia/Tokyo
+
 # 起動コマンド
 CMD ["npm", "run", "dev"]
