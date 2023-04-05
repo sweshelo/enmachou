@@ -2,6 +2,7 @@ const { JSDOM } = require('jsdom')
 const mysql = require('mysql');
 const fs = require('fs');
 const express = require("express");
+const cors = require('cors');
 
 // 「yyyymmdd」形式の日付文字列に変換する関数
 function now() {
@@ -130,9 +131,10 @@ setInterval(() => {
 // ==== Web API ==== //
 const app = express();
 const server = app.listen(4400, () =>  console.log("Node.js is listening to PORT:" + server.address().port));
+app.use(cors());
 
 const ranking = (req, res) => {
-  const getLatestRankingFromTimelineQuery = "SELECT ranking, user_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at LIMIT 100) AS t ORDER BY ranking;";
+  const getLatestRankingFromTimelineQuery = "SELECT ranking, user_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
   connection.query(getLatestRankingFromTimelineQuery, (err, result) => {
     if(result){
       res.send(result)
@@ -149,9 +151,11 @@ const userinfo = (req, res) => {
       const average = pointDiff.reduce((acc, cur) => acc + cur, 0) / pointDiff.length;
       const latestRecord = result[result.length - 1]
       const response = {
-        'user': toFullWidth(req.params.username),
+        'user_name': toFullWidth(req.params.username),
         'achievement': latestRecord.achievement,
         'chara': latestRecord.chara,
+        'point': latestRecord.point,
+        'ranking': latestRecord.ranking,
         'online': (new Date() - new Date(latestRecord.created_at)) <= defaultOnlineThreshold * 60 * 1000,
         'average': average,
         'diff': pointDiff,
