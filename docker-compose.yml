@@ -4,6 +4,7 @@ services:
   mysql:
     build: ./docker/mysql
     volumes:
+      - mysql-data:/var/lib/mysql
       - ./docker/mysql:/docker-entrypoint-initdb.d
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     environment:
@@ -27,3 +28,6 @@ services:
     depends_on:
       - mysql
     restart: always
+volumes:
+  mysql-data:
+    driver: local
