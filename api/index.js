@@ -43,6 +43,7 @@ const connection = mysql.createConnection({
 // const
 const baseUrl = `https://p.eagate.573.jp/game/chase2jokers/ccj/ranking/index.html`
 const regExp = /ranking_icon_([0-9]{1,2}).png/;
+const defaultOnlineThreshold = 20;
 
 const main = async() => {
   const rankingData = []
@@ -151,7 +152,7 @@ const userinfo = (req, res) => {
         'user': toFullWidth(req.params.username),
         'achievement': latestRecord.achievement,
         'chara': latestRecord.chara,
-        'online': (new Date() - new Date(latestRecord.created_at)) <= 20 * 60 * 1000,
+        'online': (new Date() - new Date(latestRecord.created_at)) <= defaultOnlineThreshold * 60 * 1000,
         'average': average,
         'diff': pointDiff,
         'log': result,
@@ -163,7 +164,7 @@ const userinfo = (req, res) => {
 
 const online = (req, res) => {
   const getOnlineUserFromUsersQuery = "SELECT user_name FROM users WHERE updated_at > ?;"
-  const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : 20) * 1000 * 60))
+  const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
     res.send(result)
   })
