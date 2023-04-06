@@ -174,8 +174,8 @@ const userinfo = (req, res) => {
         'ranking': latestRecord.ranking,
         'online': (new Date() - new Date(latestRecord.created_at)) <= defaultOnlineThreshold * 60 * 1000,
         'average': average,
-        'diff': pointDiff,
-        'log': result,
+        'diff': pointDiff.reverse(),
+        'log': result.reverse(),
       }
       res.send(response)
     }

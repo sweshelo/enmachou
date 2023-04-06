@@ -57,7 +57,8 @@
   padding: 5px;
   background-color: white;
   border-radius: 4px;
-  min-height: 48px;
+  min-height: 40px;
+  height: auto;
 }
 
 .block-l{
@@ -71,7 +72,7 @@
 .stats-key{
   font-size: 0.9em;
   text-align: left;
-  padding-left: 3px;
+  padding: 0 0 3px 3px;
 }
 
 .stats-value{
@@ -84,6 +85,8 @@ table{
   background-color: white;
   text-align: center;
   min-width: 350px;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 thead{
@@ -91,13 +94,42 @@ thead{
 }
 
 table, td, th{
-  border: solid 2px rgb(100, 100, 100);
   border-collapse: collapse;
-  padding: 4px 8px;
+}
+
+th{
+  padding: 8px 10px;
+}
+
+td{
+  padding: 8px 16px;
+}
+
+tr{
+  border-bottom: solid 1px #eee;
+}
+
+.playlog p{
+  margin: 4px 0;
+  padding: 4px;
+  background-color: #ccc;
+  border-radius: 5px;
+}
+
+.float-reset{
+  clear: both;
+}
+
+.mini-script{
+  font-size: 0.6em;
 }
 
 #table-wrapper{
   display: flex;
   justify-content: center;
   margin: 8px;
+}
+
+.beta-feature{
+  background-color: #ddd;
 }
