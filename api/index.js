@@ -183,7 +183,7 @@ const userinfo = (req, res) => {
 }
 
 const online = (req, res) => {
-  const getOnlineUserFromUsersQuery = "SELECT user_name FROM users WHERE updated_at > ? and user_name <> 'プレーヤー';"
+  const getOnlineUserFromUsersQuery = "SELECT user_name, ranking, point, chara, updated_at FROM users WHERE updated_at > ? and user_name <> 'プレーヤー';"
   const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
     res.send(result)
