@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
-import { useRoutes, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { config } from '../config'
 import './UserDetails.css'
 
 const OnlineIndicator = ({online}) => {
@@ -67,12 +68,12 @@ const PlayLog = (props) => {
   ) : null
 }
 
-const UserDetails = ({props}) => {
+const UserDetails = () => {
   const [ userDetailData, setUserDetailData ] = useState({})
   const { username } = useParams();
   useEffect(() => {
     const fetchUserDetailData = async() => {
-      const response = await fetch(`https://enma.sweshelo.jp/api/users/${username}`)
+      const response = await fetch(`${config.baseEndpoint}/api/users/${username}`)
       const rankingArray = await response.json()
       setUserDetailData(rankingArray)
     }
