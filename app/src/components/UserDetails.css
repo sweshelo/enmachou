@@ -1,0 +1,135 @@
+#user-detail-wrapper{
+  display: flex;
+  justify-content: center;
+  margin: 8px;
+}
+
+.player{
+  display: block;
+  height: 60px;
+  margin: 8px 0;
+  border-radius: 5px;
+  min-width: 350px;
+  max-width: 1000px;
+  background-color: white;
+  overflow: hidden;
+}
+
+.character{
+  margin-right: 8px;
+  float: left;
+}
+
+.userinfo-wrapper{
+  text-align: left;
+  float: left;
+  padding: 0px 5px;
+}
+
+.online-status{
+  border-radius: 5px;
+}
+
+.online{
+  background-color: rgb(100, 255, 100);
+  border: solid rgb(90, 240, 90) 2px;
+  box-shadow: 0px 0px 3px 3px rgb(160, 255, 190);
+}
+
+.offline{
+  background-color: gray;
+}
+
+.achievement{
+  margin: 4px 0;
+  background: linear-gradient(to right, rgb(180, 180, 180), rgb(240, 240, 240), rgb(180, 180, 180));
+}
+
+.report{
+  margin: 8px 3px;
+  min-height: 150px;
+  display: block;
+}
+
+.stats-block{
+  margin: 5px 0;
+  width: calc(50% - 15px);
+  padding: 5px;
+  background-color: white;
+  border-radius: 4px;
+  min-height: 40px;
+  height: auto;
+}
+
+.block-l{
+  float: left;
+}
+
+.block-r{
+  float: right;
+}
+
+.stats-key{
+  font-size: 0.9em;
+  text-align: left;
+  padding: 0 0 3px 3px;
+}
+
+.stats-value{
+  font-size: 1.1em;
+  text-align: right;
+  padding-right: 5px;
+}
+
+table{
+  background-color: white;
+  text-align: center;
+  min-width: 350px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+thead{
+  background-color: orange;
+}
+
+table, td, th{
+  border-collapse: collapse;
+}
+
+th{
+  padding: 8px 10px;
+}
+
+td{
+  padding: 8px 16px;
+}
+
+tr{
+  border-bottom: solid 1px #eee;
+}
+
+.playlog p{
+  margin: 4px 0;
+  padding: 4px;
+  background-color: #ccc;
+  border-radius: 5px;
+}
+
+.float-reset{
+  clear: both;
+}
+
+.mini-script{
+  font-size: 0.6em;
+}
+
+#table-wrapper{
+  display: flex;
+  justify-content: center;
+  margin: 8px;
+}
+
+.beta-feature{
+  background-color: #ddd;
+}
