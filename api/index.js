@@ -143,6 +143,22 @@ const ranking = (req, res) => {
 }
 
 const userinfo = (req, res) => {
+  if( toFullWidth(req.params.username) === 'プレーヤー' ){
+    const response = {
+      'user_name': toFullWidth(req.params.username),
+      'achievement': '',
+      'chara': null,
+      'point': 0,
+      'ranking': 0,
+      'online': false,
+      'average': null,
+      'diff': [],
+      'log': [],
+    }
+    res.send(response)
+    return
+  }
+
   const getUserTimelineFromTimelineQuery = "with records as (select timeline_id, user_name, point, row_number() over (partition by point order by timeline_id) as row_num from timeline) select * from timeline where timeline_id in (select timeline_id from records where row_num = 1) and user_name = ? order by created_at;"
   connection.query(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
     if(result){
@@ -167,7 +183,7 @@ const userinfo = (req, res) => {
 }
 
 const online = (req, res) => {
-  const getOnlineUserFromUsersQuery = "SELECT user_name FROM users WHERE updated_at > ?;"
+  const getOnlineUserFromUsersQuery = "SELECT user_name FROM users WHERE updated_at > ? and user_name <> 'プレーヤー';"
   const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
     res.send(result)
