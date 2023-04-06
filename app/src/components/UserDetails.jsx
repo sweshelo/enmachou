@@ -113,7 +113,7 @@ const UserDetails = () => {
             average={userDetailData.average}
             availAverage={
               userDetailData.diff?.length >= 10
-                ? [...userDetailData.diff].sort((a, b) => a > b).slice( sliceIndexCount, sliceIndexCount * -1 ).reduce((x, y) => x + y) / userDetailData.diff.length - sliceIndexCount * 2
+                ? [...userDetailData.diff].sort((a, b) => a > b).slice( sliceIndexCount, sliceIndexCount * -1 ).reduce((x, y) => x + y) / (userDetailData.diff.length - sliceIndexCount * 2)
                 : null
             }
           />
