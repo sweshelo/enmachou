@@ -20,12 +20,6 @@
   float: left;
 }
 
-.userinfo-wrapper{
-  text-align: left;
-  float: left;
-  padding: 0px 5px;
-}
-
 .online-status{
   border-radius: 5px;
 }
@@ -42,7 +36,19 @@
 
 .achievement{
   margin: 4px 0;
+  border-radius: 2px;
+}
+
+.gray-grad-back{
   background: linear-gradient(to right, rgb(180, 180, 180), rgb(240, 240, 240), rgb(180, 180, 180));
+}
+
+.red-grad-back{
+  background: linear-gradient(3deg, #f22, #f99, #f22); /* red */
+}
+
+.rainbow-grad-back{
+  background: linear-gradient(45deg, #fad, #ffa, #afa, #aaf, #caf); /* rainbow */
 }
 
 .report{
@@ -70,7 +76,7 @@
 }
 
 .stats-key{
-  font-size: 0.9em;
+  font-size: 0.85em;
   text-align: left;
   padding: 0 0 3px 3px;
 }
@@ -127,7 +133,7 @@ tr{
 #table-wrapper{
   display: flex;
   justify-content: center;
-  margin: 8px;
+  margin: 8px 0;
 }
 
 .beta-feature{

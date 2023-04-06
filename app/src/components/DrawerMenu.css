@@ -1,0 +1,31 @@
+#drawer-toggle{
+  position: absolute;
+  left: 16px;
+  top: calc((80px - 48px) / 2);
+  width: 48px;
+  height: 48px;
+
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(to right, #ccf, #cff);
+}
+
+.view-on-pc{
+  position: absolute;
+  left: 32px;
+  top: 100px;
+
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 10px 20px;
+  text-align: left;
+}
+
+ul, li{
+  list-style: none;
+  padding: 5px 0;
+}
+
+#drawer-body-wrapper{
+  padding-top: 20px;
+}

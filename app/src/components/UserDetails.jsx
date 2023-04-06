@@ -13,7 +13,7 @@ const OnlineIndicator = ({online}) => {
 
 const Achievement = ({title}) => {
   return(
-    <div className="achievement">
+    <div className="achievement gray-grad-back">
       <span>{title}</span>
     </div>
   )
@@ -38,7 +38,7 @@ const DetailBoard = (props) => {
           <p className="stats-value">{props.average?.toFixed(3) || 'データなし'}</p>
         </div>
         <div className="stats-block block-r beta-feature">
-          <p className="stats-key">有効平均貢献ポイント <span className="mini-script">(β版)</span></p>
+          <p className="stats-key">有効平均貢献ポイント</p>
           <p className="stats-value">{props.availAverage?.toFixed(3) || 'データなし'}</p>
         </div>
       </div>

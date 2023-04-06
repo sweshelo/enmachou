@@ -30,9 +30,23 @@
 .userinfo-wrapper{
   text-align: left;
   float: left;
-  padding: 0px 5px;
+  padding: 3px 5px;
 }
 
 a {
   color: inherit;
+}
+
+.page-title{
+  padding: 8px 0;
+  border: 2px solid #fff;
+  font-style: bold;
+  font-size: 1.2em;
+}
+
+.description {
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 4px 0;
 }
