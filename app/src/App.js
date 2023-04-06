@@ -15,7 +15,7 @@ function App() {
     <div className="App">
       <header>
         <h1><a href='/'>閻魔帳</a></h1>
-        <span>v0.1 - @sweshelo</span>
+        <span>v0.2 - @sweshelo</span>
       </header>
       <DrawerMenu />
       <Router>
