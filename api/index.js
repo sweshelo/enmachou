@@ -79,12 +79,15 @@ const main = async() => {
         if(result){
           if([...result].length === 0){
             create.push(data)
+            rankingData[index].push(null)
+            rankingData[index].push(null)
+            rankingData[index].push(null)
             resolve()
           }else{
             const diff = (data[0] == 'プレーヤー') ? null : data[4] - result[0].point
-            rankingData[index].push(diff)
-            rankingData[index].push((new Date() - new Date(result[0].created_at))/1000)
-            rankingData[index].push(result[0].timeline_id)
+            rankingData[index].push(diff || null)
+            rankingData[index].push(Math.floor((new Date() - new Date(result[0].created_at))/1000) || null)
+            rankingData[index].push(result[0].timeline_id || null)
             resolve()
           }
         }
@@ -111,6 +114,7 @@ const main = async() => {
   }
 
   const insertIntoTimelineQuery = "INSERT INTO timeline (user_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id ) VALUES ?;";
+  rankingData.forEach((r, index) => console.log(index, r))
   connection.query(insertIntoTimelineQuery, [rankingData], (err, result) => {
     if(err){
       console.error(`[${now()}] ERROR - @ UPDATE ${err}`)
@@ -183,13 +187,22 @@ const userinfo = (req, res) => {
 }
 
 const online = (req, res) => {
-  const getOnlineUserFromUsersQuery = "SELECT user_name, ranking, point, chara, updated_at FROM users WHERE updated_at > ? and user_name <> 'プレーヤー';"
+  const getOnlineUserFromUsersQuery = "SELECT user_name, ranking, point, chara, updated_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
   const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
     res.send(result)
   })
 }
 
+const maxPointRanking = (req, res) => {
+  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 ORDER BY diff desc LIMIT 100;";
+  connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
+    if(result) res.send(result)
+    if(err) res.send({error: 'something went wrong'})
+  })
+}
+
 app.get('/api/ranking', (req, res) => {ranking(req, res)})
+app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
 app.get('/api/users/:username', (req, res) => {userinfo(req, res)})
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
