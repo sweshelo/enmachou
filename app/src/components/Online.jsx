@@ -8,7 +8,7 @@ const User = ({props}) => {
       <a href={props.user_name !== 'プレーヤー' ? `/player/${props.user_name}` : null} className="player">
         <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${props.chara}.png`} />
         <div className="userinfo-wrapper">
-          <p>{props.ranking}位 - {props.point}P @ {new Date(props.updated_at).toLocaleTimeString()}</p>
+          <p>{props.ranking}位 - {props.point}P @ {new Date(props.created_at).toLocaleTimeString()}</p>
           <h2 className="username">{props.user_name}</h2>
         </div>
       </a>
