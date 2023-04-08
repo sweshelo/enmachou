@@ -73,21 +73,19 @@ const main = async() => {
   await Promise.all(fetchPromisses)
 
   const create = []
-  const sqlPromisses = rankingData.map((data) => {
+  const sqlPromisses = rankingData.map((data, index) => {
     return new Promise((resolve, reject) => {
-      connection.query(`SELECT * FROM users WHERE user_name = ?;`, data[0], (err, result) => {
+      connection.query(`SELECT * FROM timeline WHERE user_name = ? ORDER BY created_at DESC LIMIT 1;`, data[0], (err, result) => {
         if(result){
           if([...result].length === 0){
             create.push(data)
             resolve()
           }else{
-            const updateUserQuery = "UPDATE users SET ranking = ?, achievement = ?, chara = ?, point = ?, rank_diff = ?, point_diff = ?, updated_at = ? WHERE user_name = ?;"
             const diff = (data[0] == 'プレーヤー') ? null : data[4] - result[0].point
-            const rank = (data[0] == 'プレーヤー') ? null : data[1] - result[0].ranking
-            const date = (diff > 0) ? (new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' })) : result[0].updated_at
-            connection.query(updateUserQuery, [data[1], data[2], data[3], data[4], rank, diff, date, data[0]], (err, result) => {
-              resolve()
-            })
+            rankingData[index].push(diff)
+            rankingData[index].push((new Date() - new Date(result[0].created_at))/1000)
+            rankingData[index].push(result[0].timeline_id)
+            resolve()
           }
         }
         if(err){
@@ -112,7 +110,7 @@ const main = async() => {
     })
   }
 
-  const insertIntoTimelineQuery = "INSERT INTO timeline (user_name, ranking, achievement, chara, point) VALUES ?;";
+  const insertIntoTimelineQuery = "INSERT INTO timeline (user_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id ) VALUES ?;";
   connection.query(insertIntoTimelineQuery, [rankingData], (err, result) => {
     if(err){
       console.error(`[${now()}] ERROR - @ UPDATE ${err}`)
