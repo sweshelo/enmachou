@@ -139,3 +139,7 @@ tr{
 .beta-feature{
   background-color: #ddd;
 }
+
+.invalid-record{
+  background-color: #bbb;
+}

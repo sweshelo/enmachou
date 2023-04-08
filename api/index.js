@@ -159,7 +159,7 @@ const userinfo = (req, res) => {
 
   const getUserTimelineFromTimelineQuery = "with records as (select timeline_id, user_name, point, row_number() over (partition by point order by timeline_id) as row_num from timeline) select * from timeline where timeline_id in (select timeline_id from records where row_num = 1) and user_name = ? order by created_at;"
   connection.query(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
-    if(result){
+    if(result && result.length > 0){
       // 増分を計算する
       const pointDiff = result.map((record, i, arr) => i === 0 ? record.point : record.point - arr[i - 1].point).slice(1);
       const average = pointDiff.reduce((acc, cur) => acc + cur, 0) / pointDiff.length;
@@ -176,6 +176,8 @@ const userinfo = (req, res) => {
         'log': result.reverse(),
       }
       res.send(response)
+    }else{
+      res.send({error: 'something went wrong'})
     }
   })
 }

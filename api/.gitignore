@@ -1,3 +1,4 @@
 2023*.json
 node_modules
+*.sql
 .env
