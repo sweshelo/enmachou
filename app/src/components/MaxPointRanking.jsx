@@ -31,6 +31,7 @@ const MaxPointRanking = () => {
     <div id="ranking-wrapper">
       <div className="ranking">
         <h2 className="page-title rainbow-grad-back">最高貢献ポイントランキング</h2>
+        <p className="description-mini">このページでは、高スコアを登録している上位100位までのレコード一覧と、そのレコードを樹立したプレイヤーを確認できます。このランキングには、平均値算出から除外されるレコードは登録されません。</p>
         {rankingData.map((r, index) => <User key={index} props={r} />)}
       </div>
     </div>
