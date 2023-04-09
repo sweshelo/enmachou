@@ -66,10 +66,10 @@ const PlayLog = (props) => {
           {
             props.log.slice(0, -1).slice(0, 10).map((log, index) => {
               return(
-                <tr key={`timeline-${index}`}>
+                <tr key={`timeline-${index}`} className={(log.elapsed >= 600 || log.diff === null) && 'invalid-record'}>
                   <td className="datetime">{new Date(log.created_at).toLocaleString('ja-JP')}</td>
                   <td className="point">{log.point}P</td>
-                  <td className="diff">+{props.point[index]}</td>
+                  <td className="diff">+{log.diff}</td>
                 </tr>
               )
             })
@@ -92,7 +92,9 @@ const UserDetails = () => {
     fetchUserDetailData()
   }, [])
 
-  const sliceIndexCount = Math.ceil(userDetailData.diff?.length * 0.1)
+  const pointDiffArray = userDetailData.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
+  const sliceIndexCount = Math.ceil(pointDiffArray.length * 0.1)
+  console.log(pointDiffArray)
 
   return (
     <div id="user-detail-wrapper">
@@ -109,17 +111,19 @@ const UserDetails = () => {
           <OnlineIndicator online={userDetailData?.online} />
           <DetailBoard
             ranking={!userDetailData.log?.length ? null : Math.min(...userDetailData.log.map(r => r.ranking))}
-            point={!userDetailData.diff?.length ? null : Math.max(...userDetailData.diff)}
-            average={userDetailData.average}
+            point={!pointDiffArray.length ? null : Math.max(...pointDiffArray)}
+            average={
+              (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length) || null
+            }
             availAverage={
-              userDetailData.diff?.length >= 10
-                ? [...userDetailData.diff].sort((a, b) => a > b).slice( sliceIndexCount, sliceIndexCount * -1 ).reduce((x, y) => x + y) / (userDetailData.diff.length - sliceIndexCount * 2)
+              pointDiffArray.length >= 10
+                ? pointDiffArray.sort((a, b) => a > b).slice( sliceIndexCount, sliceIndexCount * -1 ).reduce((x, y) => x + y) / (pointDiffArray.length - sliceIndexCount * 2)
                 : null
             }
           />
         </div>
         <div id="table-wrapper">
-          <PlayLog log={userDetailData.log || []} point={userDetailData.diff || []} />
+          <PlayLog log={userDetailData.log || []} />
         </div>
       </div>
     </div>

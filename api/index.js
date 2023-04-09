@@ -73,21 +73,22 @@ const main = async() => {
   await Promise.all(fetchPromisses)
 
   const create = []
-  const sqlPromisses = rankingData.map((data) => {
+  const sqlPromisses = rankingData.map((data, index) => {
     return new Promise((resolve, reject) => {
-      connection.query(`SELECT * FROM users WHERE user_name = ?;`, data[0], (err, result) => {
+      connection.query(`SELECT * FROM timeline WHERE user_name = ? ORDER BY created_at DESC LIMIT 1;`, data[0], (err, result) => {
         if(result){
           if([...result].length === 0){
             create.push(data)
+            rankingData[index].push(null)
+            rankingData[index].push(null)
+            rankingData[index].push(null)
             resolve()
           }else{
-            const updateUserQuery = "UPDATE users SET ranking = ?, achievement = ?, chara = ?, point = ?, rank_diff = ?, point_diff = ?, updated_at = ? WHERE user_name = ?;"
             const diff = (data[0] == 'プレーヤー') ? null : data[4] - result[0].point
-            const rank = (data[0] == 'プレーヤー') ? null : data[1] - result[0].ranking
-            const date = (diff > 0) ? (new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' })) : result[0].updated_at
-            connection.query(updateUserQuery, [data[1], data[2], data[3], data[4], rank, diff, date, data[0]], (err, result) => {
-              resolve()
-            })
+            rankingData[index].push(diff || null)
+            rankingData[index].push(Math.floor((new Date() - new Date(result[0].created_at))/1000) || null)
+            rankingData[index].push(result[0].timeline_id || null)
+            resolve()
           }
         }
         if(err){
@@ -112,7 +113,8 @@ const main = async() => {
     })
   }
 
-  const insertIntoTimelineQuery = "INSERT INTO timeline (user_name, ranking, achievement, chara, point) VALUES ?;";
+  const insertIntoTimelineQuery = "INSERT INTO timeline (user_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id ) VALUES ?;";
+  rankingData.forEach((r, index) => console.log(index, r))
   connection.query(insertIntoTimelineQuery, [rankingData], (err, result) => {
     if(err){
       console.error(`[${now()}] ERROR - @ UPDATE ${err}`)
@@ -161,7 +163,7 @@ const userinfo = (req, res) => {
 
   const getUserTimelineFromTimelineQuery = "with records as (select timeline_id, user_name, point, row_number() over (partition by point order by timeline_id) as row_num from timeline) select * from timeline where timeline_id in (select timeline_id from records where row_num = 1) and user_name = ? order by created_at;"
   connection.query(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
-    if(result){
+    if(result && result.length > 0){
       // 増分を計算する
       const pointDiff = result.map((record, i, arr) => i === 0 ? record.point : record.point - arr[i - 1].point).slice(1);
       const average = pointDiff.reduce((acc, cur) => acc + cur, 0) / pointDiff.length;
@@ -178,18 +180,29 @@ const userinfo = (req, res) => {
         'log': result.reverse(),
       }
       res.send(response)
+    }else{
+      res.send({error: 'something went wrong'})
     }
   })
 }
 
 const online = (req, res) => {
-  const getOnlineUserFromUsersQuery = "SELECT user_name, ranking, point, chara, updated_at FROM users WHERE updated_at > ? and user_name <> 'プレーヤー';"
+  const getOnlineUserFromUsersQuery = "SELECT user_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
   const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
     res.send(result)
   })
 }
 
+const maxPointRanking = (req, res) => {
+  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 ORDER BY diff desc LIMIT 100;";
+  connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
+    if(result) res.send(result)
+    if(err) res.send({error: 'something went wrong'})
+  })
+}
+
 app.get('/api/ranking', (req, res) => {ranking(req, res)})
+app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
 app.get('/api/users/:username', (req, res) => {userinfo(req, res)})
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})

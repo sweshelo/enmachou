@@ -18,5 +18,8 @@ CREATE TABLE IF NOT EXISTS `ccj`.`timeline` (
   `achievement` TEXT,
   `chara` TEXT,
   `point` INT,
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `diff` INT DEFAULT NULL,
+  `last_timeline_id` INT DEFAULT NULL,
+  `elapsed` INT DEFAULT NULL
 );
