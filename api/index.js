@@ -167,7 +167,7 @@ const main = async() => {
   })
 }
 
-//main()
+main()
 setInterval(() => {
   main()
   console.log(`[${now()}] recorded.`)
