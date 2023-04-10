@@ -161,7 +161,7 @@ const userinfo = (req, res) => {
     return
   }
 
-  const getUserTimelineFromTimelineQuery = "with records as (select timeline_id, user_name, point, row_number() over (partition by point order by timeline_id) as row_num from timeline) select * from timeline where timeline_id in (select timeline_id from records where row_num = 1) and user_name = ? order by created_at;"
+  const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE user_name = ? AND user_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
   connection.query(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
     if(result && result.length > 0){
       // 増分を計算する
@@ -187,10 +187,23 @@ const userinfo = (req, res) => {
 }
 
 const online = (req, res) => {
-  const getOnlineUserFromUsersQuery = "SELECT user_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
+  const getOnlineUserFromUsersQuery = "SELECT DISTINCT user_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
   const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
-    res.send(result)
+    if(result){
+      const usernameArray = []
+      const responseArray = result.map((user) => {
+        if(usernameArray.includes(user.user_name)){
+          return null
+        }else{
+          usernameArray.push(user.user_name)
+          return user
+        }
+      }).filter(r => !!r)
+      res.send(responseArray)
+    }else{
+      res.send({error: 'something went wrong'})
+    }
   })
 }
 
