@@ -124,6 +124,7 @@ const Ranking = () => {
     <div id="ranking-wrapper">
       <div className="ranking">
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
+        <p className="title-paragraph">現在のキャラクター構成比率</p>
         <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} />
         {rankingData.map((r, index) => <User key={index} props={r} />)}
       </div>

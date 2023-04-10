@@ -41,7 +41,6 @@ function hideDetailPlayTime(datetimeString) {
   const date = datetime.getDate()
   const dateString = ("00" + month).slice(-2) + "/" + ("00" + date).slice(-2) + " "
 
-  console.log(datetime, datetime.getHours())
   const h = datetime.getHours()
   switch(h){
     case 2:
@@ -159,7 +158,6 @@ const main = async() => {
   }
 
   const insertIntoTimelineQuery = "INSERT INTO timeline (user_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id ) VALUES ?;";
-  rankingData.forEach((r, index) => console.log(index, r))
   connection.query(insertIntoTimelineQuery, [rankingData], (err, result) => {
     if(err){
       console.error(`[${now()}] ERROR - @ UPDATE ${err}`)
@@ -270,7 +268,79 @@ const maxPointRanking = (req, res) => {
   })
 }
 
+const chara = (req, res) => {
+  const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
+  connection.query(getCharaFromTimelineQuery, (err, result) => {
+    const data = {}
+    const dateKeys = []
+
+    if(result) {
+      let countForRanking = 0
+      for(const r of result){
+        const date = new Date(r.created_at)
+        const y = date.getFullYear();
+        const m = date.getMonth() + 1;
+        const d = date.getDate();
+
+        const yyyy = y.toString();
+        const mm = ("00" + m).slice(-2);
+        const dd = ("00" + d).slice(-2);
+
+        const dateString = `${yyyy}-${mm}-${dd}`
+        if(!data[dateString]) {
+          dateKeys.unshift(dateString)
+          data[dateString] = {}
+          data[dateString].records = 0
+          data[dateString].play = {
+            //'0': { name: null, count: null, color: null },
+            '1': { name: '赤鬼カギコ', count: 0, color: 'deeppink' },
+            '2': { name: '悪亜チノン', count: 0, color: 'deepskyblue' },
+            '3': { name: '不死ミヨミ', count: 0, color: 'gold' },
+            '4': { name: 'パイン', count: 0, color: 'yellow' },
+            '5': { name: '首塚ツバキ', count: 0, color: 'gainsboro' },
+            '6': { name: '紅刃', count: 0, color: 'crimson' },
+            '7': { name: '首塚ボタン', count: 0, color: 'orchid' },
+            //'8': { name: null, count: null, color: null },
+            //'9': { name: null, count: null, color: null },
+            '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
+          }
+          data[dateString].ranking = {
+            //'0': { name: null, count: null, color: null },
+            '1': { name: '赤鬼カギコ', count: 0, color: 'deeppink' },
+            '2': { name: '悪亜チノン', count: 0, color: 'deepskyblue' },
+            '3': { name: '不死ミヨミ', count: 0, color: 'gold' },
+            '4': { name: 'パイン', count: 0, color: 'yellow' },
+            '5': { name: '首塚ツバキ', count: 0, color: 'gainsboro' },
+            '6': { name: '紅刃', count: 0, color: 'crimson' },
+            '7': { name: '首塚ボタン', count: 0, color: 'orchid' },
+            //'8': { name: null, count: null, color: null },
+            //'9': { name: null, count: null, color: null },
+            '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
+          }
+          countForRanking = 0
+        }
+
+        // ranking
+        if( countForRanking < 100){
+          data[dateString].ranking[r.chara].count += 1
+        }
+
+        // each play
+        if( r.diff > 0 ){
+          data[dateString].play[r.chara].count += 1
+          data[dateString].records++
+        }
+
+        // count
+        countForRanking++
+      }
+      res.send({data, dateKeys: dateKeys})
+    }
+  })
+}
+
 app.get('/api/ranking', (req, res) => {ranking(req, res)})
 app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
 app.get('/api/users/:username', (req, res) => {userinfo(req, res)})
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
+app.get('/api/stats/chara', (req, res) => {chara(req, res)})

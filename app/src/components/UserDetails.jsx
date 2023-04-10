@@ -55,6 +55,7 @@ const PlayLog = (props) => {
   return props.log?.length > 1 ? (
     <div className="playlog">
       <p
+        className="title-paragraph"
         onClick={() => setLimit10(!isLimit10)}
       >{`${isLimit10 ? '直近10件' : 'すべて'}のプレイ履歴`}</p>
       <table>
