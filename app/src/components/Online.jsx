@@ -31,8 +31,12 @@ const Online = () => {
     <div id="ranking-wrapper">
       <div className="ranking">
         <h2 className="page-title rainbow-grad-back">オンラインのプレイヤー</h2>
-        <p className="description">このページでは、直近20分以内に累計貢献ポイントが上昇したプレイヤー一覧を確認できます。</p>
-        {rankingData.sort((a, b) => a.updated_at < b.updated_at).map((r, index) => <User key={index} props={r} />)}
+        <p className="description">現在 {rankingData.length}人 がオンラインと推定されます</p>
+        {rankingData.sort((a, b) => (a.updated_at !== b.updated_at) ? a.updated_at > b.updated_at : a.ranking > b.ranking)
+            .filter((item, index, array) => {
+              return array.findIndex((obj) => obj.user_name === item.user_name) === index;
+            })
+            .map((r, index) => <User key={index} props={r} />)}
       </div>
     </div>
   )

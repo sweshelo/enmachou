@@ -34,6 +34,50 @@ function toFullWidth(str) {
   });
 }
 
+// 時間帯フィルタリング
+function hideDetailPlayTime(datetimeString) {
+  const datetime = new Date(datetimeString)
+  const month = datetime.getMonth() + 1
+  const date = datetime.getDate()
+  const dateString = ("00" + month).slice(-2) + "/" + ("00" + date).slice(-2) + " "
+
+  const h = datetime.getHours()
+  switch(h){
+    case 2:
+    case 3:
+    case 4:
+      return dateString + '未明'
+    case 5:
+    case 6:
+    case 7:
+      return dateString + '早朝'
+    case 8:
+    case 9:
+    case 10:
+      return dateString + '朝'
+    case 11:
+    case 12:
+    case 13:
+      return dateString + '昼'
+    case 14:
+    case 15:
+    case 16:
+      return dateString + '午下'
+    case 17:
+    case 18:
+    case 19:
+      return dateString + '夕'
+    case 20:
+    case 21:
+    case 22:
+      return dateString + '夜'
+    case 23:
+    case 0:
+    case 1:
+      return dateString + '深夜'
+  }
+}
+
 const connection = mysql.createConnection({
   host: 'mysql',
   user: 'ccj',
@@ -114,7 +158,6 @@ const main = async() => {
   }
 
   const insertIntoTimelineQuery = "INSERT INTO timeline (user_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id ) VALUES ?;";
-  rankingData.forEach((r, index) => console.log(index, r))
   connection.query(insertIntoTimelineQuery, [rankingData], (err, result) => {
     if(err){
       console.error(`[${now()}] ERROR - @ UPDATE ${err}`)
@@ -161,7 +204,7 @@ const userinfo = (req, res) => {
     return
   }
 
-  const getUserTimelineFromTimelineQuery = "with records as (select timeline_id, user_name, point, row_number() over (partition by point order by timeline_id) as row_num from timeline) select * from timeline where timeline_id in (select timeline_id from records where row_num = 1) and user_name = ? order by created_at;"
+  const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE user_name = ? AND user_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
   connection.query(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
     if(result && result.length > 0){
       // 増分を計算する
@@ -177,7 +220,11 @@ const userinfo = (req, res) => {
         'online': (new Date() - new Date(latestRecord.created_at)) <= defaultOnlineThreshold * 60 * 1000,
         'average': average,
         'diff': pointDiff.reverse(),
-        'log': result.reverse(),
+        'log': result.map((r) => ({
+            ...r,
+            created_at: hideDetailPlayTime(r.created_at)
+          })
+        ).reverse(),
       }
       res.send(response)
     }else{
@@ -187,18 +234,108 @@ const userinfo = (req, res) => {
 }
 
 const online = (req, res) => {
-  const getOnlineUserFromUsersQuery = "SELECT user_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
+  const getOnlineUserFromUsersQuery = "SELECT DISTINCT user_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
   const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
-    res.send(result)
+    if(result){
+      const usernameArray = []
+      const responseArray = result.map((user) => {
+        if(usernameArray.includes(user.user_name)){
+          return null
+        }else{
+          usernameArray.push(user.user_name)
+          return user
+        }
+      }).filter(r => !!r)
+      res.send(responseArray)
+    }else{
+      res.send({error: 'something went wrong'})
+    }
   })
 }
 
 const maxPointRanking = (req, res) => {
   const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 ORDER BY diff desc LIMIT 100;";
   connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
-    if(result) res.send(result)
+    if(result) {
+      const response = result.map((r) => ({
+        ...r,
+        created_at: hideDetailPlayTime(r.created_at)
+      }))
+      res.send(response)
+    }
     if(err) res.send({error: 'something went wrong'})
+  })
+}
+
+const chara = (req, res) => {
+  const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
+  connection.query(getCharaFromTimelineQuery, (err, result) => {
+    const data = {}
+    const dateKeys = []
+
+    if(result) {
+      let countForRanking = 0
+      for(const r of result){
+        const date = new Date(r.created_at)
+        const y = date.getFullYear();
+        const m = date.getMonth() + 1;
+        const d = date.getDate();
+
+        const yyyy = y.toString();
+        const mm = ("00" + m).slice(-2);
+        const dd = ("00" + d).slice(-2);
+
+        const dateString = `${yyyy}-${mm}-${dd}`
+        if(!data[dateString]) {
+          dateKeys.unshift(dateString)
+          data[dateString] = {}
+          data[dateString].records = 0
+          data[dateString].play = {
+            //'0': { name: null, count: null, color: null },
+            '1': { name: '赤鬼カギコ', count: 0, color: 'deeppink' },
+            '2': { name: '悪亜チノン', count: 0, color: 'deepskyblue' },
+            '3': { name: '不死ミヨミ', count: 0, color: 'gold' },
+            '4': { name: 'パイン', count: 0, color: 'yellow' },
+            '5': { name: '首塚ツバキ', count: 0, color: 'gainsboro' },
+            '6': { name: '紅刃', count: 0, color: 'crimson' },
+            '7': { name: '首塚ボタン', count: 0, color: 'orchid' },
+            //'8': { name: null, count: null, color: null },
+            //'9': { name: null, count: null, color: null },
+            '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
+          }
+          data[dateString].ranking = {
+            //'0': { name: null, count: null, color: null },
+            '1': { name: '赤鬼カギコ', count: 0, color: 'deeppink' },
+            '2': { name: '悪亜チノン', count: 0, color: 'deepskyblue' },
+            '3': { name: '不死ミヨミ', count: 0, color: 'gold' },
+            '4': { name: 'パイン', count: 0, color: 'yellow' },
+            '5': { name: '首塚ツバキ', count: 0, color: 'gainsboro' },
+            '6': { name: '紅刃', count: 0, color: 'crimson' },
+            '7': { name: '首塚ボタン', count: 0, color: 'orchid' },
+            //'8': { name: null, count: null, color: null },
+            //'9': { name: null, count: null, color: null },
+            '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
+          }
+          countForRanking = 0
+        }
+
+        // ranking
+        if( countForRanking < 100){
+          data[dateString].ranking[r.chara].count += 1
+        }
+
+        // each play
+        if( r.diff > 0 ){
+          data[dateString].play[r.chara].count += 1
+          data[dateString].records++
+        }
+
+        // count
+        countForRanking++
+      }
+      res.send({data, dateKeys: dateKeys})
+    }
   })
 }
 
@@ -206,3 +343,4 @@ app.get('/api/ranking', (req, res) => {ranking(req, res)})
 app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
 app.get('/api/users/:username', (req, res) => {userinfo(req, res)})
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
+app.get('/api/stats/chara', (req, res) => {chara(req, res)})

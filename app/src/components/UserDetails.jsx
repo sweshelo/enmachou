@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useParams } from 'react-router-dom';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from "recharts";
 import { config } from '../config'
 import './UserDetails.css'
 
@@ -51,9 +52,13 @@ const DetailBoard = (props) => {
 }
 
 const PlayLog = (props) => {
-  return props.log?.length > 1 ? (
+  const [ isLimit10, setLimit10 ] = useState(true)
+  return props.log?.length > 0 ? (
     <div className="playlog">
-      <p>直近10件のプレイ履歴</p>
+      <p
+        className="title-paragraph"
+        onClick={() => setLimit10(!isLimit10)}
+      >{`${isLimit10 ? '直近10件' : 'すべて'}のプレイ履歴`}</p>
       <table>
         <thead>
           <tr>
@@ -64,10 +69,10 @@ const PlayLog = (props) => {
         </thead>
         <tbody>
           {
-            props.log.slice(0, -1).slice(0, 10).map((log, index) => {
+            props.log.slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
               return(
                 <tr key={`timeline-${index}`} className={(log.elapsed >= 600 || log.diff === null) && 'invalid-record'}>
-                  <td className="datetime">{new Date(log.created_at).toLocaleString('ja-JP')}</td>
+                  <td className="datetime">{log.created_at}</td>
                   <td className="point">{log.point}P</td>
                   <td className="diff">+{log.diff}</td>
                 </tr>
@@ -78,6 +83,54 @@ const PlayLog = (props) => {
       </table>
     </div>
   ) : null
+}
+
+const AverageGraph = (props) => {
+  const [ average, setAverage ] = useState([])
+  useEffect(() => {
+    const calc = {}
+    props.log.forEach((r) => {
+      if(r.elapsed > 600) return
+      const date = r.created_at.split(' ')[0]
+      if(!calc[date]){
+        calc[date] = {
+          date,
+          sum: 0,
+          max: r.diff,
+          count: 0
+        }
+      }
+      if(calc[date].max < r.diff) calc[date].max = r.diff
+      calc[date].sum += r.diff
+      calc[date].count++
+    })
+    setAverage(Object.values(calc).reverse().map((r) => ({...r, ave: r.sum / r.count})))
+  }, [props?.log])
+
+  return (
+    <div className="playlog">
+      <p className="title-paragraph">貢献度の推移</p>
+        <LineChart
+          width={350}
+          height={300}
+          data={average}
+          margin={{
+            top: 15,
+            right: 25,
+            left: 25,
+            bottom: 0,
+          }}
+        >
+          <CartesianGrid strokeDasharray="4 4" />
+          <XAxis dataKey="date" fontSize={10} height={15}/>
+          <YAxis min={50} width={5} fontSize={10} domain={[50, 'dataMax']}/>
+          <Tooltip formatter={(value) => value.toFixed(2)}/>
+          <Legend />
+          <Line type="monotone" dataKey="ave" stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="max" stroke="#82ca9d" />
+        </LineChart>
+    </div>
+  )
 }
 
 const UserDetails = () => {
@@ -94,7 +147,6 @@ const UserDetails = () => {
 
   const pointDiffArray = userDetailData.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
   const sliceIndexCount = Math.ceil(pointDiffArray.length * 0.1)
-  console.log(pointDiffArray)
 
   return (
     <div id="user-detail-wrapper">
@@ -123,7 +175,10 @@ const UserDetails = () => {
           />
         </div>
         <div id="table-wrapper">
-          <PlayLog log={userDetailData.log || []} />
+          <div>
+            <AverageGraph log={userDetailData.log || []}/>
+            <PlayLog log={userDetailData.log || []} />
+          </div>
         </div>
       </div>
     </div>

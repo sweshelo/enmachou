@@ -10,13 +10,14 @@ import {DrawerMenu} from './components/DrawerMenu';
 import Online from './components/Online';
 import {About} from './components/About';
 import MaxPointRanking from './components/MaxPointRanking';
+import Statistics from './components/Statistics';
 
 function App() {
   return (
     <div className="App">
       <header>
         <h1><a href='/'>閻魔帳</a></h1>
-        <span>v0.3 - @sweshelo</span>
+        <span>v0.5 - @sweshelo</span>
       </header>
       <DrawerMenu />
       <Router>
@@ -27,6 +28,7 @@ function App() {
           <Route path='/player/:username' element={<UserDetails />} />
           <Route path='/online' element={<Online />} />
           <Route path='/about' element={<About />} />
+          <Route path='/stats' element={<Statistics />} />
         </Routes>
       </Router>
     </div>

@@ -1,0 +1,17 @@
+.chart-wrapper{
+  display: flex;
+  justify-content: center;
+}
+
+.medium{
+  font-size: 0.7em;
+}
+
+.date-picker{
+  background-color: #dde;
+}
+
+.date-picker button{
+  padding: 4px 12px;
+  margin: 4px 15px;
+}
