@@ -259,7 +259,13 @@ const online = (req, res) => {
 const maxPointRanking = (req, res) => {
   const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 ORDER BY diff desc LIMIT 100;";
   connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
-    if(result) res.send(result)
+    if(result) {
+      const response = result.map((r) => ({
+        ...r,
+        created_at: hideDetailPlayTime(r.created_at)
+      }))
+      res.send(response)
+    }
     if(err) res.send({error: 'something went wrong'})
   })
 }
