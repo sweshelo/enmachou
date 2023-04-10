@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useParams } from 'react-router-dom';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from "recharts";
 import { config } from '../config'
 import './UserDetails.css'
 
@@ -84,6 +85,54 @@ const PlayLog = (props) => {
   ) : null
 }
 
+const AverageGraph = (props) => {
+  const [ average, setAverage ] = useState([])
+  useEffect(() => {
+    const calc = {}
+    props.log.forEach((r) => {
+      if(r.elapsed > 600) return
+      const date = r.created_at.split(' ')[0]
+      if(!calc[date]){
+        calc[date] = {
+          date,
+          sum: 0,
+          max: r.diff,
+          count: 0
+        }
+      }
+      if(calc[date].max < r.diff) calc[date].max = r.diff
+      calc[date].sum += r.diff
+      calc[date].count++
+    })
+    setAverage(Object.values(calc).reverse().map((r) => ({...r, ave: r.sum / r.count})))
+  }, [props?.log])
+
+  return (
+    <div className="playlog">
+      <p className="title-paragraph">貢献度の推移</p>
+        <LineChart
+          width={350}
+          height={300}
+          data={average}
+          margin={{
+            top: 15,
+            right: 25,
+            left: 25,
+            bottom: 0,
+          }}
+        >
+          <CartesianGrid strokeDasharray="4 4" />
+          <XAxis dataKey="date" fontSize={10} height={15}/>
+          <YAxis min={50} width={5} fontSize={10} domain={[50, 'dataMax']}/>
+          <Tooltip formatter={(value) => value.toFixed(2)}/>
+          <Legend />
+          <Line type="monotone" dataKey="ave" stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="max" stroke="#82ca9d" />
+        </LineChart>
+    </div>
+  )
+}
+
 const UserDetails = () => {
   const [ userDetailData, setUserDetailData ] = useState({})
   const { username } = useParams();
@@ -98,7 +147,6 @@ const UserDetails = () => {
 
   const pointDiffArray = userDetailData.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
   const sliceIndexCount = Math.ceil(pointDiffArray.length * 0.1)
-  console.log(pointDiffArray)
 
   return (
     <div id="user-detail-wrapper">
@@ -127,7 +175,10 @@ const UserDetails = () => {
           />
         </div>
         <div id="table-wrapper">
-          <PlayLog log={userDetailData.log || []} />
+          <div>
+            <AverageGraph log={userDetailData.log || []}/>
+            <PlayLog log={userDetailData.log || []} />
+          </div>
         </div>
       </div>
     </div>
