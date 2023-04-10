@@ -10,6 +10,7 @@ import {DrawerMenu} from './components/DrawerMenu';
 import Online from './components/Online';
 import {About} from './components/About';
 import MaxPointRanking from './components/MaxPointRanking';
+import Statistics from './components/Statistics';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path='/player/:username' element={<UserDetails />} />
           <Route path='/online' element={<Online />} />
           <Route path='/about' element={<About />} />
+          <Route path='/stats' element={<Statistics />} />
         </Routes>
       </Router>
     </div>

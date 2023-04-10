@@ -83,6 +83,7 @@ const Statistics = () => {
       const response = await fetch(`${config.baseEndpoint}/api/stats/chara`)
       const chartArray = await response.json()
       setCharaChartData(chartArray)
+      setFocusDateIndex(chartArray.dateKeys.length - 1)
     }
     fetchCharaChartData()
   }, [])

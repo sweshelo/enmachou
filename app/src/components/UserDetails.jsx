@@ -52,7 +52,7 @@ const DetailBoard = (props) => {
 
 const PlayLog = (props) => {
   const [ isLimit10, setLimit10 ] = useState(true)
-  return props.log?.length > 1 ? (
+  return props.log?.length > 0 ? (
     <div className="playlog">
       <p
         className="title-paragraph"
@@ -68,7 +68,7 @@ const PlayLog = (props) => {
         </thead>
         <tbody>
           {
-            props.log.slice(0, -1).slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
+            props.log.slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
               return(
                 <tr key={`timeline-${index}`} className={(log.elapsed >= 600 || log.diff === null) && 'invalid-record'}>
                   <td className="datetime">{log.created_at}</td>
