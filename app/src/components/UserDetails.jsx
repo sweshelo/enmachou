@@ -51,9 +51,12 @@ const DetailBoard = (props) => {
 }
 
 const PlayLog = (props) => {
+  const [ isLimit10, setLimit10 ] = useState(true)
   return props.log?.length > 1 ? (
     <div className="playlog">
-      <p>直近10件のプレイ履歴</p>
+      <p
+        onClick={() => setLimit10(!isLimit10)}
+      >{`${isLimit10 ? '直近10件' : 'すべて'}のプレイ履歴`}</p>
       <table>
         <thead>
           <tr>
@@ -64,10 +67,10 @@ const PlayLog = (props) => {
         </thead>
         <tbody>
           {
-            props.log.slice(0, -1).slice(0, 10).map((log, index) => {
+            props.log.slice(0, -1).slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
               return(
                 <tr key={`timeline-${index}`} className={(log.elapsed >= 600 || log.diff === null) && 'invalid-record'}>
-                  <td className="datetime">{new Date(log.created_at).toLocaleString('ja-JP')}</td>
+                  <td className="datetime">{log.created_at}</td>
                   <td className="point">{log.point}P</td>
                   <td className="diff">+{log.diff}</td>
                 </tr>

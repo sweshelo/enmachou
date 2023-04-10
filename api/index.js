@@ -34,6 +34,51 @@ function toFullWidth(str) {
   });
 }
 
+// 時間帯フィルタリング
+function hideDetailPlayTime(datetimeString) {
+  const datetime = new Date(datetimeString)
+  const month = datetime.getMonth() + 1
+  const date = datetime.getDate()
+  const dateString = ("00" + month).slice(-2) + "/" + ("00" + date).slice(-2) + " "
+
+  console.log(datetime, datetime.getHours())
+  const h = datetime.getHours()
+  switch(h){
+    case 2:
+    case 3:
+    case 4:
+      return dateString + '未明'
+    case 5:
+    case 6:
+    case 7:
+      return dateString + '早朝'
+    case 8:
+    case 9:
+    case 10:
+      return dateString + '朝'
+    case 11:
+    case 12:
+    case 13:
+      return dateString + '昼'
+    case 14:
+    case 15:
+    case 16:
+      return dateString + '午下'
+    case 17:
+    case 18:
+    case 19:
+      return dateString + '夕'
+    case 20:
+    case 21:
+    case 22:
+      return dateString + '夜'
+    case 23:
+    case 0:
+    case 1:
+      return dateString + '深夜'
+  }
+}
+
 const connection = mysql.createConnection({
   host: 'mysql',
   user: 'ccj',
@@ -124,7 +169,7 @@ const main = async() => {
   })
 }
 
-main()
+//main()
 setInterval(() => {
   main()
   console.log(`[${now()}] recorded.`)
@@ -177,7 +222,11 @@ const userinfo = (req, res) => {
         'online': (new Date() - new Date(latestRecord.created_at)) <= defaultOnlineThreshold * 60 * 1000,
         'average': average,
         'diff': pointDiff.reverse(),
-        'log': result.reverse(),
+        'log': result.map((r) => ({
+            ...r,
+            created_at: hideDetailPlayTime(r.created_at)
+          })
+        ).reverse(),
       }
       res.send(response)
     }else{
