@@ -303,6 +303,8 @@ const chara = (req, res) => {
             //'8': { name: null, count: null, color: null },
             //'9': { name: null, count: null, color: null },
             '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
+            //'11': { name: null, count: null, color: null },
+            '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
           }
           data[dateString].ranking = {
             //'0': { name: null, count: null, color: null },
@@ -316,6 +318,8 @@ const chara = (req, res) => {
             //'8': { name: null, count: null, color: null },
             //'9': { name: null, count: null, color: null },
             '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
+            //'11': { name: null, count: null, color: null },
+            '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
           }
           countForRanking = 0
         }
