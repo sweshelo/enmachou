@@ -94,7 +94,7 @@ const main = async() => {
   const rankingData = []
   const array = [0, 1, 2, 3]
   const fetchPromisses = array.map(index => {
-    return fetch(`${baseUrl}?page=${index}&rid=202304`)
+    return fetch(`${baseUrl}?page=${index}&rid=${now().substring(0,6)}`)
       .then(r => r.text())
       .then(r => {
         const dom = new JSDOM(r, 'text/html')
