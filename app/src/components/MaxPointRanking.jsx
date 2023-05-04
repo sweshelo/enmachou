@@ -20,7 +20,7 @@ const MaxPointRanking = () => {
   const [ rankingData, setRankingData ] = useState([])
   useEffect(() => {
     const fetchRankingData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/max-ranking`)
+      const response = await fetch(`${config.baseEndpoint}/api/max-ranking`, {credentials:'include'})
       const rankingArray = await response.json()
       setRankingData(rankingArray)
     }

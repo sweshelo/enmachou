@@ -207,6 +207,7 @@ app.use(cors({
 app.use(cookieParser())
 
 const ranking = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   const getLatestRankingFromTimelineQuery = "SELECT ranking, user_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
   connection.query(getLatestRankingFromTimelineQuery, (err, result) => {
     if(result){
@@ -216,6 +217,7 @@ const ranking = (req, res) => {
 }
 
 const userinfo = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   if( toFullWidth(req.params.username) === 'プレーヤー' ){
     const response = {
       'user_name': toFullWidth(req.params.username),
@@ -262,6 +264,7 @@ const userinfo = (req, res) => {
 }
 
 const prefectures = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE user_name = ? AND user_name <> 'プレーヤー';"
   connection.query(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
     if(result && result.length > 0){
@@ -323,6 +326,7 @@ const prefectures = (req, res) => {
 }
 
 const online = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   const getOnlineUserFromUsersQuery = "SELECT DISTINCT user_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
   const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
@@ -344,6 +348,7 @@ const online = (req, res) => {
 }
 
 const maxPointRanking = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-05 00:00:00' ORDER BY diff desc LIMIT 100;";
   connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
     if(result) {
@@ -358,7 +363,7 @@ const maxPointRanking = (req, res) => {
 }
 
 const chara = (req, res) => {
-  console.log(req.cookies)
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
   connection.query(getCharaFromTimelineQuery, (err, result) => {
     const data = {}

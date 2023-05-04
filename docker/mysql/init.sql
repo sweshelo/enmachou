@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `ccj`.`timeline` (
 
 CREATE TABLE IF NOT EXISTS `ccj`.`log` (
   `log_id` INT PRIMARY KEY AUTO_INCREMENT,
-  `tracker` STRING AS UUID,
+  `tracker` VARCHAR(36),
   `visit` TEXT,
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 );
