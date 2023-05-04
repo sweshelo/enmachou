@@ -189,7 +189,7 @@ const updateInterval = [
 setInterval(() => {
   const nowTime = new Date()
   const nowInterval = updateInterval[nowTime.getHours()]
-  if ( nowInterval != 0 && nowTime.getMinutes() % updateInterval[nowTime.getHours()]){
+  if ( nowInterval != 0 && (nowTime.getMinutes() % updateInterval[nowTime.getHours()]) == 0){
     main()
     console.log(`[${now()}] recorded.`)
   }else{
