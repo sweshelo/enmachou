@@ -147,6 +147,7 @@ const main = async() => {
 
   // 新規ユーザを登録
   if(create.length > 0){
+    console.log(create)
     const insertIntoUserQuery = "INSERT INTO users (user_name, ranking, achievement, chara, point) VALUES ?;";
     connection.query(insertIntoUserQuery, [create], (err, result) => {
       if(err){
@@ -321,6 +322,7 @@ const chara = (req, res) => {
             //'11': { name: null, count: null, color: null },
             '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
           }
+          data[dateString].timeframe = [...Array(24)].map(() => 0)
           countForRanking = 0
         }
 
@@ -333,6 +335,8 @@ const chara = (req, res) => {
         if( r.diff > 0 ){
           data[dateString].play[r.chara].count += 1
           data[dateString].records++
+          console.log(date.getHours())
+          data[dateString].timeframe[date.getHours()] += 1
         }
 
         // count
