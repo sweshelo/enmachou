@@ -23,3 +23,10 @@ CREATE TABLE IF NOT EXISTS `ccj`.`timeline` (
   `last_timeline_id` INT DEFAULT NULL,
   `elapsed` INT DEFAULT NULL
 );
+
+CREATE TABLE IF NOT EXISTS `ccj`.`log` (
+  `log_id` INT PRIMARY KEY AUTO_INCREMENT,
+  `tracker` STRING AS UUID,
+  `visit` TEXT,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+);
