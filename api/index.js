@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const fs = require('fs');
 const express = require("express");
 const cors = require('cors');
+const crypto = require("crypto");
 
 // 「yyyymmdd」形式の日付文字列に変換する関数
 function now() {
@@ -168,11 +169,33 @@ const main = async() => {
   })
 }
 
+const updateInterval = [
+  // 0~
+  4, 4,
+  // 2~
+  30, 30, 30,
+  // 5 (under maintenance)
+  0, 0, 0,
+  // 8~
+  5, 5,
+  // 10~
+  4, 4, 4, 4, 4, 4, 4,
+  // 17~
+  2, 2, 2, 2,
+  // 21~
+  4, 4, 4 ]
+
 main()
 setInterval(() => {
-  main()
-  console.log(`[${now()}] recorded.`)
-}, 1000 * 60 * 5)
+  const nowTime = new Date()
+  const nowInterval = updateInterval[nowTime.getHours()]
+  if ( nowInterval != 0 && nowTime.getMinutes() % updateInterval[nowTime.getHours()]){
+    main()
+    console.log(`[${now()}] recorded.`)
+  }else{
+    console.log(`[Pass] Current update interval: '${nowInterval}'`)
+  }
+}, 1000 * 60)
 
 // ==== Web API ==== //
 const app = express();
@@ -256,7 +279,7 @@ const online = (req, res) => {
 }
 
 const maxPointRanking = (req, res) => {
-  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 ORDER BY diff desc LIMIT 100;";
+  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-05 00:00:00' ORDER BY diff desc LIMIT 100;";
   connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
     if(result) {
       const response = result.map((r) => ({
