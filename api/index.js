@@ -99,7 +99,7 @@ const main = async() => {
       .then(r => {
         const dom = new JSDOM(r, 'text/html')
         const document = dom.window.document
-        rankingData.push(...[...document.querySelector('#ranking_data').children].slice(1, 26).map(data => {
+        rankingData.push(...[...document.querySelector('#ranking_data')?.children].slice(1, 26).map(data => {
           const match = data.querySelector('img').src.match(regExp);
           const number = match ? match[1] : null;
           const username = [...data.querySelectorAll('div')][1].querySelectorAll('p')[1].childNodes[1].textContent
