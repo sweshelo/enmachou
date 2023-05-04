@@ -94,7 +94,7 @@ const Ranking = () => {
 
   useEffect(() => {
     const fetchRankingData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/ranking`)
+      const response = await fetch(`${config.baseEndpoint}/api/ranking`, {credentials:'include'})
       const rankingArray = await response.json()
       setRankingData(rankingArray)
     }

@@ -1,0 +1,17 @@
+.visited-pref{
+  fill: #f41;
+}
+
+.unvisited-pref{
+  fill: #888;
+}
+
+.non-operating-pref{
+  fill: #000;
+}
+
+#map{
+  stroke: white;
+  background-color: #fff;
+  border-radius: 3px;
+}

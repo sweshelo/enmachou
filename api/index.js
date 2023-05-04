@@ -3,6 +3,8 @@ const mysql = require('mysql');
 const fs = require('fs');
 const express = require("express");
 const cors = require('cors');
+const crypto = require("crypto");
+const cookieParser = require("cookie-parser");
 
 // 「yyyymmdd」形式の日付文字列に変換する関数
 function now() {
@@ -99,7 +101,7 @@ const main = async() => {
       .then(r => {
         const dom = new JSDOM(r, 'text/html')
         const document = dom.window.document
-        rankingData.push(...[...document.querySelector('#ranking_data').children].slice(1, 26).map(data => {
+        rankingData.push(...[...document.querySelector('#ranking_data')?.children].slice(1, 26).map(data => {
           const match = data.querySelector('img').src.match(regExp);
           const number = match ? match[1] : null;
           const username = [...data.querySelectorAll('div')][1].querySelectorAll('p')[1].childNodes[1].textContent
@@ -147,6 +149,7 @@ const main = async() => {
 
   // 新規ユーザを登録
   if(create.length > 0){
+    console.log(create)
     const insertIntoUserQuery = "INSERT INTO users (user_name, ranking, achievement, chara, point) VALUES ?;";
     connection.query(insertIntoUserQuery, [create], (err, result) => {
       if(err){
@@ -167,18 +170,44 @@ const main = async() => {
   })
 }
 
-main()
+const updateInterval = [
+  // 0~
+  4, 4,
+  // 2~
+  30, 30, 30,
+  // 5 (under maintenance)
+  0, 0, 0,
+  // 8~
+  5, 5,
+  // 10~
+  4, 4, 4, 4, 4, 4, 4,
+  // 17~
+  2, 2, 2, 2,
+  // 21~
+  4, 4, 4 ]
+
 setInterval(() => {
-  main()
-  console.log(`[${now()}] recorded.`)
-}, 1000 * 60 * 5)
+  const nowTime = new Date()
+  const nowInterval = updateInterval[nowTime.getHours()]
+  if ( nowInterval != 0 && (nowTime.getMinutes() % updateInterval[nowTime.getHours()]) == 0){
+    main()
+    console.log(`[${now()}] recorded.`)
+  }else{
+    console.log(`[Pass] Current update interval: '${nowInterval}'`)
+  }
+}, 1000 * 60)
 
 // ==== Web API ==== //
 const app = express();
 const server = app.listen(4400, () =>  console.log("Node.js is listening to PORT:" + server.address().port));
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3001',
+  credentials: true
+}));
+app.use(cookieParser())
 
 const ranking = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   const getLatestRankingFromTimelineQuery = "SELECT ranking, user_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
   connection.query(getLatestRankingFromTimelineQuery, (err, result) => {
     if(result){
@@ -188,6 +217,7 @@ const ranking = (req, res) => {
 }
 
 const userinfo = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   if( toFullWidth(req.params.username) === 'プレーヤー' ){
     const response = {
       'user_name': toFullWidth(req.params.username),
@@ -221,9 +251,9 @@ const userinfo = (req, res) => {
         'average': average,
         'diff': pointDiff.reverse(),
         'log': result.map((r) => ({
-            ...r,
-            created_at: hideDetailPlayTime(r.created_at)
-          })
+          ...r,
+          created_at: hideDetailPlayTime(r.created_at)
+        })
         ).reverse(),
       }
       res.send(response)
@@ -233,7 +263,70 @@ const userinfo = (req, res) => {
   })
 }
 
+const prefectures = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+  const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE user_name = ? AND user_name <> 'プレーヤー';"
+  connection.query(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
+    if(result && result.length > 0){
+      const prefectureAchievementTable = [
+        { name: '北海道', achievement: 'North Sea Road' },
+        { name: '青森県', achievement: 'Blue Forest' },
+        { name: '岩手県', achievement: 'Rock Hand' },
+        { name: '宮城県', achievement: 'Palace Castle' },
+        { name: '秋田県', achievement: 'Autumn Paddy' },
+        { name: '山形県', achievement: 'Mountain Form' },
+        { name: '福島県', achievement: 'Happy Island' },
+        { name: '茨城県', achievement: 'Thorn Castle' },
+        { name: '栃木県', achievement: 'Buckeye' },
+        { name: '群馬県', achievement: 'Herd Horse' },
+        { name: '埼玉県', achievement: 'Cape Ball' },
+        { name: '千葉県', achievement: 'Thousand Leaf' },
+        { name: '東京都', achievement: 'East Capital' },
+        { name: '神奈川県', achievement: 'God Apple River' },
+        { name: '新潟県', achievement: 'New Lagoon' },
+        { name: '富山県', achievement: 'Mt. Wealth' },
+        { name: '石川県', achievement: 'Stone River' },
+        { name: '福井県', achievement: 'Happy Well' },
+        { name: '山梨県', achievement: 'Mountain Pear' },
+        { name: '長野県', achievement: 'Long Field' },
+        { name: '岐阜県', achievement: 'Crossroads Hill' },
+        { name: '静岡県', achievement: 'Silent Hill' },
+        { name: '愛知県', achievement: 'Love Intelligence' },
+        { name: '三重県', achievement: 'Triple' },
+        { name: '滋賀県', achievement: 'Moisten Celebrate' },
+        { name: '京都府', achievement: 'Capital' },
+        { name: '大阪府', achievement: 'Big Slope' },
+        { name: '兵庫県', achievement: 'Soldier Warehouse' },
+        { name: '奈良県', achievement: 'Nice Apple' },
+        { name: '和歌山県', achievement: 'Mt. Gentle Song' },
+        { name: '鳥取県', achievement: 'Bird get' },
+        { name: '島根県', achievement: 'Island Root' },
+        { name: '岡山県', achievement: 'Mt. Hill' },
+        { name: '広島県', achievement: 'Wide Island' },
+        { name: '山口県', achievement: 'Mountain Mouth' },
+        { name: '徳島県', achievement: 'Virtue Island' },
+        { name: '香川県', achievement: 'Aroma River' },
+        { name: '愛媛県', achievement: 'Love Princess' },
+        { name: '高知県', achievement: 'High Intelligence' },
+        { name: '福岡県', achievement: 'Happy Hill' },
+        { name: '佐賀県', achievement: 'Assistant Celebrate' },
+        { name: '長崎県', achievement: 'Long Cape' },
+        { name: '熊本県', achievement: 'Bear Book' },
+        { name: '大分県', achievement: 'Big Minute' },
+        { name: '宮崎県', achievement: 'Palace Cape' },
+        { name: '鹿児島県', achievement: 'Fawn Island' },
+        { name: '沖縄県', achievement: 'Offing Rope' },
+      ]
+      const achievementArray = result.map(r => r.achievement)
+      res.send(prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n))
+    }else{
+      res.send({error: 'something went wrong'})
+    }
+  })
+}
+
 const online = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   const getOnlineUserFromUsersQuery = "SELECT DISTINCT user_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
   const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
@@ -255,7 +348,8 @@ const online = (req, res) => {
 }
 
 const maxPointRanking = (req, res) => {
-  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 ORDER BY diff desc LIMIT 100;";
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-05 00:00:00' ORDER BY diff desc LIMIT 100;";
   connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
     if(result) {
       const response = result.map((r) => ({
@@ -269,6 +363,7 @@ const maxPointRanking = (req, res) => {
 }
 
 const chara = (req, res) => {
+  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
   connection.query(getCharaFromTimelineQuery, (err, result) => {
     const data = {}
@@ -321,6 +416,7 @@ const chara = (req, res) => {
             //'11': { name: null, count: null, color: null },
             '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
           }
+          data[dateString].timeframe = [...Array(24)].map(() => 0)
           countForRanking = 0
         }
 
@@ -333,6 +429,7 @@ const chara = (req, res) => {
         if( r.diff > 0 ){
           data[dateString].play[r.chara].count += 1
           data[dateString].records++
+          data[dateString].timeframe[date.getHours()] += 1
         }
 
         // count
@@ -343,8 +440,24 @@ const chara = (req, res) => {
   })
 }
 
+const trackingLog = (tracker, endpoint) => {
+  const insertIntoLogQuery = "INSERT INTO log (tracker, visit) VALUES (?);";
+  connection.query(insertIntoLogQuery, [[tracker, endpoint]])
+}
+
+const generateTracker = (req, res) => {
+  const trackerUuid = crypto.randomUUID()
+  res.cookie('tracker', trackerUuid)
+  res.send({
+    'status': 'ok',
+    'tracker': trackerUuid
+  })
+}
+
 app.get('/api/ranking', (req, res) => {ranking(req, res)})
 app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
 app.get('/api/users/:username', (req, res) => {userinfo(req, res)})
+app.get('/api/users/:username/prefectures', (req, res) => {prefectures(req, res)})
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
 app.get('/api/stats/chara', (req, res) => {chara(req, res)})
+app.post('/api/tracker', (req, res) => {generateTracker(req, res)})

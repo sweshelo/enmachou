@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useParams } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from "recharts";
 import { config } from '../config'
+import Map from "./Map";
 import './UserDetails.css'
 
 const OnlineIndicator = ({online}) => {
@@ -45,7 +46,6 @@ const DetailBoard = (props) => {
       </div>
       <div className="float-reset">
         <p className="mini-script">有効平均貢献ポイントは下限・上限の外れ値10%を除外して算出されます。</p>
-        <p className="mini-script">このパラメータは閻魔帳における獲得ポイントが推定値によるために設けられています。</p>
       </div>
     </div>
   )
@@ -138,7 +138,7 @@ const UserDetails = () => {
   const { username } = useParams();
   useEffect(() => {
     const fetchUserDetailData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/users/${username}`)
+      const response = await fetch(`${config.baseEndpoint}/api/users/${username}`, {credentials:'include'})
       const rankingArray = await response.json()
       setUserDetailData(rankingArray)
     }
@@ -146,7 +146,8 @@ const UserDetails = () => {
   }, [])
 
   const pointDiffArray = userDetailData.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
-  const sliceIndexCount = Math.ceil(pointDiffArray.length * 0.1)
+  const pointAfter0505DiffArray = userDetailData.log?.map( r => r.elapsed < 600 && new Date(r.created_at) > new Date('2023-05-05 00:00:00') ? r.diff : null).filter(r => r > 0) || [];
+  const sliceIndexCount = Math.ceil(pointAfter0505DiffArray.length * 0.1)
 
   return (
     <div id="user-detail-wrapper">
@@ -163,22 +164,26 @@ const UserDetails = () => {
           <OnlineIndicator online={userDetailData?.online} />
           <DetailBoard
             ranking={!userDetailData.log?.length ? null : Math.min(...userDetailData.log.map(r => r.ranking))}
-            point={!pointDiffArray.length ? null : Math.max(...pointDiffArray)}
+            point={!pointAfter0505DiffArray.length ? null : Math.max(...pointAfter0505DiffArray)}
             average={
               (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length) || null
             }
             availAverage={
-              pointDiffArray.length >= 10
-                ? pointDiffArray.sort((a, b) => a > b).slice( sliceIndexCount, sliceIndexCount * -1 ).reduce((x, y) => x + y) / (pointDiffArray.length - sliceIndexCount * 2)
+              pointAfter0505DiffArray.length >= 10
+                ? pointAfter0505DiffArray.sort((a, b) => a > b).slice( sliceIndexCount, sliceIndexCount * -1 ).reduce((x, y) => x + y) / (pointAfter0505DiffArray.length - sliceIndexCount * 2)
                 : null
             }
           />
         </div>
         <div id="table-wrapper">
           <div>
-            <AverageGraph log={userDetailData.log || []}/>
+            <AverageGraph log={userDetailData.log?.slice(-300) || []}/>
             <PlayLog log={userDetailData.log || []} />
           </div>
+        </div>
+        <div id="prefectures">
+          <p className="title-paragraph">このユーザの制県度</p>
+          <Map />
         </div>
       </div>
     </div>

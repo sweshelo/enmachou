@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Sector, Cell, ResponsiveContainer, BarChart, CartesianGrid, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { config } from "../config"
 import './Statistics.css'
 
@@ -74,13 +74,25 @@ const CharaChart = ({data}) => {
   )
 }
 
+const TimeframeChart = ({data}) => {
+  const timeframeObject = data.map(r => ({ play: r }))
+  return(
+    <BarChart width={350} height={250} data={timeframeObject}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis />
+      <Tooltip />
+      <Bar dataKey={'play'} fill="#8884d8" />
+    </BarChart>
+  )
+}
+
 const Statistics = () => {
   const [ charaChartData, setCharaChartData ] = useState(null)
   const [ focusDateIndex, setFocusDateIndex ] = useState(0)
 
   useEffect(() => {
     const fetchCharaChartData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/stats/chara`)
+      const response = await fetch(`${config.baseEndpoint}/api/stats/chara`, {credentials:'include'})
       const chartArray = await response.json()
       setCharaChartData(chartArray)
       setFocusDateIndex(chartArray.dateKeys.length - 1)
@@ -118,6 +130,12 @@ const Statistics = () => {
           </div>
           <div className="chart-wrapper">
             { charaChartData && <CharaChart data={charaChartData.data[charaChartData.dateKeys[focusDateIndex]].ranking} />}
+          </div>
+        </div>
+        <div className="ranking">
+          <p className="title-paragraph">プレイ時間帯傾向</p>
+          <div className="chart-wrapper">
+            { charaChartData && <TimeframeChart data={charaChartData.data[charaChartData.dateKeys[focusDateIndex]].timeframe} />}
           </div>
         </div>
       </div>

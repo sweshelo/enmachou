@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
+import {useCookies} from 'react-cookie'
 import Ranking from './components/Ranking';
 import UserDetails from './components/UserDetails';
 import {DrawerMenu} from './components/DrawerMenu';
@@ -11,13 +12,25 @@ import Online from './components/Online';
 import {About} from './components/About';
 import MaxPointRanking from './components/MaxPointRanking';
 import Statistics from './components/Statistics';
+import {useState} from 'react';
+import {config} from './config';
 
 function App() {
+
+  const [ cookie, setCookie ] = useCookies(['tracker'])
+  useState(()=>{
+    if(!cookie.tracker){
+      fetch(config.baseEndpoint + '/api/tracker', {method:'POST'}).then(r => r.json()).then(
+        r => setCookie('tracker', r.tracker)
+      )
+    }
+  },cookie)
+
   return (
     <div className="App">
       <header>
         <h1><a href='/'>閻魔帳</a></h1>
-        <span>v0.5 - @sweshelo</span>
+        <span>v0.6 - @sweshelo</span>
       </header>
       <DrawerMenu />
       <Router>
