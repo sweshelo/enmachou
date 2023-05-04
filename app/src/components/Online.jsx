@@ -18,11 +18,13 @@ const User = ({props}) => {
 
 const Online = () => {
   const [ rankingData, setRankingData ] = useState([])
+  const [ isLoading, setIsLoading ] = useState(true)
   useEffect(() => {
     const fetchRankingData = async() => {
       const response = await fetch(`${config.baseEndpoint}/api/online`)
       const rankingArray = await response.json()
       setRankingData(rankingArray)
+      setIsLoading(false)
     }
     fetchRankingData()
   }, [])
@@ -31,8 +33,12 @@ const Online = () => {
     <div id="ranking-wrapper">
       <div className="ranking">
         <h2 className="page-title rainbow-grad-back">オンラインのプレイヤー</h2>
-        <p className="description">現在 {rankingData.length}人 がオンラインと推定されます</p>
-        {rankingData.sort((a, b) => (a.updated_at !== b.updated_at) ? a.updated_at > b.updated_at : a.ranking > b.ranking)
+        <p className="description">{
+          isLoading
+            ? `読み込み中です…`
+            : `現在 ${rankingData.length}人 がオンラインと推定されます`
+          }</p>
+        {rankingData.sort((a, b) => (a.updated_at !== b.updated_at) ? a.updated_at < b.updated_at : a.ranking > b.ranking)
             .filter((item, index, array) => {
               return array.findIndex((obj) => obj.user_name === item.user_name) === index;
             })
