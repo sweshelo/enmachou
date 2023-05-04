@@ -21,7 +21,7 @@ const Online = () => {
   const [ isLoading, setIsLoading ] = useState(true)
   useEffect(() => {
     const fetchRankingData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/online`)
+      const response = await fetch(`${config.baseEndpoint}/api/online`, {credentials:'include'})
       const rankingArray = await response.json()
       setRankingData(rankingArray)
       setIsLoading(false)

@@ -4,6 +4,7 @@ const fs = require('fs');
 const express = require("express");
 const cors = require('cors');
 const crypto = require("crypto");
+const cookieParser = require("cookie-parser");
 
 // 「yyyymmdd」形式の日付文字列に変換する関数
 function now() {
@@ -185,7 +186,6 @@ const updateInterval = [
   // 21~
   4, 4, 4 ]
 
-main()
 setInterval(() => {
   const nowTime = new Date()
   const nowInterval = updateInterval[nowTime.getHours()]
@@ -200,7 +200,11 @@ setInterval(() => {
 // ==== Web API ==== //
 const app = express();
 const server = app.listen(4400, () =>  console.log("Node.js is listening to PORT:" + server.address().port));
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3001',
+  credentials: true
+}));
+app.use(cookieParser())
 
 const ranking = (req, res) => {
   const getLatestRankingFromTimelineQuery = "SELECT ranking, user_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
@@ -354,6 +358,7 @@ const maxPointRanking = (req, res) => {
 }
 
 const chara = (req, res) => {
+  console.log(req.cookies)
   const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
   connection.query(getCharaFromTimelineQuery, (err, result) => {
     const data = {}
@@ -419,7 +424,6 @@ const chara = (req, res) => {
         if( r.diff > 0 ){
           data[dateString].play[r.chara].count += 1
           data[dateString].records++
-          console.log(date.getHours())
           data[dateString].timeframe[date.getHours()] += 1
         }
 
@@ -431,9 +435,24 @@ const chara = (req, res) => {
   })
 }
 
+const trackingLog = (tracker, endpoint) => {
+  const insertIntoLogQuery = "INSERT INTO log (tracker_id, visit) VALUES ?;";
+  connection.query(insertIntoLogQuery, [tracker, endpoint])
+}
+
+const generateTracker = (req, res) => {
+  const trackerUuid = crypto.randomUUID()
+  res.cookie('tracker', trackerUuid)
+  res.send({
+    'status': 'ok',
+    'tracker': trackerUuid
+  })
+}
+
 app.get('/api/ranking', (req, res) => {ranking(req, res)})
 app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
 app.get('/api/users/:username', (req, res) => {userinfo(req, res)})
 app.get('/api/users/:username/prefectures', (req, res) => {prefectures(req, res)})
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
 app.get('/api/stats/chara', (req, res) => {chara(req, res)})
+app.post('/api/tracker', (req, res) => {generateTracker(req, res)})

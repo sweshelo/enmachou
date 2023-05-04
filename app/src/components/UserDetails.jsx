@@ -138,7 +138,7 @@ const UserDetails = () => {
   const { username } = useParams();
   useEffect(() => {
     const fetchUserDetailData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/users/${username}`)
+      const response = await fetch(`${config.baseEndpoint}/api/users/${username}`, {credentials:'include'})
       const rankingArray = await response.json()
       setUserDetailData(rankingArray)
     }

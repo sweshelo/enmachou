@@ -92,7 +92,7 @@ const Statistics = () => {
 
   useEffect(() => {
     const fetchCharaChartData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/stats/chara`)
+      const response = await fetch(`${config.baseEndpoint}/api/stats/chara`, {credentials:'include'})
       const chartArray = await response.json()
       setCharaChartData(chartArray)
       setFocusDateIndex(chartArray.dateKeys.length - 1)
