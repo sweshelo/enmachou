@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useParams } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from "recharts";
 import { config } from '../config'
+import Map from "./Map";
 import './UserDetails.css'
 
 const OnlineIndicator = ({online}) => {
@@ -45,7 +46,6 @@ const DetailBoard = (props) => {
       </div>
       <div className="float-reset">
         <p className="mini-script">有効平均貢献ポイントは下限・上限の外れ値10%を除外して算出されます。</p>
-        <p className="mini-script">このパラメータは閻魔帳における獲得ポイントが推定値によるために設けられています。</p>
       </div>
     </div>
   )
@@ -180,6 +180,10 @@ const UserDetails = () => {
             <AverageGraph log={userDetailData.log?.slice(-300) || []}/>
             <PlayLog log={userDetailData.log || []} />
           </div>
+        </div>
+        <div id="prefectures">
+          <p className="title-paragraph">このユーザの制県度</p>
+          <Map />
         </div>
       </div>
     </div>

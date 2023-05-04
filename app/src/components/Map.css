@@ -3,9 +3,15 @@
 }
 
 .unvisited-pref{
-  fill: #fff;
+  fill: #888;
+}
+
+.non-operating-pref{
+  fill: #000;
 }
 
 #map{
-  stroke: black;
+  stroke: white;
+  background-color: #fff;
+  border-radius: 3px;
 }
