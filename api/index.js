@@ -441,8 +441,8 @@ const chara = (req, res) => {
 }
 
 const trackingLog = (tracker, endpoint) => {
-  const insertIntoLogQuery = "INSERT INTO log (tracker_id, visit) VALUES ?;";
-  connection.query(insertIntoLogQuery, [tracker, endpoint])
+  const insertIntoLogQuery = "INSERT INTO log (tracker, visit) VALUES (?);";
+  connection.query(insertIntoLogQuery, [[tracker, endpoint]])
 }
 
 const generateTracker = (req, res) => {
