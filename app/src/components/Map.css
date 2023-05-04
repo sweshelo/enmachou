@@ -1,0 +1,11 @@
+.visited-pref{
+  fill: #f41;
+}
+
+.unvisited-pref{
+  fill: #fff;
+}
+
+#map{
+  stroke: black;
+}
