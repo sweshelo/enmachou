@@ -76,7 +76,6 @@ const CharaChart = ({data}) => {
 
 const TimeframeChart = ({data}) => {
   const timeframeObject = data.map(r => ({ play: r }))
-  console.log(timeframeObject)
   return(
     <BarChart width={350} height={250} data={timeframeObject}>
       <CartesianGrid strokeDasharray="3 3" />
