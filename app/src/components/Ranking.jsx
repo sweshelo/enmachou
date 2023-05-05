@@ -4,6 +4,7 @@ import { config } from "../config"
 import './Ranking.css';
 
 const User = ({props}) => {
+  console.log(props.chara)
   return(
     <div>
       <a href={props.user_name !== 'プレーヤー' ? `/player/${props.user_name}` : null} className="player">
@@ -63,7 +64,7 @@ const renderActiveShape = (props) => {
   );
 };
 
-const CharaChart = ({data}) => {
+const CharaChart = ({data, clickHandler = ()=>{}}) => {
   const [ hoverIndex, setHoverIndex ] = useState(0)
   return(
     <PieChart width={350} height={210} id="chara-chart">
@@ -79,6 +80,7 @@ const CharaChart = ({data}) => {
         activeIndex={hoverIndex}
         activeShape={renderActiveShape}
         onMouseEnter={(_, index) => setHoverIndex(index)}
+        onClick={(_, index) => clickHandler(index)}
       >
         {data.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -91,6 +93,8 @@ const CharaChart = ({data}) => {
 const Ranking = () => {
   const [ rankingData, setRankingData ] = useState([])
   const [ charaChartData, setCharaChartData ] = useState([])
+  const [ isFiltered, setFilter ] = useState(false)
+  const [ filterChara, setFilterChara ] = useState('0')
 
   useEffect(() => {
     const fetchRankingData = async() => {
@@ -121,13 +125,25 @@ const Ranking = () => {
     setCharaChartData(charaChartMock)
   }, [rankingData])
 
+  const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '10', '12' ]
+
+  const charaFilterClickHandler = (index) => {
+    if (charaIndexTable[index] === filterChara) {
+      setFilter(!isFiltered)
+    }else{
+      setFilter(true)
+    }
+    setFilterChara( charaIndexTable[index] )
+    console.log(isFiltered, filterChara)
+  }
+
   return (
     <div id="ranking-wrapper">
       <div className="ranking">
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
         <p className="title-paragraph">現在のキャラクター構成比率</p>
-        <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} />
-        {rankingData.map((r, index) => <User key={index} props={r} />)}
+        <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} clickHandler={charaFilterClickHandler} />
+        {rankingData.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <User key={index} props={r} />)}
       </div>
     </div>
   )
