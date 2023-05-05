@@ -172,19 +172,19 @@ const main = async() => {
 
 const updateInterval = [
   // 0~
-  4, 4,
+  3, 3,
   // 2~
   30, 30, 30,
   // 5 (under maintenance)
   0, 0, 0,
   // 8~
-  5, 5,
+  3, 3,
   // 10~
-  4, 4, 4, 4, 4, 4, 4,
-  // 17~
-  2, 2, 2, 2,
+  2, 2, 2, 2, 2, 2,
+  // 16~
+  1, 1, 1, 1, 1,
   // 21~
-  4, 4, 4 ]
+  3, 3, 3 ]
 
 setInterval(() => {
   const nowTime = new Date()
@@ -201,7 +201,7 @@ setInterval(() => {
 const app = express();
 const server = app.listen(4400, () =>  console.log("Node.js is listening to PORT:" + server.address().port));
 app.use(cors({
-  origin: 'http://localhost:3001',
+  //origin: 'http://192.168.1.10:3001',
   credentials: true
 }));
 app.use(cookieParser())
