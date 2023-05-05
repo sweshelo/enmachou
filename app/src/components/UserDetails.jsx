@@ -146,7 +146,7 @@ const UserDetails = () => {
   }, [])
 
   const pointDiffArray = userDetailData.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
-  const pointAfter0505DiffArray = userDetailData.log?.map( r => r.elapsed < 600 && new Date(r.created_at) > new Date('2023-05-05 00:00:00') ? r.diff : null).filter(r => r > 0) || [];
+  const pointAfter0505DiffArray = userDetailData.log?.map( r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-05 00:00:00') ? r.diff : null).filter(r => r > 0) || [];
   const sliceIndexCount = Math.ceil(pointAfter0505DiffArray.length * 0.1)
 
   return (
