@@ -146,8 +146,8 @@ const UserDetails = () => {
   }, [])
 
   const pointDiffArray = userDetailData.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
-  const pointAfter0505DiffArray = userDetailData.log?.map( r => r.elapsed < 600 && new Date(r.created_at) > new Date('2023-05-05 00:00:00') ? r.diff : null).filter(r => r > 0) || [];
-  const sliceIndexCount = Math.ceil(pointAfter0505DiffArray.length * 0.1)
+  const pointAfter0506DiffArray = userDetailData.log?.map( r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r.diff : null).filter(r => r > 0) || [];
+  const sliceIndexCount = Math.ceil(pointAfter0506DiffArray.length * 0.1)
 
   return (
     <div id="user-detail-wrapper">
@@ -164,20 +164,20 @@ const UserDetails = () => {
           <OnlineIndicator online={userDetailData?.online} />
           <DetailBoard
             ranking={!userDetailData.log?.length ? null : Math.min(...userDetailData.log.map(r => r.ranking))}
-            point={!pointAfter0505DiffArray.length ? null : Math.max(...pointAfter0505DiffArray)}
+            point={!pointAfter0506DiffArray.length ? null : Math.max(...pointAfter0506DiffArray)}
             average={
               (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length) || null
             }
             availAverage={
-              pointAfter0505DiffArray.length >= 10
-                ? pointAfter0505DiffArray.sort((a, b) => a > b).slice( sliceIndexCount, sliceIndexCount * -1 ).reduce((x, y) => x + y) / (pointAfter0505DiffArray.length - sliceIndexCount * 2)
+              pointAfter0506DiffArray.length >= 10
+                ? pointAfter0506DiffArray.sort((a, b) => a > b).slice( sliceIndexCount, sliceIndexCount * -1 ).reduce((x, y) => x + y) / (pointAfter0506DiffArray.length - sliceIndexCount * 2)
                 : null
             }
           />
         </div>
         <div id="table-wrapper">
           <div>
-            <AverageGraph log={userDetailData.log?.slice(-300) || []}/>
+            <AverageGraph log={userDetailData.log?.slice(0, 300) || []}/>
             <PlayLog log={userDetailData.log || []} />
           </div>
         </div>
