@@ -177,7 +177,7 @@ const UserDetails = () => {
         </div>
         <div id="table-wrapper">
           <div>
-            <AverageGraph log={userDetailData.log?.slice(300) || []}/>
+            <AverageGraph log={userDetailData.log?.slice(0, 300) || []}/>
             <PlayLog log={userDetailData.log || []} />
           </div>
         </div>
