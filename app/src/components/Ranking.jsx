@@ -4,7 +4,6 @@ import { config } from "../config"
 import './Ranking.css';
 
 const User = ({props}) => {
-  console.log(props.chara)
   return(
     <div>
       <a href={props.user_name !== 'プレーヤー' ? `/player/${props.user_name}` : null} className="player">
@@ -126,7 +125,6 @@ const Ranking = () => {
   }, [rankingData])
 
   const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '10', '12' ]
-
   const charaFilterClickHandler = (index) => {
     if (charaIndexTable[index] === filterChara) {
       setFilter(!isFiltered)
@@ -134,7 +132,6 @@ const Ranking = () => {
       setFilter(true)
     }
     setFilterChara( charaIndexTable[index] )
-    console.log(isFiltered, filterChara)
   }
 
   return (
