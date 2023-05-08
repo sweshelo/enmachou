@@ -172,9 +172,9 @@ const main = async() => {
 
 const updateInterval = [
   // 0~
-  3, 3,
+  3, 0,
   // 2~
-  30, 30, 30,
+  0, 0, 0,
   // 5 (under maintenance)
   0, 0, 0,
   // 8~
@@ -349,7 +349,7 @@ const online = (req, res) => {
 
 const maxPointRanking = (req, res) => {
   if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-05 00:00:00' ORDER BY diff desc LIMIT 100;";
+  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-06 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
   connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
     if(result) {
       const response = result.map((r) => ({
