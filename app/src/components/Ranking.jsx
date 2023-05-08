@@ -117,7 +117,7 @@ const Ranking = () => {
       { name: null, count: null },
       { name: null, count: null },
       { name: '最愛チアモ', count: 0, color: 'lightpink' },
-      { name: null, count: null },
+      { name: 'マラリヤ', count: 0, color: 'purple' },
       { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
     ]
     rankingData.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
