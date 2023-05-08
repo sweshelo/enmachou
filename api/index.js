@@ -398,7 +398,7 @@ const chara = (req, res) => {
             //'8': { name: null, count: null, color: null },
             //'9': { name: null, count: null, color: null },
             '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
-            //'11': { name: null, count: null, color: null },
+            '11': { name: 'マラリヤ', count: 0, color: 'purple' },
             '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
           }
           data[dateString].ranking = {
@@ -413,7 +413,7 @@ const chara = (req, res) => {
             //'8': { name: null, count: null, color: null },
             //'9': { name: null, count: null, color: null },
             '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
-            //'11': { name: null, count: null, color: null },
+            '11': { name: 'マラリヤ', count: 0, color: 'purple' },
             '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
           }
           data[dateString].timeframe = [...Array(24)].map(() => 0)
