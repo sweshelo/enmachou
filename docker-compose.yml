@@ -28,6 +28,18 @@ services:
     depends_on:
       - mysql
     restart: always
+  scraper:
+    build: ./scraper
+    volumes:
+      - ./scraper:/app
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=ccj
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=ccj
+    depends_on:
+      - mysql
+    restart: always
   front:
     build: ./app
     ports:
