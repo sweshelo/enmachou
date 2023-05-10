@@ -21,7 +21,9 @@ function App() {
   useState(()=>{
     if(!cookie.tracker){
       fetch(config.baseEndpoint + '/api/tracker', {method:'POST'}).then(r => r.json()).then(
-        r => setCookie('tracker', r.tracker)
+        r => setCookie('tracker', r.tracker, {
+          expires: new Date(Date.now() + (90 * 24 * 60 * 60 * 1000))
+        })
       )
     }
   },cookie)

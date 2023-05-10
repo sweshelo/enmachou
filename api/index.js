@@ -70,7 +70,7 @@ const defaultOnlineThreshold = 20;
 const app = express();
 const server = app.listen(4400, () =>  console.log("Node.js is listening to PORT:" + server.address().port));
 app.use(cors({
-  //origin: 'http://192.168.1.10:5500',
+  origin: 'http://localhost:3001',
   credentials: true
 }));
 app.use(cookieParser())
@@ -316,7 +316,6 @@ const trackingLog = (tracker, endpoint) => {
 
 const generateTracker = (req, res) => {
   const trackerUuid = crypto.randomUUID()
-  res.cookie('tracker', trackerUuid)
   res.send({
     'status': 'ok',
     'tracker': trackerUuid
