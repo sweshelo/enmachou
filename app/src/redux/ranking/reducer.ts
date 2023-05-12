@@ -7,17 +7,21 @@ type Action = {
 }
 
 type State = {
-  player: Player[];
+  normal: Player[];
+  max: Player[];
 }
 
 const initialState: State = {
-  player: [],
+  normal: [],
+  max: [],
 }
 
 const rankingReducer = (state = initialState, action: Action) => {
   switch(action.type){
     case actions.SET_RANKING:
-      return { ...state, player: action.payload }
+      return { ...state, normal: action.payload }
+    case actions.SET_MAX_RANKING:
+      return { ...state, max: action.payload}
     default:
       return { ...state }
   }

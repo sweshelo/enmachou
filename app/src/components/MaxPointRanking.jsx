@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react"
-import { config } from "../config"
+import {useDispatch, useSelector} from "react-redux";
+import actions from "../redux/ranking/actions.ts";
 import './Ranking.css';
 
 const User = ({props}) => {
@@ -17,14 +18,10 @@ const User = ({props}) => {
 }
 
 const MaxPointRanking = () => {
-  const [ rankingData, setRankingData ] = useState([])
+  const ranking = useSelector((state) => state.rankingReducer)
+  const dispatch = useDispatch()
   useEffect(() => {
-    const fetchRankingData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/max-ranking`, {credentials:'include'})
-      const rankingArray = await response.json()
-      setRankingData(rankingArray)
-    }
-    fetchRankingData()
+    dispatch(actions.getMaxRankingUserList())
   }, [])
 
   return (
@@ -32,9 +29,9 @@ const MaxPointRanking = () => {
       <div className="ranking">
         <h2 className="page-title rainbow-grad-back">最高貢献ポイントランキング</h2>
         <p className="description-mini">このページでは、高スコアを登録している上位100位までのレコード一覧と、そのレコードを樹立したプレイヤーを確認できます。このランキングには、平均値算出から除外されるレコードは登録されません。</p>
-        {rankingData.length > 0
-          ? rankingData.map((r, index) => <User key={index} props={r} />)
-          : <>レコードがありません</>
+        {ranking?.max.length > 0
+          ? ranking?.max.map((r, index) => <User key={index} props={r} />)
+          : <p className="description">レコードがありません</p>
         }
       </div>
     </div>

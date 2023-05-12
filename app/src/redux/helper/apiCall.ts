@@ -19,7 +19,7 @@ class EnmaApi {
   static getRankingData(){
     return EnmaApi.httpGet('ranking')
   }
-  static getMaxRecordRankingData(){
+  static getMaxRankingData(){
     return EnmaApi.httpGet('max-ranking')
   }
   static getPlayerDetailData(player: Player){

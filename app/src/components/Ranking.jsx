@@ -95,7 +95,7 @@ const Ranking = () => {
   const [ isFiltered, setFilter ] = useState(false)
   const [ filterChara, setFilterChara ] = useState('0')
   const dispatch = useDispatch()
-  const { player } = useSelector(state => state.rankingReducer)
+  const ranking = useSelector(state => state.rankingReducer)
 
   useEffect(() => {
     dispatch(actions.getRankingUserList())
@@ -117,9 +117,9 @@ const Ranking = () => {
       { name: 'マラリヤ', count: 0, color: 'purple' },
       { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
     ]
-    player?.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
+    ranking?.normal?.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
     setCharaChartData(charaChartMock)
-  }, [player])
+  }, [ranking])
 
   const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '10', '12' ]
   const charaFilterClickHandler = (index) => {
@@ -137,7 +137,7 @@ const Ranking = () => {
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
         <p className="title-paragraph">現在のキャラクター構成比率</p>
         <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} clickHandler={charaFilterClickHandler} />
-        {player?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <User key={index} props={r} />)}
+        {ranking?.normal?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <User key={index} props={r} />)}
       </div>
     </div>
   )
