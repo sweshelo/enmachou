@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2/promise');
 const fs = require('fs');
 const express = require("express");
 const cors = require('cors');
@@ -65,6 +65,11 @@ const connection = mysql.createConnection({
 
 // const
 const defaultOnlineThreshold = 20;
+const status = {
+  ok: 'ok',
+  error: 'error',
+  undefined: 'undefind'
+}
 
 // ==== Web API ==== //
 const app = express();
@@ -75,41 +80,63 @@ app.use(cors({
 }));
 app.use(cookieParser())
 
-const ranking = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getLatestRankingFromTimelineQuery = "SELECT ranking, player_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
-  connection.query(getLatestRankingFromTimelineQuery, (err, result) => {
-    if(result){
-      res.send(result)
+const ranking = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getLatestRankingFromTimelineQuery = "SELECT ranking, player_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
+    const [ result ] = await (await connection).execute(getLatestRankingFromTimelineQuery)
+    if (result && result.length > 0){
+      res.send({
+        status: status.ok,
+        body: result
+      })
+    }else{
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。'
+      })
     }
-  })
+    return
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const userinfo = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  if( toFullWidth(req.params.username) === 'プレーヤー' ){
-    const response = {
-      'player_name': toFullWidth(req.params.username),
-      'achievement': '',
-      'chara': null,
-      'point': 0,
-      'ranking': 0,
-      'online': false,
-      'average': null,
-      'diff': [],
-      'log': [],
+const playerinfo = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    if( toFullWidth(req.params.playername) === 'プレーヤー' ){
+      const response = {
+        'player_name': toFullWidth(req.params.playername),
+        'achievement': '',
+        'chara': null,
+        'point': 0,
+        'ranking': 0,
+        'online': false,
+        'average': null,
+        'diff': [],
+        'log': [],
+      }
+      res.send({
+        status: status.error,
+        message: 'このユーザのデータを取得することは出来ません。',
+        body: response
+      })
+      return
     }
-    res.send(response)
-    return
-  }
 
-  const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
-  connection.query(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
+    const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
+    const [ result ] = await (await connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername) ])
+
     if(result && result.length > 0){
       // 増分を計算する
       const latestRecord = result[result.length - 1]
       const response = {
-        'player_name': toFullWidth(req.params.username),
+        'player_name': toFullWidth(req.params.playername),
         'achievement': latestRecord.achievement,
         'chara': latestRecord.chara,
         'point': latestRecord.point,
@@ -121,17 +148,30 @@ const userinfo = (req, res) => {
         })
         ).reverse(),
       }
-      res.send(response)
+      res.send({
+        status: status.ok,
+        body: response
+      })
     }else{
-      res.send({error: 'something went wrong'})
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。'
+      })
     }
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const prefectures = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
-  connection.query(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
+const prefectures = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
+    const [ result ] = await (await connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.username) ])
     if(result && result.length > 0){
       const prefectureAchievementTable = [
         { name: '北海道', achievement: 'North Sea Road' },
@@ -185,16 +225,26 @@ const prefectures = (req, res) => {
       const achievementArray = result.map(r => r.achievement)
       res.send(prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n))
     }else{
-      res.send({error: 'something went wrong'})
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。'
+      })
     }
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const online = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getOnlineUserFromUsersQuery = "SELECT DISTINCT player_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and player_name <> 'プレーヤー' and diff > 0;"
-  const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
-  connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
+const online = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getOnlineUserFromUsersQuery = "SELECT DISTINCT player_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and player_name <> 'プレーヤー' and diff > 0;"
+    const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
+    const [ result ] = await (await connection).execute(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ])
     if(result){
       const usernameArray = []
       const responseArray = result.map((user) => {
@@ -209,32 +259,52 @@ const online = (req, res) => {
     }else{
       res.send({error: 'something went wrong'})
     }
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const maxPointRanking = (req, res) => {
+const maxPointRanking = async(req, res) => {
+  try{
   if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE player_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-06 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
-  connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
-    if(result) {
+    const [ result ] = await (await connection).execute(getMaxPointsFromTimelineQuery)
+    if (result && result.length > 0) {
       const response = result.map((r) => ({
         ...r,
         created_at: hideDetailPlayTime(r.created_at)
       }))
-      res.send(response)
+      res.send({
+        status: status.ok,
+        body: response
+      })
+    }else{
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。'
+      })
     }
-    if(err) res.send({error: 'something went wrong'})
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const chara = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
-  connection.query(getCharaFromTimelineQuery, (err, result) => {
+const chara = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
+    const [ result ] = await (await connection).execute(getCharaFromTimelineQuery)
     const data = {}
     const dateKeys = []
 
-    if(result) {
+    if(result && result.length > 0) {
       let countForRanking = 0
       for(const r of result){
         const date = new Date(r.created_at)
@@ -300,9 +370,26 @@ const chara = (req, res) => {
         // count
         countForRanking++
       }
-      res.send({data, dateKeys: dateKeys})
+      res.send({
+        status: status.ok,
+        body:{
+          data,
+          dateKeys: dateKeys
+        }
+      })
+    }else{
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。',
+      })
     }
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
 const trackingLog = (tracker, endpoint) => {
@@ -320,8 +407,8 @@ const generateTracker = (req, res) => {
 
 app.get('/api/ranking', (req, res) => {ranking(req, res)})
 app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
-app.get('/api/users/:username', (req, res) => {userinfo(req, res)})
-app.get('/api/users/:username/prefectures', (req, res) => {prefectures(req, res)})
+app.get('/api/players/:playername', (req, res) => {playerinfo(req, res)})
+app.get('/api/players/:playername/prefectures', (req, res) => {prefectures(req, res)})
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
 app.get('/api/stats/chara', (req, res) => {chara(req, res)})
 app.post('/api/tracker', (req, res) => {generateTracker(req, res)})
