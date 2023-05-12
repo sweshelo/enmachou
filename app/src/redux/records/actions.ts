@@ -1,4 +1,4 @@
-import {Player} from "../type"
+import {Player, PlayerDetail, PlayLog} from "../type"
 
 const actions = {
   GET_ONLINEUSER: 'GET_ONLINEUSER',
@@ -9,6 +9,9 @@ const actions = {
   SET_RANKING: 'SET_RANKING',
   GET_MAX_RANKING: 'GET_MAX_RANKING',
   SET_MAX_RANKING: 'SET_MAX_RANKING',
+  GET_PLAYER_DETAIL: 'GET_PLAYER_DETAIL',
+  SET_PLAYER_DETAIL: 'SET_PLAYER_DETAIL',
+
   getRankingUserList: () => ({
     type: actions.GET_RANKING
   }),
@@ -26,18 +29,26 @@ const actions = {
   getOnlineUserList: () => ({
     type: actions.GET_ONLINEUSER
   }),
-  setOnlineUserList: (payload: Player[])=>{
-    return({
-      type: 'SET_ONLINEUSER',
-      payload,
-    })
-  },
+  setOnlineUserList: (payload: Player[]) => ({
+    type: actions.SET_ONLINEUSER,
+    payload,
+  }),
   startLoading: () => ({
     type: actions.SET_AS_LOADING
   }),
   finishLoading: () => ({
     type: actions.SET_AS_LOADED
   }),
+  getPlayerDetail: (playerName: string) => ({
+    type: actions.GET_PLAYER_DETAIL,
+    payload: {
+      playerName
+    }
+  }),
+  setPlayerDetail: (payload: PlayerDetail) => ({
+    type: actions.SET_PLAYER_DETAIL,
+    payload,
+  })
 }
 
 export default actions

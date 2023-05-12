@@ -1,5 +1,5 @@
 import actions from './actions.ts'
-import { Player } from '../type'
+import { Player, PlayerDetail } from '../type'
 
 type Action = {
   type: string;
@@ -11,6 +11,7 @@ type State = {
   standardRanking: Player[];
   maxRanking: Player[];
   isLoading: boolean;
+  playerDetail: PlayerDetail | null;
 }
 
 const initialState: State = {
@@ -18,6 +19,7 @@ const initialState: State = {
   standardRanking: [],
   maxRanking: [],
   isLoading: true,
+  playerDetail: null,
 }
 
 const recordsReducer = (state = initialState, action: Action) => {
@@ -32,6 +34,8 @@ const recordsReducer = (state = initialState, action: Action) => {
       return { ...state, standardRanking: action.payload }
     case actions.SET_MAX_RANKING:
       return { ...state, maxRanking: action.payload }
+    case actions.SET_PLAYER_DETAIL:
+      return { ...state, playerDetail: action.payload }
     default:
       return { ...state }
   }

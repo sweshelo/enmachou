@@ -22,11 +22,11 @@ class EnmaApi {
   static getMaxRankingData(){
     return EnmaApi.httpGet('max-ranking')
   }
-  static getPlayerDetailData(player: Player){
-    return EnmaApi.httpGet(`players/${player.player_name}`)
+  static getPlayerDetailData(playerName: string){
+    return EnmaApi.httpGet(`players/${playerName}`)
   }
-  static getPlayerPrefecturesData(player: Player){
-    return EnmaApi.httpGet(`players/${player.player_name}/prefectures`)
+  static getPlayerPrefecturesData(playerName: string){
+    return EnmaApi.httpGet(`players/${playerName}/prefectures`)
   }
   static getOnlinePlayerData(){
     return EnmaApi.httpGet(`online`)
