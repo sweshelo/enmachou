@@ -245,7 +245,7 @@ const online = async(req, res) => {
     const getOnlineUserFromUsersQuery = "SELECT DISTINCT player_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and player_name <> 'プレーヤー' and diff > 0;"
     const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
     const [ result ] = await (await connection).execute(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ])
-    if(result){
+    if(result && result.length > 0){
       const usernameArray = []
       const responseArray = result.map((user) => {
         if(usernameArray.includes(user.player_name)){
@@ -255,9 +255,16 @@ const online = async(req, res) => {
           return user
         }
       }).filter(r => !!r)
-      res.send(responseArray)
+      res.send({
+        status: status.ok,
+        body: responseArray,
+      })
     }else{
-      res.send({error: 'something went wrong'})
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。',
+      })
     }
   }catch(e){
     res.send({
