@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react"
 import { config } from "../config"
 import "./Ranking.css"
+import { useDispatch } from "react-redux"
+import actions from "../redux/account/actions.ts"
 
 const User = ({props}) => {
   return(
@@ -19,7 +21,9 @@ const User = ({props}) => {
 const Online = () => {
   const [ rankingData, setRankingData ] = useState([])
   const [ isLoading, setIsLoading ] = useState(true)
+  const dispatch = useDispatch()
   useEffect(() => {
+    dispatch(actions.TEST)
     const fetchRankingData = async() => {
       const response = await fetch(`${config.baseEndpoint}/api/online`, {credentials:'include'})
       const rankingArray = await response.json()
