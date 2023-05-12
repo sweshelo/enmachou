@@ -124,7 +124,7 @@ const Ranking = () => {
     setCharaChartData(charaChartMock)
   }, [rankingData])
 
-  const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '10', '12' ]
+  const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '10', '11', '12' ]
   const charaFilterClickHandler = (index) => {
     if (charaIndexTable[index] === filterChara) {
       setFilter(!isFiltered)
