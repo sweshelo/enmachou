@@ -135,7 +135,6 @@ const playerinfo = async(req, res) => {
       (await connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
       (await connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.playername) ])
     ])
-    console.log(prefectureResult)
 
     if(playLogResult && playLogResult.length > 0){
       // 制県度
