@@ -157,7 +157,7 @@ const UserDetails = () => {
           { userDetailData.chara && <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${userDetailData.chara}.png`} /> }
           <div className="userinfo-wrapper">
             <p>{userDetailData.ranking}位 - {userDetailData.point}P</p>
-            <h2 className="username">{userDetailData.user_name}</h2>
+            <h2 className="username">{userDetailData.player_name}</h2>
           </div>
         </div>
         <div className="info">
