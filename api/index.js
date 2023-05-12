@@ -77,7 +77,7 @@ app.use(cookieParser())
 
 const ranking = (req, res) => {
   if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getLatestRankingFromTimelineQuery = "SELECT ranking, user_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
+  const getLatestRankingFromTimelineQuery = "SELECT ranking, player_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
   connection.query(getLatestRankingFromTimelineQuery, (err, result) => {
     if(result){
       res.send(result)
@@ -89,7 +89,7 @@ const userinfo = (req, res) => {
   if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
   if( toFullWidth(req.params.username) === 'プレーヤー' ){
     const response = {
-      'user_name': toFullWidth(req.params.username),
+      'player_name': toFullWidth(req.params.username),
       'achievement': '',
       'chara': null,
       'point': 0,
@@ -103,22 +103,18 @@ const userinfo = (req, res) => {
     return
   }
 
-  const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE user_name = ? AND user_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
+  const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
   connection.query(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
     if(result && result.length > 0){
       // 増分を計算する
-      const pointDiff = result.map((record, i, arr) => i === 0 ? record.point : record.point - arr[i - 1].point).slice(1);
-      const average = pointDiff.reduce((acc, cur) => acc + cur, 0) / pointDiff.length;
       const latestRecord = result[result.length - 1]
       const response = {
-        'user_name': toFullWidth(req.params.username),
+        'player_name': toFullWidth(req.params.username),
         'achievement': latestRecord.achievement,
         'chara': latestRecord.chara,
         'point': latestRecord.point,
         'ranking': latestRecord.ranking,
         'online': (new Date() - new Date(latestRecord.created_at)) <= defaultOnlineThreshold * 60 * 1000,
-        'average': average,
-        'diff': pointDiff.reverse(),
         'log': result.map((r) => ({
           ...r,
           created_at: hideDetailPlayTime(r.created_at)
@@ -134,7 +130,7 @@ const userinfo = (req, res) => {
 
 const prefectures = (req, res) => {
   if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE user_name = ? AND user_name <> 'プレーヤー';"
+  const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
   connection.query(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
     if(result && result.length > 0){
       const prefectureAchievementTable = [
@@ -196,16 +192,16 @@ const prefectures = (req, res) => {
 
 const online = (req, res) => {
   if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getOnlineUserFromUsersQuery = "SELECT DISTINCT user_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
+  const getOnlineUserFromUsersQuery = "SELECT DISTINCT player_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and player_name <> 'プレーヤー' and diff > 0;"
   const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
   connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
     if(result){
       const usernameArray = []
       const responseArray = result.map((user) => {
-        if(usernameArray.includes(user.user_name)){
+        if(usernameArray.includes(user.player_name)){
           return null
         }else{
-          usernameArray.push(user.user_name)
+          usernameArray.push(user.player_name)
           return user
         }
       }).filter(r => !!r)
@@ -218,7 +214,7 @@ const online = (req, res) => {
 
 const maxPointRanking = (req, res) => {
   if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-06 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
+  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE player_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-06 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
   connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
     if(result) {
       const response = result.map((r) => ({
