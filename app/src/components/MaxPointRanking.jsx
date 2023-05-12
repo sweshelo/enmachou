@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import {useDispatch, useSelector} from "react-redux";
-import actions from "../redux/ranking/actions.ts";
+import actions from "../redux/records/actions.ts";
 import './Ranking.css';
 
 const User = ({props}) => {
@@ -18,7 +18,7 @@ const User = ({props}) => {
 }
 
 const MaxPointRanking = () => {
-  const ranking = useSelector((state) => state.rankingReducer)
+  const ranking = useSelector((state) => state.recordsReducer)
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(actions.getMaxRankingUserList())
@@ -29,8 +29,8 @@ const MaxPointRanking = () => {
       <div className="ranking">
         <h2 className="page-title rainbow-grad-back">最高貢献ポイントランキング</h2>
         <p className="description-mini">このページでは、高スコアを登録している上位100位までのレコード一覧と、そのレコードを樹立したプレイヤーを確認できます。このランキングには、平均値算出から除外されるレコードは登録されません。</p>
-        {ranking?.max.length > 0
-          ? ranking?.max.map((r, index) => <User key={index} props={r} />)
+        {ranking?.maxRanking.length > 0
+          ? ranking?.maxRanking.map((r, index) => <User key={index} props={r} />)
           : <p className="description">レコードがありません</p>
         }
       </div>

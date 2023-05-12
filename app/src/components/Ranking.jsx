@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import {useDispatch, useSelector} from "react-redux";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
-import actions from "../redux/ranking/actions.ts";
+import actions from "../redux/records/actions.ts";
 import './Ranking.css';
 
 const User = ({props}) => {
@@ -95,7 +95,7 @@ const Ranking = () => {
   const [ isFiltered, setFilter ] = useState(false)
   const [ filterChara, setFilterChara ] = useState('0')
   const dispatch = useDispatch()
-  const ranking = useSelector(state => state.rankingReducer)
+  const ranking = useSelector(state => state.recordsReducer)
 
   useEffect(() => {
     dispatch(actions.getRankingUserList())
@@ -117,7 +117,7 @@ const Ranking = () => {
       { name: 'マラリヤ', count: 0, color: 'purple' },
       { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
     ]
-    ranking?.normal?.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
+    ranking?.standardRanking?.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
     setCharaChartData(charaChartMock)
   }, [ranking])
 
@@ -137,7 +137,7 @@ const Ranking = () => {
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
         <p className="title-paragraph">現在のキャラクター構成比率</p>
         <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} clickHandler={charaFilterClickHandler} />
-        {ranking?.normal?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <User key={index} props={r} />)}
+        {ranking?.standardRanking?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <User key={index} props={r} />)}
       </div>
     </div>
   )

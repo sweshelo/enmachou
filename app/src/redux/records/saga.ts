@@ -2,6 +2,13 @@ import { all, call, put, takeEvery } from 'redux-saga/effects';
 import {EnmaApi} from '../helper/apiCall.ts';
 import actions from './actions.ts';
 
+export function* getOnlineUser(): Generator<unknown, void, any>{
+  const response = yield call(EnmaApi.getOnlinePlayerData)
+  const result = yield response.json()
+  yield put(actions.setOnlineUserList(result.body))
+  yield put(actions.finishLoading())
+}
+
 export function* getRankingData(): Generator<unknown, void, any>{
   const response = yield call(EnmaApi.getRankingData)
   const result = yield response.json()
@@ -14,9 +21,10 @@ export function* getMaxRankingData(): Generator<unknown, void, any>{
   yield put(actions.setMaxRankingUserList(result.body))
 }
 
-export default function* rankingSaga(): Generator<any, any, any>{
+export default function* recordsSaga(): Generator<any, any, any>{
   yield all([
     takeEvery(actions.GET_RANKING, getRankingData),
     takeEvery(actions.GET_MAX_RANKING, getMaxRankingData),
+    takeEvery(actions.GET_ONLINEUSER, getOnlineUser)
   ])
 }

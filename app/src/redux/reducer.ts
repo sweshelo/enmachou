@@ -1,12 +1,10 @@
 import { combineReducers } from 'redux';
 import accountReducer from './account/reducer.ts';
-import onlineReducer from './online/reducer.ts';
-import rankingReducer from './ranking/reducer.ts';
+import recordsReducer from './records/reducer.ts';
 
 const rootReducer = combineReducers({
   accountReducer,
-  onlineReducer,
-  rankingReducer,
+  recordsReducer,
 })
 
 export default rootReducer
