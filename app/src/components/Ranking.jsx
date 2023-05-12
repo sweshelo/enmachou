@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
+import {useDispatch, useSelector} from "react-redux";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
-import { config } from "../config"
+import actions from "../redux/ranking/actions.ts";
 import './Ranking.css';
 
 const User = ({props}) => {
@@ -90,18 +91,14 @@ const CharaChart = ({data, clickHandler = ()=>{}}) => {
 }
 
 const Ranking = () => {
-  const [ rankingData, setRankingData ] = useState([])
   const [ charaChartData, setCharaChartData ] = useState([])
   const [ isFiltered, setFilter ] = useState(false)
   const [ filterChara, setFilterChara ] = useState('0')
+  const dispatch = useDispatch()
+  const { player } = useSelector(state => state.rankingReducer)
 
   useEffect(() => {
-    const fetchRankingData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/ranking`, {credentials:'include'})
-      const rankingArray = await response.json()
-      setRankingData(rankingArray)
-    }
-    fetchRankingData()
+    dispatch(actions.getRankingUserList())
   }, [])
 
   useEffect(() => {
@@ -120,9 +117,9 @@ const Ranking = () => {
       { name: 'マラリヤ', count: 0, color: 'purple' },
       { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
     ]
-    rankingData.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
+    player?.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
     setCharaChartData(charaChartMock)
-  }, [rankingData])
+  }, [player])
 
   const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '10', '12' ]
   const charaFilterClickHandler = (index) => {
@@ -140,7 +137,7 @@ const Ranking = () => {
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
         <p className="title-paragraph">現在のキャラクター構成比率</p>
         <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} clickHandler={charaFilterClickHandler} />
-        {rankingData.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <User key={index} props={r} />)}
+        {player?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <User key={index} props={r} />)}
       </div>
     </div>
   )
