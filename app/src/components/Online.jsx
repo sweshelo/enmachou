@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react"
-import { config } from "../config"
+import React, { useEffect } from "react"
 import "./Ranking.css"
 import { useDispatch, useSelector } from "react-redux"
 import actions from "../redux/online/actions.ts"
