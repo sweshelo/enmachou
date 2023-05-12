@@ -5,13 +5,13 @@ import actions from './actions.ts';
 export function* getRankingData(): Generator<unknown, void, any>{
   const response = yield call(EnmaApi.getRankingData)
   const result = yield response.json()
-  yield put(actions.setRankingUserList(result))
+  yield put(actions.setRankingUserList(result.body))
 }
 
 export function* getMaxRankingData(): Generator<unknown, void, any>{
   const response = yield call(EnmaApi.getMaxRankingData)
   const result = yield response.json()
-  yield put(actions.setMaxRankingUserList(result))
+  yield put(actions.setMaxRankingUserList(result.body))
 }
 
 export default function* rankingSaga(): Generator<any, any, any>{

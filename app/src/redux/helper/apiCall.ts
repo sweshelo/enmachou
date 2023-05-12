@@ -23,10 +23,10 @@ class EnmaApi {
     return EnmaApi.httpGet('max-ranking')
   }
   static getPlayerDetailData(player: Player){
-    return EnmaApi.httpGet(`users/${player.player_name}`)
+    return EnmaApi.httpGet(`players/${player.player_name}`)
   }
   static getPlayerPrefecturesData(player: Player){
-    return EnmaApi.httpGet(`users/${player.player_name}/prefectures`)
+    return EnmaApi.httpGet(`players/${player.player_name}/prefectures`)
   }
   static getOnlinePlayerData(){
     return EnmaApi.httpGet(`online`)

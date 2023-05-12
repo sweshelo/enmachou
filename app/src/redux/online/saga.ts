@@ -5,7 +5,7 @@ import actions from './actions.ts';
 export function* getOnlineUser(): Generator<unknown, void, any>{
   const response = yield call(EnmaApi.getOnlinePlayerData)
   const result = yield response.json()
-  yield put(actions.setOnlineUserList(result))
+  yield put(actions.setOnlineUserList(result.body))
   yield put(actions.finishLoading())
 }
 

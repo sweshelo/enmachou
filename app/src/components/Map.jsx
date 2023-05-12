@@ -47,8 +47,8 @@ const Map = () => {
   const { username } = useParams();
   useEffect(()=>{
     const fetchVisitedPrefecture = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/users/${username}/prefectures`)
-      const visitStateArray = await response.json()
+      const response = await fetch(`${config.baseEndpoint}/api/players/${username}/prefectures`)
+      const visitStateArray = (await response.json()).body
       if(visitStateArray.length > 0){
         drawMap(visitStateArray)
         setNoData(false)
