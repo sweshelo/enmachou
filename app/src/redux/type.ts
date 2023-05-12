@@ -9,6 +9,7 @@ type PlayerDetail = Player & {
   achievement: string;
   online: boolean;
   log: PlayLog[];
+  prefectures: string[];
 };
 
 type PlayLog = {

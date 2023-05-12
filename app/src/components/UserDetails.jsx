@@ -179,10 +179,12 @@ const UserDetails = () => {
             <PlayLog log={playerDetail?.log || []} />
           </div>
         </div>
-        <div id="prefectures">
-          <p className="title-paragraph">このユーザの制県度</p>
-          {/*<Map />*/}
-        </div>
+        { playerDetail?.prefectures.length > 0 && (
+          <div id="prefectures">
+            <p className="title-paragraph">このユーザの制県度</p>
+            <Map visited={[...playerDetail?.prefectures]} />
+          </div>
+        ) }
       </div>
     </div>
   )

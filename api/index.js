@@ -130,11 +130,68 @@ const playerinfo = async(req, res) => {
     }
 
     const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
-    const [ result ] = await (await connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername) ])
+    const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
+    const [ [playLogResult], [prefectureResult] ] = await Promise.all([
+      (await connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
+      (await connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.playername) ])
+    ])
+    console.log(prefectureResult)
 
-    if(result && result.length > 0){
+    if(playLogResult && playLogResult.length > 0){
+      // 制県度
+      const prefectureAchievementTable = [
+        { name: '北海道', achievement: 'North Sea Road' },
+        { name: '青森県', achievement: 'Blue Forest' },
+        { name: '岩手県', achievement: 'Rock Hand' },
+        { name: '宮城県', achievement: 'Palace Castle' },
+        { name: '秋田県', achievement: 'Autumn Paddy' },
+        { name: '山形県', achievement: 'Mountain Form' },
+        { name: '福島県', achievement: 'Happy Island' },
+        { name: '茨城県', achievement: 'Thorn Castle' },
+        { name: '栃木県', achievement: 'Buckeye' },
+        { name: '群馬県', achievement: 'Herd Horse' },
+        { name: '埼玉県', achievement: 'Cape Ball' },
+        { name: '千葉県', achievement: 'Thousand Leaf' },
+        { name: '東京都', achievement: 'East Capital' },
+        { name: '神奈川県', achievement: 'God Apple River' },
+        { name: '新潟県', achievement: 'New Lagoon' },
+        { name: '富山県', achievement: 'Mt. Wealth' },
+        { name: '石川県', achievement: 'Stone River' },
+        { name: '福井県', achievement: 'Happy Well' },
+        { name: '山梨県', achievement: 'Mountain Pear' },
+        { name: '長野県', achievement: 'Long Field' },
+        { name: '岐阜県', achievement: 'Crossroads Hill' },
+        { name: '静岡県', achievement: 'Silent Hill' },
+        { name: '愛知県', achievement: 'Love Intelligence' },
+        { name: '三重県', achievement: 'Triple' },
+        { name: '滋賀県', achievement: 'Moisten Celebrate' },
+        { name: '京都府', achievement: 'Capital' },
+        { name: '大阪府', achievement: 'Big Slope' },
+        { name: '兵庫県', achievement: 'Soldier Warehouse' },
+        { name: '奈良県', achievement: 'Nice Apple' },
+        { name: '和歌山県', achievement: 'Mt. Gentle Song' },
+        { name: '鳥取県', achievement: 'Bird get' },
+        { name: '島根県', achievement: 'Island Root' },
+        { name: '岡山県', achievement: 'Mt. Hill' },
+        { name: '広島県', achievement: 'Wide Island' },
+        { name: '山口県', achievement: 'Mountain Mouth' },
+        { name: '徳島県', achievement: 'Virtue Island' },
+        { name: '香川県', achievement: 'Aroma River' },
+        { name: '愛媛県', achievement: 'Love Princess' },
+        { name: '高知県', achievement: 'High Intelligence' },
+        { name: '福岡県', achievement: 'Happy Hill' },
+        { name: '佐賀県', achievement: 'Assistant Celebrate' },
+        { name: '長崎県', achievement: 'Long Cape' },
+        { name: '熊本県', achievement: 'Bear Book' },
+        { name: '大分県', achievement: 'Big Minute' },
+        { name: '宮崎県', achievement: 'Palace Cape' },
+        { name: '鹿児島県', achievement: 'Fawn Island' },
+        { name: '沖縄県', achievement: 'Offing Rope' },
+      ]
+      const achievementArray = prefectureResult.map(r => r.achievement)
+
       // 増分を計算する
-      const latestRecord = result[result.length - 1]
+      const latestRecord = playLogResult[playLogResult.length - 1]
       const response = {
         'player_name': toFullWidth(req.params.playername),
         'achievement': latestRecord.achievement,
@@ -142,12 +199,14 @@ const playerinfo = async(req, res) => {
         'point': latestRecord.point,
         'ranking': latestRecord.ranking,
         'online': (new Date() - new Date(latestRecord.created_at)) <= defaultOnlineThreshold * 60 * 1000,
-        'log': result.map((r) => ({
+        'log': playLogResult.map((r) => ({
           ...r,
           created_at: hideDetailPlayTime(r.created_at)
-        })
+        }),
         ).reverse(),
+        'prefectures': prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n)
       }
+
       res.send({
         status: status.ok,
         body: response
@@ -276,8 +335,8 @@ const online = async(req, res) => {
 
 const maxPointRanking = async(req, res) => {
   try{
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE player_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-06 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE player_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-06 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
     const [ result ] = await (await connection).execute(getMaxPointsFromTimelineQuery)
     if (result && result.length > 0) {
       const response = result.map((r) => ({
