@@ -26,7 +26,7 @@ function App() {
         })
       )
     }
-  },cookie)
+  }, [])
 
   return (
     <div className="App">
