@@ -32,7 +32,7 @@ function App() {
     <div className="App">
       <header>
         <h1><a href='/'>閻魔帳</a></h1>
-        <span>v0.7 - @sweshelo</span>
+        <span>v0.8 - @sweshelo</span>
       </header>
       <DrawerMenu />
       <Router>
