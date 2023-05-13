@@ -27,11 +27,18 @@ export function* getPlayerDetailData({payload}): Generator<unknown, void, any>{
   yield put(actions.setPlayerDetail(result.body))
 }
 
+export function* getStatsData(): Generator<unknown, void, any>{
+  const response = yield call(EnmaApi.getStatsData)
+  const result = yield response.json()
+  yield put(actions.setStats(result.body))
+}
+
 export default function* recordsSaga(): Generator<any, any, any>{
   yield all([
     takeEvery(actions.GET_RANKING, getRankingData),
     takeEvery(actions.GET_MAX_RANKING, getMaxRankingData),
     takeEvery(actions.GET_ONLINEUSER, getOnlineUser),
     takeEvery(actions.GET_PLAYER_DETAIL, getPlayerDetailData),
+    takeEvery(actions.GET_STATS, getStatsData),
   ])
 }

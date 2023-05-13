@@ -31,6 +31,9 @@ class EnmaApi {
   static getOnlinePlayerData(){
     return EnmaApi.httpGet(`online`)
   }
+  static getStatsData(){
+    return EnmaApi.httpGet(`stats`)
+  }
 }
 
 export { EnmaApi }

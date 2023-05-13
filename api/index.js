@@ -361,7 +361,7 @@ const maxPointRanking = async(req, res) => {
   }
 }
 
-const chara = async(req, res) => {
+const statistics = async(req, res) => {
   try{
     if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
     const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
@@ -475,5 +475,5 @@ app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
 app.get('/api/players/:playername', (req, res) => {playerinfo(req, res)})
 app.get('/api/players/:playername/prefectures', (req, res) => {prefectures(req, res)})
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
-app.get('/api/stats/chara', (req, res) => {chara(req, res)})
+app.get('/api/stats', (req, res) => {statistics(req, res)})
 app.post('/api/tracker', (req, res) => {generateTracker(req, res)})

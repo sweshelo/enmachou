@@ -25,4 +25,25 @@ type PlayLog = {
   elapsed: number;
 }
 
-export { Player, PlayerDetail, PlayLog }
+type Chara = {
+  name: string;
+  count: number;
+  color: string;
+}
+
+type Stats = {
+  data: {
+    [key: string]: {
+      records: number;
+      play: {
+        [key: string]: Chara
+      };
+      ranking: {
+        [key: string]: Chara
+      };
+    }
+  };
+  dateKeys: string[];
+}
+
+export { Player, PlayerDetail, PlayLog, Stats }
