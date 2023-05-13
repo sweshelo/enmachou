@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react"
+import {useDispatch, useSelector} from "react-redux";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
-import { config } from "../config"
+import actions from "../redux/records/actions.ts";
 import './Ranking.css';
 
-const User = ({props}) => {
+const Player = ({props}) => {
   return(
     <div>
-      <a href={props.user_name !== 'プレーヤー' ? `/player/${props.user_name}` : null} className="player">
+      <a href={props.player_name !== 'プレーヤー' ? `/player/${props.player_name}` : null} className="player">
         <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${props.chara}.png`} />
-        <div className="userinfo-wrapper">
+        <div className="playerinfo-wrapper">
           <p>{props.ranking}位 - {props.point}P</p>
-          <h2 className="username">{props.user_name}</h2>
+          <h2 className="playername">{props.player_name}</h2>
         </div>
       </a>
     </div>
@@ -90,18 +91,14 @@ const CharaChart = ({data, clickHandler = ()=>{}}) => {
 }
 
 const Ranking = () => {
-  const [ rankingData, setRankingData ] = useState([])
   const [ charaChartData, setCharaChartData ] = useState([])
   const [ isFiltered, setFilter ] = useState(false)
   const [ filterChara, setFilterChara ] = useState('0')
+  const dispatch = useDispatch()
+  const ranking = useSelector(state => state.recordsReducer)
 
   useEffect(() => {
-    const fetchRankingData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/ranking`, {credentials:'include'})
-      const rankingArray = await response.json()
-      setRankingData(rankingArray)
-    }
-    fetchRankingData()
+    dispatch(actions.getRankingPlayerList())
   }, [])
 
   useEffect(() => {
@@ -120,9 +117,9 @@ const Ranking = () => {
       { name: 'マラリヤ', count: 0, color: 'purple' },
       { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
     ]
-    rankingData.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
+    ranking?.standardRanking?.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
     setCharaChartData(charaChartMock)
-  }, [rankingData])
+  }, [ranking])
 
   const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '10', '11', '12' ]
   const charaFilterClickHandler = (index) => {
@@ -140,7 +137,7 @@ const Ranking = () => {
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
         <p className="title-paragraph">現在のキャラクター構成比率</p>
         <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} clickHandler={charaFilterClickHandler} />
-        {rankingData.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <User key={index} props={r} />)}
+        {ranking?.standardRanking?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <Player key={index} props={r} />)}
       </div>
     </div>
   )

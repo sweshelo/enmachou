@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS `ccj`.`users` (
-  `user_id` INT PRIMARY KEY AUTO_INCREMENT,
-  `user_name` VARCHAR(8) NOT NULL,
+CREATE TABLE IF NOT EXISTS `ccj`.`players` (
+  `player_id` INT PRIMARY KEY AUTO_INCREMENT,
+  `player_name` VARCHAR(8) NOT NULL,
   `ranking` INT,
   `achievement` TEXT,
   `chara` TEXT,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `ccj`.`users` (
 
 CREATE TABLE IF NOT EXISTS `ccj`.`timeline` (
   `timeline_id` INT PRIMARY KEY AUTO_INCREMENT,
-  `user_name` VARCHAR(8) NOT NULL,
+  `player_name` VARCHAR(8) NOT NULL,
   `ranking` INT,
   `achievement` TEXT,
   `chara` TEXT,
