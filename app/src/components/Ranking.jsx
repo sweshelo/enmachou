@@ -4,14 +4,14 @@ import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 import actions from "../redux/records/actions.ts";
 import './Ranking.css';
 
-const User = ({props}) => {
+const Player = ({props}) => {
   return(
     <div>
       <a href={props.player_name !== 'プレーヤー' ? `/player/${props.player_name}` : null} className="player">
         <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${props.chara}.png`} />
-        <div className="userinfo-wrapper">
+        <div className="playerinfo-wrapper">
           <p>{props.ranking}位 - {props.point}P</p>
-          <h2 className="username">{props.player_name}</h2>
+          <h2 className="playername">{props.player_name}</h2>
         </div>
       </a>
     </div>
@@ -98,7 +98,7 @@ const Ranking = () => {
   const ranking = useSelector(state => state.recordsReducer)
 
   useEffect(() => {
-    dispatch(actions.getRankingUserList())
+    dispatch(actions.getRankingPlayerList())
   }, [])
 
   useEffect(() => {
@@ -137,7 +137,7 @@ const Ranking = () => {
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
         <p className="title-paragraph">現在のキャラクター構成比率</p>
         <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} clickHandler={charaFilterClickHandler} />
-        {ranking?.standardRanking?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <User key={index} props={r} />)}
+        {ranking?.standardRanking?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <Player key={index} props={r} />)}
       </div>
     </div>
   )

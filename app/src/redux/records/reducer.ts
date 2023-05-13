@@ -26,7 +26,7 @@ const initialState: State = {
 
 const recordsReducer = (state = initialState, action: Action) => {
   switch(action.type){
-    case actions.SET_ONLINEUSER:
+    case actions.SET_ONLINEPLAYER:
       return { ...state, onlinePlayer: action.payload }
     case actions.SET_AS_LOADING:
       return { ...state, isLoading: true }

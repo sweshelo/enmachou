@@ -1,8 +1,8 @@
 import {Player, PlayerDetail, PlayLog, Stats} from "../type"
 
 const actions = {
-  GET_ONLINEUSER: 'GET_ONLINEUSER',
-  SET_ONLINEUSER: 'SET_ONLINEUSER',
+  GET_ONLINEPLAYER: 'GET_ONLINEPLAYER',
+  SET_ONLINEPLAYER: 'SET_ONLINEPLAYER',
   SET_AS_LOADED: 'SET_AS_LOADED',
   SET_AS_LOADING: 'SET_AS_LOADING',
   GET_RANKING: 'GET_RANKING',
@@ -14,25 +14,25 @@ const actions = {
   GET_STATS: 'GET_STATS',
   SET_STATS: 'SET_STATS',
 
-  getRankingUserList: () => ({
+  getRankingPlayerList: () => ({
     type: actions.GET_RANKING
   }),
-  setRankingUserList: (payload: Player[]) => ({
+  setRankingPlayerList: (payload: Player[]) => ({
     type: actions.SET_RANKING,
     payload,
   }),
-  getMaxRankingUserList: () => ({
+  getMaxRankingPlayerList: () => ({
     type: actions.GET_MAX_RANKING
   }),
-  setMaxRankingUserList: (payload: Player[]) => ({
+  setMaxRankingPlayerList: (payload: Player[]) => ({
     type: actions.SET_MAX_RANKING,
     payload,
   }),
-  getOnlineUserList: () => ({
-    type: actions.GET_ONLINEUSER
+  getOnlinePlayerList: () => ({
+    type: actions.GET_ONLINEPLAYER,
   }),
-  setOnlineUserList: (payload: Player[]) => ({
-    type: actions.SET_ONLINEUSER,
+  setOnlinePlayerList: (payload: Player[]) => ({
+    type: actions.SET_ONLINEPLAYER,
     payload,
   }),
   startLoading: () => ({

@@ -108,7 +108,7 @@ const Statistics = () => {
   })
 
   return (
-    <div id="user-detail-wrapper">
+    <div id="player-detail-wrapper">
       <div>
         <div className="ranking">
           <h2 className="page-title rainbow-grad-back">統計</h2>
