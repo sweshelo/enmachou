@@ -21,7 +21,7 @@ const MaxPointRanking = () => {
   const ranking = useSelector((state) => state.recordsReducer)
   const dispatch = useDispatch()
   useEffect(() => {
-    dispatch(actions.getMaxRankingplayerList())
+    dispatch(actions.getMaxRankingPlayerList())
   }, [])
 
   return (
