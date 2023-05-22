@@ -470,6 +470,27 @@ const generateTracker = (req, res) => {
   })
 }
 
+const cleanInvalidRecords = async(req, res) => {
+  const [ result ] = await (await connection).execute('SELECT * FROM timeline WHERE player_name <> "プレーヤー";')
+  const requireToDelete = []
+  result.sort((a, b) => a.player_name.localeCompare(b.player_name))
+  result.forEach((record, i) => {
+    if(i==0) return
+    const last = result[i-1]
+    if(record.point == last.point && record.user_name == last.user_name && record.diff > 0) {
+      requireToDelete.push(last.timeline_id)
+      console.log(last.player_name, last.point, record.point, record.diff, last.created_at, record.created_at)
+    }
+  })
+  console.log(requireToDelete)
+  requireToDelete.forEach(async(record) => {
+    (await connection).execute('DELETE FROM timeline WHERE timeline_id = ?', [record])
+  })
+  res.send({
+    'status': status.ok
+  })
+}
+
 app.get('/api/ranking', (req, res) => {ranking(req, res)})
 app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
 app.get('/api/players/:playername', (req, res) => {playerinfo(req, res)})
@@ -477,3 +498,4 @@ app.get('/api/players/:playername/prefectures', (req, res) => {prefectures(req, 
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
 app.get('/api/stats', (req, res) => {statistics(req, res)})
 app.post('/api/tracker', (req, res) => {generateTracker(req, res)})
+app.post('/api/clean', (req, res) => {cleanInvalidRecords(req, res)})
