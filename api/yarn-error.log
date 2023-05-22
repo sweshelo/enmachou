@@ -1,8 +1,8 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Users\sweshelo\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add cookie-parser
+  C:\Program Files\nodejs\node.exe C:\Users\sweshelo\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add mysql2
 
 PATH: 
-  C:\Program Files\PowerShell\7;C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.16.10262.0_x64__8wekyb3d8bbwe;C:\Program Files\Common Files\Oracle\Java\javapath;c:\devkitPro\msys2\usr\bin;C:\Program Files\Oculus\Support\oculus-runtime;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\Neovim\bin;C:\Program Files\nodejs\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Docker\Docker\resources\bin;C:\Users\sweshelo\AppData\Local\Citra\nightly-mingw;C:\Program Files\dotnet\;C:\devkitPro\tools\bin;C:\MinGW\bin;C:\Program Files\Go\bin;C:\Program Files\PowerShell\7\;C:\Users\sweshelo\scoop\apps\python\current\Scripts;C:\Users\sweshelo\scoop\apps\python\current;C:\Users\sweshelo\AppData\Local\Programs\Python\Launcher\;C:\Users\sweshelo\scoop\apps\gsudo\current;C:\Users\sweshelo\scoop\shims;C:\Users\sweshelo\AppData\Local\Microsoft\WindowsApps;C:\Users\sweshelo\AppData\Roaming\npm;C:\Users\sweshelo\AppData\Local\Programs\oh-my-posh\bin;C:\Users\sweshelo\bin;C:\Users\sweshelo\.dotnet\tools;C:\Users\sweshelo\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\sweshelo\go\bin;C:\Users\sweshelo\bin\platform-tools;C:\devkitPro\devkitARM\bin;C:\Program Files\Neovim\bin
+  C:\Program Files\PowerShell\7;C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.16.10262.0_x64__8wekyb3d8bbwe;C:\Program Files\Common Files\Oracle\Java\javapath;c:\devkitPro\msys2\usr\bin;C:\Program Files\Oculus\Support\oculus-runtime;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\Neovim\bin;C:\Program Files\nodejs\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Docker\Docker\resources\bin;C:\Users\sweshelo\AppData\Local\Citra\nightly-mingw;C:\Program Files\dotnet\;C:\devkitPro\tools\bin;C:\MinGW\bin;C:\Program Files\Go\bin;C:\Program Files\PowerShell\7\;C:\Users\sweshelo\scoop\apps\python\current\Scripts;C:\Users\sweshelo\scoop\apps\python\current;C:\Users\sweshelo\AppData\Local\Programs\Python\Launcher\;C:\Users\sweshelo\scoop\apps\gsudo\current;C:\Users\sweshelo\scoop\shims;C:\Users\sweshelo\AppData\Local\Microsoft\WindowsApps;C:\Users\sweshelo\AppData\Roaming\npm;C:\Users\sweshelo\AppData\Local\Programs\oh-my-posh\bin;C:\Users\sweshelo\bin;C:\Users\sweshelo\.dotnet\tools;C:\Users\sweshelo\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\sweshelo\go\bin;C:\Users\sweshelo\bin\platform-tools;C:\devkitPro\devkitARM\bin;
 
 Yarn version: 
   1.22.19
@@ -23,6 +23,7 @@ npm manifest:
     "main": "index.js",
     "license": "MIT",
     "dependencies": {
+      "cookie-parser": "^1.4.6",
       "cors": "^2.8.5",
       "express": "^4.18.2",
       "jsdom": "^21.1.1",
@@ -209,10 +210,23 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/content-type/-/content-type-1.0.5.tgz#8b773162656d1d1086784c8f23a54ce6d73d7918"
     integrity sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==
   
+  cookie-parser@^1.4.6:
+    version "1.4.6"
+    resolved "https://registry.yarnpkg.com/cookie-parser/-/cookie-parser-1.4.6.tgz#3ac3a7d35a7a03bbc7e365073a26074824214594"
+    integrity sha512-z3IzaNjdwUC2olLIB5/ITd0/setiaFMLYiZJle7xg5Fe9KWAceil7xszYfHHBtDFYLSgJduS2Ty0P1uJdPDJeA==
+    dependencies:
+      cookie "0.4.1"
+      cookie-signature "1.0.6"
+  
   cookie-signature@1.0.6:
     version "1.0.6"
     resolved "https://registry.yarnpkg.com/cookie-signature/-/cookie-signature-1.0.6.tgz#e303a882b342cc3ee8ca513a79999734dab3ae2c"
     integrity sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==
+  
+  cookie@0.4.1:
+    version "0.4.1"
+    resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.4.1.tgz#afd713fe26ebd21ba95ceb61f9a8116e50a537d1"
+    integrity sha512-ZwrFkGJxUR3EIoXtO+yVE69Eb7KlixbaeAWfBQB9vVsNn/o+Yw69gBWSSDK825hQNdN+wF8zELf3dFNl/kxkUA==
   
   cookie@0.5.0:
     version "0.5.0"

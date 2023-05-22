@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect } from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from "recharts";
-import { config } from '../config'
-import Map from "./Map";
-import './UserDetails.css'
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
+import actions from '../redux/records/actions.ts';
+import Map from './Map';
+import './PlayerDetails.css';
 
 const OnlineIndicator = ({online}) => {
   return(
@@ -133,37 +134,33 @@ const AverageGraph = (props) => {
   )
 }
 
-const UserDetails = () => {
-  const [ userDetailData, setUserDetailData ] = useState({})
-  const { username } = useParams();
+const PlayerDetails = () => {
+  const { playerDetail } = useSelector((state) => state.recordsReducer)
+  const { playername } = useParams()
+  const dispatch = useDispatch()
   useEffect(() => {
-    const fetchUserDetailData = async() => {
-      const response = await fetch(`${config.baseEndpoint}/api/users/${username}`, {credentials:'include'})
-      const rankingArray = await response.json()
-      setUserDetailData(rankingArray)
-    }
-    fetchUserDetailData()
+    dispatch(actions.getPlayerDetail(playername))
   }, [])
 
-  const pointDiffArray = userDetailData.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
-  const pointAfter0506DiffArray = userDetailData.log?.map( r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r.diff : null).filter(r => r > 0) || [];
+  const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
+  const pointAfter0506DiffArray = playerDetail?.log?.map( r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r.diff : null).filter(r => r > 0) || [];
   const sliceIndexCount = Math.ceil(pointAfter0506DiffArray.length * 0.1)
 
   return (
-    <div id="user-detail-wrapper">
-      <div className="user-detail">
-        <Achievement title={userDetailData.achievement} />
+    <div id="player-detail-wrapper">
+      <div className="player-detail">
+        <Achievement title={playerDetail?.achievement} />
         <div className="player">
-          { userDetailData.chara && <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${userDetailData.chara}.png`} /> }
-          <div className="userinfo-wrapper">
-            <p>{userDetailData.ranking}位 - {userDetailData.point}P</p>
-            <h2 className="username">{userDetailData.user_name}</h2>
+          { playerDetail?.chara && <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${playerDetail?.chara}.png`} /> }
+          <div className="playerinfo-wrapper">
+            <p>{playerDetail?.ranking}位 - {playerDetail?.point}P</p>
+            <h2 className="playername">{playerDetail?.player_name}</h2>
           </div>
         </div>
         <div className="info">
-          <OnlineIndicator online={userDetailData?.online} />
+          <OnlineIndicator online={playerDetail?.online} />
           <DetailBoard
-            ranking={!userDetailData.log?.length ? null : Math.min(...userDetailData.log.map(r => r.ranking))}
+            ranking={!playerDetail?.log?.length ? null : Math.min(...playerDetail?.log.map(r => r.ranking))}
             point={!pointAfter0506DiffArray.length ? null : Math.max(...pointAfter0506DiffArray)}
             average={
               (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length) || null
@@ -177,18 +174,20 @@ const UserDetails = () => {
         </div>
         <div id="table-wrapper">
           <div>
-            <AverageGraph log={userDetailData.log?.slice(0, 300) || []}/>
-            <PlayLog log={userDetailData.log || []} />
+            <AverageGraph log={playerDetail?.log?.slice(0, 300) || []}/>
+            <PlayLog log={playerDetail?.log || []} />
           </div>
         </div>
-        <div id="prefectures">
-          <p className="title-paragraph">このユーザの制県度</p>
-          <Map />
-        </div>
+        { playerDetail?.prefectures.length > 0 && (
+          <div id="prefectures">
+            <p className="title-paragraph">このユーザの制県度</p>
+            <Map visited={[...playerDetail?.prefectures]} />
+          </div>
+        ) }
       </div>
     </div>
   )
 
 }
 
-export default UserDetails
+export default PlayerDetails

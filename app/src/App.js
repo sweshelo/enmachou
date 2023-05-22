@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 import {useCookies} from 'react-cookie'
 import Ranking from './components/Ranking';
-import UserDetails from './components/UserDetails';
+import PlayerDetails from './components/PlayerDetails';
 import {DrawerMenu} from './components/DrawerMenu';
 import Online from './components/Online';
 import {About} from './components/About';
@@ -26,13 +26,13 @@ function App() {
         })
       )
     }
-  },cookie)
+  }, [])
 
   return (
     <div className="App">
       <header>
         <h1><a href='/'>閻魔帳</a></h1>
-        <span>v0.7 - @sweshelo</span>
+        <span>v0.8 - @sweshelo</span>
       </header>
       <DrawerMenu />
       <Router>
@@ -40,7 +40,7 @@ function App() {
           <Route path="/" element={<Ranking />} />
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/ranking/max" element={<MaxPointRanking />} />
-          <Route path='/player/:username' element={<UserDetails />} />
+          <Route path='/player/:playername' element={<PlayerDetails />} />
           <Route path='/online' element={<Online />} />
           <Route path='/about' element={<About />} />
           <Route path='/stats' element={<Statistics />} />

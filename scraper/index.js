@@ -65,7 +65,7 @@ const main = async() => {
   const create = []
   const sqlPromisses = rankingData.map((data, index) => {
     return new Promise((resolve, reject) => {
-      connection.query(`SELECT * FROM timeline WHERE user_name = ? ORDER BY created_at DESC LIMIT 1;`, data[0], (err, result) => {
+      connection.query(`SELECT * FROM timeline WHERE player_name = ? ORDER BY created_at DESC LIMIT 1;`, data[0], (err, result) => {
         if(result){
           if([...result].length === 0){
             create.push(data)
@@ -94,7 +94,7 @@ const main = async() => {
   // 新規ユーザを登録
   if(create.length > 0){
     console.log(create)
-    const insertIntoUserQuery = "INSERT INTO users (user_name, ranking, achievement, chara, point) VALUES ?;";
+    const insertIntoUserQuery = "INSERT INTO users (player_name, ranking, achievement, chara, point) VALUES ?;";
     connection.query(insertIntoUserQuery, [create], (err, result) => {
       if(err){
         console.error(`[${now()}] ERROR @ CREATE - ${err}`)
@@ -104,7 +104,7 @@ const main = async() => {
     })
   }
 
-  const insertIntoTimelineQuery = "INSERT INTO timeline (user_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id ) VALUES ?;";
+  const insertIntoTimelineQuery = "INSERT INTO timeline (player_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id ) VALUES ?;";
   connection.query(insertIntoTimelineQuery, [rankingData], (err, result) => {
     if(err){
       console.error(`[${now()}] ERROR - @ UPDATE ${err}`)

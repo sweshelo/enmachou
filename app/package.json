@@ -1,6 +1,6 @@
 {
   "name": "enmachou-frontend",
-  "version": "0.7.6",
+  "version": "0.8.6",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
@@ -11,10 +11,15 @@
     "react-cookie": "^4.1.1",
     "react-dom": "^18.2.0",
     "react-modern-drawer": "^1.2.0",
+    "react-redux": "^8.0.5",
     "react-router-dom": "^6.10.0",
     "react-scripts": "5.0.1",
     "recharts": "^2.5.0",
+    "redux": "^4.2.1",
+    "redux-devtools-extension": "^2.13.9",
+    "redux-saga": "^1.2.3",
     "topojson-client": "^3.1.0",
+    "typescript": "^5.0.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

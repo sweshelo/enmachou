@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2/promise');
 const fs = require('fs');
 const express = require("express");
 const cors = require('cors');
@@ -65,6 +65,11 @@ const connection = mysql.createConnection({
 
 // const
 const defaultOnlineThreshold = 20;
+const status = {
+  ok: 'ok',
+  error: 'error',
+  undefined: 'undefind'
+}
 
 // ==== Web API ==== //
 const app = express();
@@ -75,67 +80,156 @@ app.use(cors({
 }));
 app.use(cookieParser())
 
-const ranking = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getLatestRankingFromTimelineQuery = "SELECT ranking, user_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
-  connection.query(getLatestRankingFromTimelineQuery, (err, result) => {
-    if(result){
-      res.send(result)
+const ranking = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getLatestRankingFromTimelineQuery = "SELECT ranking, player_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
+    const [ result ] = await (await connection).execute(getLatestRankingFromTimelineQuery)
+    if (result && result.length > 0){
+      res.send({
+        status: status.ok,
+        body: result
+      })
+    }else{
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。'
+      })
     }
-  })
+    return
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const userinfo = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  if( toFullWidth(req.params.username) === 'プレーヤー' ){
-    const response = {
-      'user_name': toFullWidth(req.params.username),
-      'achievement': '',
-      'chara': null,
-      'point': 0,
-      'ranking': 0,
-      'online': false,
-      'average': null,
-      'diff': [],
-      'log': [],
-    }
-    res.send(response)
-    return
-  }
-
-  const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE user_name = ? AND user_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
-  connection.query(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
-    if(result && result.length > 0){
-      // 増分を計算する
-      const pointDiff = result.map((record, i, arr) => i === 0 ? record.point : record.point - arr[i - 1].point).slice(1);
-      const average = pointDiff.reduce((acc, cur) => acc + cur, 0) / pointDiff.length;
-      const latestRecord = result[result.length - 1]
+const playerinfo = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    if( toFullWidth(req.params.playername) === 'プレーヤー' ){
       const response = {
-        'user_name': toFullWidth(req.params.username),
+        'player_name': toFullWidth(req.params.playername),
+        'achievement': '',
+        'chara': null,
+        'point': 0,
+        'ranking': 0,
+        'online': false,
+        'average': null,
+        'diff': [],
+        'log': [],
+      }
+      res.send({
+        status: status.error,
+        message: 'このユーザのデータを取得することは出来ません。',
+        body: response
+      })
+      return
+    }
+
+    const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
+    const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
+    const [ [playLogResult], [prefectureResult] ] = await Promise.all([
+      (await connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
+      (await connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.playername) ])
+    ])
+
+    if(playLogResult && playLogResult.length > 0){
+      // 制県度
+      const prefectureAchievementTable = [
+        { name: '北海道', achievement: 'North Sea Road' },
+        { name: '青森県', achievement: 'Blue Forest' },
+        { name: '岩手県', achievement: 'Rock Hand' },
+        { name: '宮城県', achievement: 'Palace Castle' },
+        { name: '秋田県', achievement: 'Autumn Paddy' },
+        { name: '山形県', achievement: 'Mountain Form' },
+        { name: '福島県', achievement: 'Happy Island' },
+        { name: '茨城県', achievement: 'Thorn Castle' },
+        { name: '栃木県', achievement: 'Buckeye' },
+        { name: '群馬県', achievement: 'Herd Horse' },
+        { name: '埼玉県', achievement: 'Cape Ball' },
+        { name: '千葉県', achievement: 'Thousand Leaf' },
+        { name: '東京都', achievement: 'East Capital' },
+        { name: '神奈川県', achievement: 'God Apple River' },
+        { name: '新潟県', achievement: 'New Lagoon' },
+        { name: '富山県', achievement: 'Mt. Wealth' },
+        { name: '石川県', achievement: 'Stone River' },
+        { name: '福井県', achievement: 'Happy Well' },
+        { name: '山梨県', achievement: 'Mountain Pear' },
+        { name: '長野県', achievement: 'Long Field' },
+        { name: '岐阜県', achievement: 'Crossroads Hill' },
+        { name: '静岡県', achievement: 'Silent Hill' },
+        { name: '愛知県', achievement: 'Love Intelligence' },
+        { name: '三重県', achievement: 'Triple' },
+        { name: '滋賀県', achievement: 'Moisten Celebrate' },
+        { name: '京都府', achievement: 'Capital' },
+        { name: '大阪府', achievement: 'Big Slope' },
+        { name: '兵庫県', achievement: 'Soldier Warehouse' },
+        { name: '奈良県', achievement: 'Nice Apple' },
+        { name: '和歌山県', achievement: 'Mt. Gentle Song' },
+        { name: '鳥取県', achievement: 'Bird get' },
+        { name: '島根県', achievement: 'Island Root' },
+        { name: '岡山県', achievement: 'Mt. Hill' },
+        { name: '広島県', achievement: 'Wide Island' },
+        { name: '山口県', achievement: 'Mountain Mouth' },
+        { name: '徳島県', achievement: 'Virtue Island' },
+        { name: '香川県', achievement: 'Aroma River' },
+        { name: '愛媛県', achievement: 'Love Princess' },
+        { name: '高知県', achievement: 'High Intelligence' },
+        { name: '福岡県', achievement: 'Happy Hill' },
+        { name: '佐賀県', achievement: 'Assistant Celebrate' },
+        { name: '長崎県', achievement: 'Long Cape' },
+        { name: '熊本県', achievement: 'Bear Book' },
+        { name: '大分県', achievement: 'Big Minute' },
+        { name: '宮崎県', achievement: 'Palace Cape' },
+        { name: '鹿児島県', achievement: 'Fawn Island' },
+        { name: '沖縄県', achievement: 'Offing Rope' },
+      ]
+      const achievementArray = prefectureResult.map(r => r.achievement)
+
+      // 増分を計算する
+      const latestRecord = playLogResult[playLogResult.length - 1]
+      const response = {
+        'player_name': toFullWidth(req.params.playername),
         'achievement': latestRecord.achievement,
         'chara': latestRecord.chara,
         'point': latestRecord.point,
         'ranking': latestRecord.ranking,
         'online': (new Date() - new Date(latestRecord.created_at)) <= defaultOnlineThreshold * 60 * 1000,
-        'average': average,
-        'diff': pointDiff.reverse(),
-        'log': result.map((r) => ({
+        'log': playLogResult.map((r) => ({
           ...r,
           created_at: hideDetailPlayTime(r.created_at)
-        })
+        }),
         ).reverse(),
+        'prefectures': prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n)
       }
-      res.send(response)
+
+      res.send({
+        status: status.ok,
+        body: response
+      })
     }else{
-      res.send({error: 'something went wrong'})
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。'
+      })
     }
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const prefectures = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE user_name = ? AND user_name <> 'プレーヤー';"
-  connection.query(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.username) ], (err, result) => {
+const prefectures = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
+    const [ result ] = await (await connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.username) ])
     if(result && result.length > 0){
       const prefectureAchievementTable = [
         { name: '北海道', achievement: 'North Sea Road' },
@@ -189,56 +283,93 @@ const prefectures = (req, res) => {
       const achievementArray = result.map(r => r.achievement)
       res.send(prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n))
     }else{
-      res.send({error: 'something went wrong'})
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。'
+      })
     }
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const online = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getOnlineUserFromUsersQuery = "SELECT DISTINCT user_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and user_name <> 'プレーヤー' and diff > 0;"
-  const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
-  connection.query(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ], (err, result) => {
-    if(result){
+const online = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getOnlineUserFromUsersQuery = "SELECT DISTINCT player_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and player_name <> 'プレーヤー' and diff > 0;"
+    const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : defaultOnlineThreshold) * 1000 * 60))
+    const [ result ] = await (await connection).execute(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ])
+    if(result && result.length > 0){
       const usernameArray = []
       const responseArray = result.map((user) => {
-        if(usernameArray.includes(user.user_name)){
+        if(usernameArray.includes(user.player_name)){
           return null
         }else{
-          usernameArray.push(user.user_name)
+          usernameArray.push(user.player_name)
           return user
         }
       }).filter(r => !!r)
-      res.send(responseArray)
+      res.send({
+        status: status.ok,
+        body: responseArray,
+      })
     }else{
-      res.send({error: 'something went wrong'})
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。',
+      })
     }
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const maxPointRanking = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE user_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-06 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
-  connection.query(getMaxPointsFromTimelineQuery, (err, result) => {
-    if(result) {
+const maxPointRanking = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE player_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-06 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
+    const [ result ] = await (await connection).execute(getMaxPointsFromTimelineQuery)
+    if (result && result.length > 0) {
       const response = result.map((r) => ({
         ...r,
         created_at: hideDetailPlayTime(r.created_at)
       }))
-      res.send(response)
+      res.send({
+        status: status.ok,
+        body: response
+      })
+    }else{
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。'
+      })
     }
-    if(err) res.send({error: 'something went wrong'})
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
-const chara = (req, res) => {
-  if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
-  const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
-  connection.query(getCharaFromTimelineQuery, (err, result) => {
+const statistics = async(req, res) => {
+  try{
+    if (req.cookies.tracker) trackingLog(req.cookies.tracker, req.originalUrl)
+    const getCharaFromTimelineQuery = "SELECT chara, diff, created_at FROM timeline ORDER BY created_at DESC;"
+    const [ result ] = await (await connection).execute(getCharaFromTimelineQuery)
     const data = {}
     const dateKeys = []
 
-    if(result) {
+    if(result && result.length > 0) {
       let countForRanking = 0
       for(const r of result){
         const date = new Date(r.created_at)
@@ -304,9 +435,26 @@ const chara = (req, res) => {
         // count
         countForRanking++
       }
-      res.send({data, dateKeys: dateKeys})
+      res.send({
+        status: status.ok,
+        body:{
+          data,
+          dateKeys: dateKeys
+        }
+      })
+    }else{
+      res.send({
+        status: status.undefined,
+        body: [],
+        message: 'データがありません。',
+      })
     }
-  })
+  }catch(e){
+    res.send({
+      status: status.error,
+      message: e.message
+    })
+  }
 }
 
 const trackingLog = (tracker, endpoint) => {
@@ -322,10 +470,32 @@ const generateTracker = (req, res) => {
   })
 }
 
+const cleanInvalidRecords = async(req, res) => {
+  const [ result ] = await (await connection).execute('SELECT * FROM timeline WHERE player_name <> "プレーヤー";')
+  const requireToDelete = []
+  result.sort((a, b) => a.player_name.localeCompare(b.player_name))
+  result.forEach((record, i) => {
+    if(i==0) return
+    const last = result[i-1]
+    if(record.point == last.point && record.user_name == last.user_name && record.diff > 0) {
+      requireToDelete.push(last.timeline_id)
+      console.log(last.player_name, last.point, record.point, record.diff, last.created_at, record.created_at)
+    }
+  })
+  console.log(requireToDelete)
+  requireToDelete.forEach(async(record) => {
+    (await connection).execute('DELETE FROM timeline WHERE timeline_id = ?', [record])
+  })
+  res.send({
+    'status': status.ok
+  })
+}
+
 app.get('/api/ranking', (req, res) => {ranking(req, res)})
 app.get('/api/max-ranking', (req, res) => {maxPointRanking(req, res)})
-app.get('/api/users/:username', (req, res) => {userinfo(req, res)})
-app.get('/api/users/:username/prefectures', (req, res) => {prefectures(req, res)})
+app.get('/api/players/:playername', (req, res) => {playerinfo(req, res)})
+app.get('/api/players/:playername/prefectures', (req, res) => {prefectures(req, res)})
 app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
-app.get('/api/stats/chara', (req, res) => {chara(req, res)})
+app.get('/api/stats', (req, res) => {statistics(req, res)})
 app.post('/api/tracker', (req, res) => {generateTracker(req, res)})
+app.post('/api/clean', (req, res) => {cleanInvalidRecords(req, res)})
