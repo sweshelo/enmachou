@@ -4,16 +4,40 @@
   margin: 8px;
 }
 
+.centerize{
+  display: flex;
+  justify-content: center;
+}
+
 .player{
   display: block;
   height: 60px;
   margin: 8px 0;
   border-radius: 5px;
-  min-width: 350px;
+  min-width: 300px;
   max-width: 1000px;
   background-color: white;
   overflow: hidden;
 }
+
+@media screen and (-webkit-min-device-pixel-ratio:0){
+  .player{
+    width: 450px;
+  }
+  table{
+    width: 450px;
+  }
+}
+
+@-moz-document url-prefix(){
+  .player{
+    width: 380px;
+  }
+  table{
+    width: 380px;
+  }
+}
+
 
 .character{
   margin-right: 8px;
@@ -52,31 +76,24 @@
 }
 
 .report{
-  margin: 8px 3px;
+  margin: 8px 0;
   min-height: 150px;
   display: block;
 }
 
 .stats-block{
   margin: 5px 0;
-  width: calc(50% - 15px);
-  padding: 5px;
+  width: calc(33%);
+  margin: 4px 3px;
+  padding: 5px 5px 3px 5px;
   background-color: white;
   border-radius: 4px;
   min-height: 40px;
   height: auto;
 }
 
-.block-l{
-  float: left;
-}
-
-.block-r{
-  float: right;
-}
-
 .stats-key{
-  font-size: 0.85em;
+  font-size: 0.8em;
   text-align: left;
   padding: 0 0 3px 3px;
 }
@@ -115,6 +132,17 @@ tr{
   border-bottom: solid 1px #eee;
 }
 
+tr.focus-record{
+  background-color: #e0d490;
+}
+
+.record-operation{
+  padding: 0;
+}
+
+.button-record-operation{
+}
+
 .title-paragraph{
   margin: 4px 0;
   padding: 4px;
@@ -124,7 +152,8 @@ tr{
 }
 
 .float-reset{
-  clear: both;
+  display: flex;
+  justify-content: center;
 }
 
 .mini-script{
@@ -144,3 +173,4 @@ tr{
 .invalid-record{
   background-color: #bbb;
 }
+

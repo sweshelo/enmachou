@@ -5,6 +5,10 @@ import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, L
 import actions from '../redux/records/actions.ts';
 import Map from './Map';
 import './PlayerDetails.css';
+import { BiHide } from 'react-icons/bi';
+import { MdDeleteForever } from 'react-icons/md';
+import { BsYoutube } from 'react-icons/bs';
+import { GiBattleAxe } from 'react-icons/gi';
 
 const OnlineIndicator = ({online}) => {
   return(
@@ -26,34 +30,47 @@ const DetailBoard = (props) => {
   return(
     <div className="report">
       <div className="float-reset">
-        <div className="stats-block block-l">
+        <div className="stats-block">
           <p className="stats-key">瞬間最高ランキング</p>
           <p className="stats-value">{props.ranking}位</p>
         </div>
-        <div className="stats-block block-r">
+        <div className="stats-block">
           <p className="stats-key">最高貢献ポイント</p>
           <p className="stats-value">{props.point || 'データなし'}</p>
         </div>
-      </div>
-      <div className="float-reset">
-        <div className="stats-block block-l">
+        <div className="stats-block">
           <p className="stats-key">平均貢献ポイント</p>
           <p className="stats-value">{props.average?.toFixed(3) || 'データなし'}</p>
         </div>
-        <div className="stats-block block-r beta-feature">
+      </div>
+      <div className="float-reset">
+        <div className="stats-block">
           <p className="stats-key">有効平均貢献ポイント</p>
           <p className="stats-value">{props.availAverage?.toFixed(3) || 'データなし'}</p>
         </div>
+        <div className="stats-block">
+          <p className="stats-key">自己標準偏差</p>
+          <p className="stats-value">{props.sd || 'データなし'}</p>
+        </div>
+        <div className="stats-block">
+          <p className="stats-key">全国偏差値</p>
+          <p className="stats-value">{props.dv || 'データなし'}</p>
+        </div>
       </div>
-      <div className="float-reset">
-        <p className="mini-script">有効平均貢献ポイントは下限・上限の外れ値10%を除外して算出されます。</p>
+      {/*
+      <div>
+        <p className="mini-script">有効平均貢献ポイントは直近110プレイの下限・上限の外れ値5件ずつを除外して算出されます。</p>
+        <p className="mini-script">標準偏差は値の散らばり具合を指し、この値が小さいほど貢献度が安定していることを表します。</p>
+        <p className="mini-script">全国偏差値は標準偏差を全てのレコードから算出し、それに対する有効平均貢献ポイントの偏差値です。</p>
       </div>
+      */}
     </div>
   )
 }
 
 const PlayLog = (props) => {
   const [ isLimit10, setLimit10 ] = useState(true)
+  const [ focusRecord, setFocusRecord ] = useState(null)
   return props.log?.length > 0 ? (
     <div className="playlog">
       <p
@@ -72,11 +89,45 @@ const PlayLog = (props) => {
           {
             props.log.slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
               return(
-                <tr key={`timeline-${index}`} className={(log.elapsed >= 600 || log.diff === null) && 'invalid-record'}>
-                  <td className="datetime">{log.created_at}</td>
-                  <td className="point">{log.point}P</td>
-                  <td className="diff">+{log.diff}</td>
-                </tr>
+                <>
+                  <tr
+                    key={`timeline-${index}`}
+                    className={`${(log.elapsed >= 600 || log.diff === null) ? 'invalid-record' : ''} ${(focusRecord == log.timeline_id) ? 'focus-record' : ''}`}
+                    onClick={()=>{
+                      setFocusRecord(focusRecord === log.timeline_id ? null : log.timeline_id)
+                    }}
+                  >
+                    <td className="datetime">{log.created_at}</td>
+                    <td className="point">{log.point}P</td>
+                    <td className="diff">+{log.diff}</td>
+                  </tr>
+                  { focusRecord === log.timeline_id && (
+                    <tr>
+                      <td colSpan={3} className='record-operation'>
+                        <button className='button-record-operation'>
+                          <BiHide size={'24px'}/>
+                        </button>
+                        <MdDeleteForever size={'24px'}/>
+                        <BsYoutube size={'24px'}/>
+                        <GiBattleAxe size={'24px'}/>
+                        {/*
+                        <div className='button-record-operation'>
+                          <span><BiHide/> 記録を非表示</span>
+                        </div>
+                        <div className='button-record-operation'>
+                          <span><MdDeleteForever/> 記録を削除</span>
+                        </div>
+                        <div className='button-record-operation'>
+                          <span><BsYoutube/> 動画を紐付け</span>
+                        </div>
+                        <div className='button-record-operation'>
+                          <span><GiBattleAxe/> 推定マッチング</span>
+                        </div>
+                        */}
+                      </td>
+                    </tr>
+                  )}
+                </>
               )
             })
           }
@@ -111,25 +162,28 @@ const AverageGraph = (props) => {
   return (
     <div className="playlog">
       <p className="title-paragraph">貢献度の推移</p>
-        <LineChart
-          width={350}
-          height={300}
-          data={average}
-          margin={{
-            top: 15,
-            right: 25,
-            left: 25,
-            bottom: 0,
-          }}
-        >
-          <CartesianGrid strokeDasharray="4 4" />
-          <XAxis dataKey="date" fontSize={10} height={15}/>
-          <YAxis min={50} width={5} fontSize={10} domain={[50, 'dataMax']}/>
-          <Tooltip formatter={(value) => value.toFixed(2)}/>
-          <Legend />
-          <Line type="monotone" dataKey="ave" stroke="#8884d8" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey="max" stroke="#82ca9d" />
-        </LineChart>
+      <div className='centerize'>
+      <LineChart
+        id='chart'
+        width={380}
+        height={300}
+        data={average}
+        margin={{
+          top: 15,
+          right: 25,
+          left: 25,
+          bottom: 0,
+        }}
+      >
+        <CartesianGrid strokeDasharray="4 4" />
+        <XAxis dataKey="date" fontSize={10} height={15}/>
+        <YAxis min={50} width={5} fontSize={10} domain={[50, 'dataMax']}/>
+        <Tooltip formatter={(value) => value.toFixed(2)}/>
+        <Legend />
+        <Line type="monotone" dataKey="ave" stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line type="monotone" dataKey="max" stroke="#82ca9d" />
+      </LineChart>
+      </div>
     </div>
   )
 }
