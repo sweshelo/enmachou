@@ -50,20 +50,14 @@ const DetailBoard = (props) => {
         </div>
         <div className="stats-block">
           <p className="stats-key">自己標準偏差</p>
-          <p className="stats-value">{props.sd || 'データなし'}</p>
+          <p className="stats-value">{props.standardDeviation?.toFixed(3) || 'データなし'}</p>
         </div>
         <div className="stats-block">
-          <p className="stats-key">全国偏差値</p>
+          <p className="stats-key">全国偏差値 ‹参考値›</p>
           <p className="stats-value">{props.dv || 'データなし'}</p>
         </div>
       </div>
-      {/*
-      <div>
-        <p className="mini-script">有効平均貢献ポイントは直近110プレイの下限・上限の外れ値5件ずつを除外して算出されます。</p>
-        <p className="mini-script">標準偏差は値の散らばり具合を指し、この値が小さいほど貢献度が安定していることを表します。</p>
-        <p className="mini-script">全国偏差値は標準偏差を全てのレコードから算出し、それに対する有効平均貢献ポイントの偏差値です。</p>
-      </div>
-      */}
+      <p className='mini-script'>※「偏差」と「偏差値」は異なるものです</p>
     </div>
   )
 }
@@ -104,26 +98,20 @@ const PlayLog = (props) => {
                   { focusRecord === log.timeline_id && (
                     <tr>
                       <td colSpan={3} className='record-operation'>
-                        <button className='button-record-operation'>
-                          <BiHide size={'24px'}/>
-                        </button>
-                        <MdDeleteForever size={'24px'}/>
-                        <BsYoutube size={'24px'}/>
-                        <GiBattleAxe size={'24px'}/>
-                        {/*
-                        <div className='button-record-operation'>
-                          <span><BiHide/> 記録を非表示</span>
-                        </div>
-                        <div className='button-record-operation'>
-                          <span><MdDeleteForever/> 記録を削除</span>
-                        </div>
-                        <div className='button-record-operation'>
-                          <span><BsYoutube/> 動画を紐付け</span>
-                        </div>
-                        <div className='button-record-operation'>
-                          <span><GiBattleAxe/> 推定マッチング</span>
-                        </div>
-                        */}
+                        <ul>
+                          <li className='button-record-operation'>
+                            <button><BiHide/> 記録を非表示</button>
+                          </li>
+                          <li className='button-record-operation'>
+                            <button><MdDeleteForever/> 記録を削除</button>
+                          </li>
+                          <li className='button-record-operation'>
+                            <button><BsYoutube/> 動画を紐付け</button>
+                          </li>
+                          <li className='button-record-operation'>
+                            <button><GiBattleAxe/> 推定マッチング</button>
+                          </li>
+                        </ul>
                       </td>
                     </tr>
                   )}
@@ -163,26 +151,26 @@ const AverageGraph = (props) => {
     <div className="playlog">
       <p className="title-paragraph">貢献度の推移</p>
       <div className='centerize'>
-      <LineChart
-        id='chart'
-        width={380}
-        height={300}
-        data={average}
-        margin={{
-          top: 15,
-          right: 25,
-          left: 25,
-          bottom: 0,
-        }}
-      >
-        <CartesianGrid strokeDasharray="4 4" />
-        <XAxis dataKey="date" fontSize={10} height={15}/>
-        <YAxis min={50} width={5} fontSize={10} domain={[50, 'dataMax']}/>
-        <Tooltip formatter={(value) => value.toFixed(2)}/>
-        <Legend />
-        <Line type="monotone" dataKey="ave" stroke="#8884d8" activeDot={{ r: 8 }} />
-        <Line type="monotone" dataKey="max" stroke="#82ca9d" />
-      </LineChart>
+        <LineChart
+          id='chart'
+          width={380}
+          height={300}
+          data={average}
+          margin={{
+            top: 15,
+            right: 25,
+            left: 25,
+            bottom: 0,
+          }}
+        >
+          <CartesianGrid strokeDasharray="4 4" />
+          <XAxis dataKey="date" fontSize={10} height={15}/>
+          <YAxis min={50} width={5} fontSize={10} domain={[50, 'dataMax']}/>
+          <Tooltip formatter={(value) => value.toFixed(2)}/>
+          <Legend />
+          <Line type="monotone" dataKey="ave" stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="max" stroke="#82ca9d" />
+        </LineChart>
       </div>
     </div>
   )
@@ -197,8 +185,10 @@ const PlayerDetails = () => {
   }, [])
 
   const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
-  const pointAfter0506DiffArray = playerDetail?.log?.map( r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r.diff : null).filter(r => r > 0) || [];
-  const sliceIndexCount = Math.ceil(pointAfter0506DiffArray.length * 0.1)
+  const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r : null)
+    .filter(r => r?.diff > 0) || [];
+  const standardAverage = (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length)
+  console.log(pointAfter0506DiffArray.sort((a, b) => a.timeline_id > b.timeline_id).slice(0, 110).sort((a, b) => a.diff > b.diff).slice( 5, -5 ).reduce((sum, obj) => sum + obj.diff, 0))
 
   return (
     <div id="player-detail-wrapper">
@@ -217,12 +207,17 @@ const PlayerDetails = () => {
             ranking={!playerDetail?.log?.length ? null : Math.min(...playerDetail?.log.map(r => r.ranking))}
             point={!pointAfter0506DiffArray.length ? null : Math.max(...pointAfter0506DiffArray)}
             average={
-              (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length) || null
+              standardAverage || null
             }
             availAverage={
-              pointAfter0506DiffArray.length >= 10
-                ? pointAfter0506DiffArray.sort((a, b) => a > b).slice( sliceIndexCount, sliceIndexCount * -1 ).reduce((x, y) => x + y) / (pointAfter0506DiffArray.length - sliceIndexCount * 2)
+              pointAfter0506DiffArray.length >= 110
+                ? pointAfter0506DiffArray.sort((a, b) => a.id > b.id).slice(0, 110).sort((a, b) => a.diff > b.diff).slice( 5, -5 ).reduce((sum, obj) => sum + obj.diff, 0) / 100
                 : null
+            }
+            standardDeviation={
+              Math.sqrt(
+              pointDiffArray.map(val => Math.pow(val - standardAverage, 2)).reduce((acc, val) => acc + val, 0) / pointDiffArray.length
+            )
             }
           />
         </div>
