@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2/promise');
 const { JSDOM } = require('jsdom')
 
 const connection = mysql.createConnection({
@@ -34,110 +34,101 @@ function now() {
 // const
 const baseUrl = `https://p.eagate.573.jp/game/chase2jokers/ccj/ranking/index.html`
 const regExp = /ranking_icon_([0-9]{1,2}).png/;
-const defaultOnlineThreshold = 20;
 
-const main = async() => {
-  const rankingData = []
-  const array = [0, 1, 2, 3]
-  const fetchPromisses = array.map(index => {
-    return fetch(`${baseUrl}?page=${index}&rid=${now().substring(0,6)}`)
-      .then(r => r.text())
-      .then(r => {
-        const dom = new JSDOM(r, 'text/html')
-        const document = dom.window.document
-        rankingData.push(...[...document.querySelector('#ranking_data')?.children].slice(1, 26).map(data => {
-          const match = data.querySelector('img').src.match(regExp);
-          const number = match ? match[1] : null;
-          const username = [...data.querySelectorAll('div')][1].querySelectorAll('p')[1].childNodes[1].textContent
-          return([
-            username,
-            parseInt(data.querySelector('div').textContent), // ranking
-            [...data.querySelectorAll('div')][1].querySelector('span').textContent, // achievement
-            number, // photo
-            parseInt([...data.querySelectorAll('div')][2].childNodes[0].textContent), // point
-          ])
-        }))
-      })
-  })
-
-  await Promise.all(fetchPromisses)
-
-  const create = []
-  const sqlPromisses = rankingData.map((data, index) => {
-    return new Promise((resolve, reject) => {
-      connection.query(`SELECT * FROM timeline WHERE player_name = ? ORDER BY created_at DESC LIMIT 1;`, data[0], (err, result) => {
-        if(result){
-          if([...result].length === 0){
-            create.push(data)
-            rankingData[index].push(null)
-            rankingData[index].push(null)
-            rankingData[index].push(null)
-            resolve()
-          }else{
-            const diff = (data[0] == 'プレーヤー') ? null : data[4] - result[0].point
-            rankingData[index].push(diff || null)
-            rankingData[index].push(Math.floor((new Date() - new Date(result[0].created_at))/1000) || null)
-            rankingData[index].push(result[0].timeline_id || null)
-            resolve()
-          }
-        }
-        if(err){
-          console.log(`[${now()}] ERROR @ SELECT - ${err}`)
-          reject()
-        }
-      })
-    })
-  })
-  await Promise.all(sqlPromisses)
-  console.log(`[${now()}] Promisses waited.`)
-
-  // 新規ユーザを登録
-  if(create.length > 0){
-    console.log(create)
-    const insertIntoUserQuery = "INSERT INTO users (player_name, ranking, achievement, chara, point) VALUES ?;";
-    connection.query(insertIntoUserQuery, [create], (err, result) => {
-      if(err){
-        console.error(`[${now()}] ERROR @ CREATE - ${err}`)
-      }else{
-        console.log(`[${now()}] created.`)
-      }
-    })
+const fetchRankingPage = async(pageIndex) => {
+  const page = await fetch(`${baseUrl}?page=${pageIndex}&rid=${now().substring(0,6)}`)
+  const html = await page.text()
+  const dom = new JSDOM(html, 'text/html')
+  const document = dom.window.document
+  const pageInfomation = {
+    index: pageIndex,
+    rankingData: [],
+    updatedAt: null,
   }
-
-  const insertIntoTimelineQuery = "INSERT INTO timeline (player_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id ) VALUES ?;";
-  connection.query(insertIntoTimelineQuery, [rankingData], (err, result) => {
-    if(err){
-      console.error(`[${now()}] ERROR - @ UPDATE ${err}`)
-    }else{
-      console.log(`[${now()}] updated.`)
-    }
-  })
+  pageInfomation.updatedAt = new Date(document.querySelectorAll('.inner_box dd > p')[3].textContent.slice(5).replaceAll('.', '/'))
+  pageInfomation.rankingData.push(...[...document.querySelector('#ranking_data')?.children].slice(1, 26).map(data => {
+    const match = data.querySelector('img').src.match(regExp);
+    const number = match ? match[1] : null;
+    const playerName = [...data.querySelectorAll('div')][1].querySelectorAll('p')[1].childNodes[1].textContent
+    return({
+      playerName: playerName,
+      ranking: parseInt(data.querySelector('div').textContent), // ranking
+      achievement: [...data.querySelectorAll('div')][1].querySelector('span').textContent, // achievement
+      chara: number, // photo
+      point: parseInt([...data.querySelectorAll('div')][2].childNodes[0].textContent), // point
+    })
+  }))
+  return pageInfomation
 }
 
-const updateInterval = [
-  // 0~
-  3, 0,
-  // 2~
-  0, 0, 0,
-  // 5 (under maintenance)
-  0, 0, 0,
-  // 8~
-  3, 3,
-  // 10~
-  2, 2, 2, 2, 2, 2,
-  // 16~
-  1, 1, 1, 1, 1,
-  // 21~
-  3, 3, 3 ]
+const main = async() => {
+  console.log(new Date())
+  console.log('** START')
+  // 最終更新を取得
+  const [ lastUpdatedAtResult ] = await (await connection).execute('SELECT created_at FROM timeline ORDER BY created_at DESC LIMIT 1;');
+
+  // 最初の１ページを取得
+  const page = await fetchRankingPage(0)
+  console.log('== GOT Official Ranking')
+  console.log(`   Updated at ${page.updatedAt}`)
+  if (new Date(lastUpdatedAtResult.created_at) === page.updatedAt){
+    console.log(lastUpdatedAtResult)
+  }
+
+  // 残りの３ページを取得
+  const fetchPromisses = [1, 2, 3].map(index => fetchRankingPage(index))
+  await Promise.all(fetchPromisses)
+  console.log(`== GOT Official Ranking`)
+  console.log(`== GETTING LatestRecords ...`)
+
+  // 取得結果 合算
+  const rankingData = [
+    ...page.rankingData,
+    ...(await fetchPromisses[0]).rankingData,
+    ...(await fetchPromisses[1]).rankingData,
+    ...(await fetchPromisses[2]).rankingData,
+  ]
+
+  // IN句で用いるplayer_name配列
+  const playerNameArray = rankingData.map(r => r.playerName !== 'プレーヤー' ? r.playerName : null).filter((r) => !!r)
+  const getLatestRecordEachPlayerFromTimeline = `
+SELECT t.*
+FROM timeline t
+WHERE t.player_name IN (${playerNameArray.map(() => '?').join(',')})
+AND t.created_at = (
+    SELECT MAX(created_at)
+    FROM timeline
+    WHERE player_name = t.player_name
+);`
+  const [ latestRecords ] = await (await connection).execute(getLatestRecordEachPlayerFromTimeline, playerNameArray)
+  console.log(`== GOT LatestRecords`)
+
+  const rawRankingPromisses = rankingData.map(async(record) => {
+    console.log(`== CALC. Diff`)
+    console.log(`   ${record.playerName}`)
+    const playerLatestRecord = latestRecords.find(r => r.player_name === record.playerName)
+    return [
+      record.playerName,
+      record.ranking,
+      record.achievement,
+      record.chara,
+      record.point,
+      playerLatestRecord ? record.point - playerLatestRecord.point : null,
+      playerLatestRecord ? (new Date() - new Date(playerLatestRecord.created_at)) / 1000 : null,
+      playerLatestRecord ? playerLatestRecord.timeline_id : null,
+      rankingData.updatedAt
+    ]
+  })
+  const rawRankingData = await Promise.all(rawRankingPromisses)
+  console.log('== GENERATED rawRankingData')
+
+  const insertIntoTimelineQuery = "INSERT INTO timeline (player_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id, updated_at ) VALUES ?;";
+  const [ result, error ] = await (await connection).query(insertIntoTimelineQuery, [rawRankingData])
+
+  console.log('** All Done.')
+  console.log(new Date())
+}
 
 setInterval(() => {
-  const nowTime = new Date()
-  const nowInterval = updateInterval[nowTime.getHours()]
-  if ( nowInterval != 0 && (nowTime.getMinutes() % updateInterval[nowTime.getHours()]) == 0){
-    main()
-    console.log(`[${now()}] recorded.`)
-  }else{
-    console.log(`[Pass] Current update interval: '${nowInterval}'`)
-  }
+  main()
 }, 1000 * 60)
-
