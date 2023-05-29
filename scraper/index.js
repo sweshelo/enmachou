@@ -106,8 +106,6 @@ AND t.created_at = (
   console.log(`== GOT LatestRecords`)
 
   const rawRankingPromisses = rankingData.map(async(record) => {
-    console.log(`== CALC. Diff`)
-    console.log(`   ${record.playerName}`)
     const playerLatestRecord = latestRecords.find(r => r.player_name === record.playerName)
     return [
       record.playerName,
@@ -131,6 +129,32 @@ AND t.created_at = (
   console.log(new Date())
 }
 
+const calculateStandardDeviation = async() => {
+  // 全データを取得
+  const [ allRecords ] = await (await connection).execute('SELECT diff FROM timeline WHERE player_name <> "プレーヤー" AND elapsed < 600 AND diff BETWEEN 50 AND 500;')
+  const data = allRecords.map(r => r.diff)
+
+  // 平均
+  const sum = data.reduce((acc, value) => acc + value, 0);
+  const mean = sum / data.length;
+
+  // 分散と偏差を算出
+  const squaredDifferencesSum = data.reduce((acc, value) => acc + Math.pow(value - mean, 2), 0);
+  const variance = squaredDifferencesSum / data.length;
+  const standardDeviation = Math.sqrt(variance);
+
+  // TEST
+  console.log(`データ件数: ${data.length}`)
+  console.log(`平均      : ${mean}`)
+  console.log(`標準偏差  : ${standardDeviation.toFixed(3)}`)
+
+  const points = [50, 100, 130, 160, 190, 220, 250, 280, 300, 320, 340, 360, 380]
+  points.forEach((p) => {
+    console.log( `${p}P -> ${((p-mean) / standardDeviation * 10 + 50).toFixed(3)}` )
+  })
+}
+
 setInterval(() => {
   main()
+  calculateStandardDeviation()
 }, 1000 * 60)
