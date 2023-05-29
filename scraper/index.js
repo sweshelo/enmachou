@@ -65,14 +65,16 @@ const main = async() => {
   console.log(new Date())
   console.log('** START')
   // 最終更新を取得
-  const [ lastUpdatedAtResult ] = await (await connection).execute('SELECT created_at FROM timeline ORDER BY created_at DESC LIMIT 1;');
+  const [ lastUpdatedAtResult ] = await (await connection).execute('SELECT updated_at FROM timeline ORDER BY updated_at DESC LIMIT 1;');
 
   // 最初の１ページを取得
   const page = await fetchRankingPage(0)
   console.log('== GOT Official Ranking')
-  console.log(`   Updated at ${page.updatedAt}`)
-  if (new Date(lastUpdatedAtResult.created_at) === page.updatedAt){
-    console.log(lastUpdatedAtResult)
+  console.log(`   Updated at ${page.updatedAt} <Official>`)
+  console.log(`   Updated at ${new Date(lastUpdatedAtResult[0].updated_at)} <DB>`)
+  if (new Date(lastUpdatedAtResult[0].updated_at).getTime() === page.updatedAt.getTime()){
+    console.log(`** Escape.`)
+    return
   }
 
   // 残りの３ページを取得
@@ -116,7 +118,7 @@ AND t.created_at = (
       playerLatestRecord ? record.point - playerLatestRecord.point : null,
       playerLatestRecord ? (new Date() - new Date(playerLatestRecord.created_at)) / 1000 : null,
       playerLatestRecord ? playerLatestRecord.timeline_id : null,
-      rankingData.updatedAt
+      page.updatedAt
     ]
   })
   const rawRankingData = await Promise.all(rawRankingPromisses)
