@@ -36,29 +36,34 @@ const baseUrl = `https://p.eagate.573.jp/game/chase2jokers/ccj/ranking/index.htm
 const regExp = /ranking_icon_([0-9]{1,2}).png/;
 
 const fetchRankingPage = async(pageIndex) => {
-  const page = await fetch(`${baseUrl}?page=${pageIndex}&rid=${now().substring(0,6)}`)
-  const html = await page.text()
-  const dom = new JSDOM(html, 'text/html')
-  const document = dom.window.document
-  const pageInfomation = {
-    index: pageIndex,
-    rankingData: [],
-    updatedAt: null,
+  try{
+    const page = await fetch(`${baseUrl}?page=${pageIndex}&rid=${now().substring(0,6)}`)
+    const html = await page.text()
+    const dom = new JSDOM(html, 'text/html')
+    const document = dom.window.document
+    const pageInfomation = {
+      index: pageIndex,
+      rankingData: [],
+      updatedAt: null,
+    }
+    pageInfomation.updatedAt = new Date(document.querySelectorAll('.inner_box dd > p')[3].textContent.slice(5).replaceAll('.', '/'))
+    pageInfomation.rankingData.push(...[...document.querySelector('#ranking_data')?.children].slice(1, 26).map(data => {
+      const match = data.querySelector('img').src.match(regExp);
+      const number = match ? match[1] : null;
+      const playerName = [...data.querySelectorAll('div')][1].querySelectorAll('p')[1].childNodes[1].textContent
+      return({
+        playerName: playerName,
+        ranking: parseInt(data.querySelector('div').textContent), // ranking
+        achievement: [...data.querySelectorAll('div')][1].querySelector('span').textContent, // achievement
+        chara: number, // photo
+        point: parseInt([...data.querySelectorAll('div')][2].childNodes[0].textContent), // point
+      })
+    }))
+    return pageInfomation
+  }catch(e){
+    console.error(e)
+    return
   }
-  pageInfomation.updatedAt = new Date(document.querySelectorAll('.inner_box dd > p')[3].textContent.slice(5).replaceAll('.', '/'))
-  pageInfomation.rankingData.push(...[...document.querySelector('#ranking_data')?.children].slice(1, 26).map(data => {
-    const match = data.querySelector('img').src.match(regExp);
-    const number = match ? match[1] : null;
-    const playerName = [...data.querySelectorAll('div')][1].querySelectorAll('p')[1].childNodes[1].textContent
-    return({
-      playerName: playerName,
-      ranking: parseInt(data.querySelector('div').textContent), // ranking
-      achievement: [...data.querySelectorAll('div')][1].querySelector('span').textContent, // achievement
-      chara: number, // photo
-      point: parseInt([...data.querySelectorAll('div')][2].childNodes[0].textContent), // point
-    })
-  }))
-  return pageInfomation
 }
 
 const main = async() => {
@@ -69,6 +74,11 @@ const main = async() => {
 
   // 最初の１ページを取得
   const page = await fetchRankingPage(0)
+  if(!page){
+    console.log('== Failed to get Official Ranking')
+    console.log(`** Escape.`)
+    return
+  }
   console.log('== GOT Official Ranking')
   console.log(`   Updated at ${page.updatedAt} <Official>`)
   console.log(`   Updated at ${new Date(lastUpdatedAtResult[0].updated_at)} <DB>`)
