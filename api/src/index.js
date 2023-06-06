@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require('cors');
 const crypto = require("crypto");
 const cookieParser = require("cookie-parser");
+const { login } = require('./account');
 
 // 全角文字にする
 function toFullWidth(str) {
@@ -75,7 +76,7 @@ const status = {
 const app = express();
 const server = app.listen(4400, () =>  console.log("Node.js is listening to PORT:" + server.address().port));
 app.use(cors({
-  origin: 'http://localhost:3001',
+  origin: 'http://192.168.1.10:3001',
   credentials: true
 }));
 app.use(cookieParser())
@@ -459,7 +460,7 @@ const statistics = async(req, res) => {
 
 const trackingLog = (tracker, endpoint) => {
   const insertIntoLogQuery = "INSERT INTO log (tracker, visit) VALUES (?);";
-  connection.query(insertIntoLogQuery, [[tracker, endpoint]])
+  //(await connection).execute(insertIntoLogQuery, [[tracker, endpoint]])
 }
 
 const generateTracker = (req, res) => {
@@ -499,3 +500,5 @@ app.get('/api/online/:threshold?', (req, res) => {online(req, res)})
 app.get('/api/stats', (req, res) => {statistics(req, res)})
 app.post('/api/tracker', (req, res) => {generateTracker(req, res)})
 app.post('/api/clean', (req, res) => {cleanInvalidRecords(req, res)})
+
+app.post('/api/user/login', (req, res) => {(login(req, res))})
