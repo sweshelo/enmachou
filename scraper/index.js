@@ -190,14 +190,24 @@ const calculateDeviationValue = async() => {
   const variance = squaredDifferencesSum / allPlayersData.length
   const standardDeviation = Math.sqrt(variance)
 
-  // TEST
-  /*
-  const sweshelo = allPlayersData.find(data => data.name === 'Ｓｗｅｓｈｅｌｏ')
-  console.log(`Sweshelo:`)
-  console.log(`  平均値 -> ${sweshelo.availAverage}`)
-  console.log(`  偏差値 -> ${((sweshelo.availAverage - averageOfAvailAverageOfAllPlayer) / standardDeviation * 10 + 50).toFixed(3)}`)
-  */
+  // データベースに格納する
+  allPlayersData.map(async(player) => {
+    const [ record ] = await (await connection).execute('SELECT player_id FROM players WHERE player_name = ? LIMIT 1', [player.name])
+    const isExist = record.length > 0
+    const deviationValue = (player.availAverage - averageOfAvailAverageOfAllPlayer) / standardDeviation * 10 + 50
+    if(isExist){
+      const player_id = record[0].player_id
+      await (await connection).query('UPDATE players SET effective_average = ?, deviation_value = ?, updated_at = ? WHERE player_id = ?', [player.availAverage, deviationValue, new Date(),  player_id])
+    }else{
+      const [ LatestRecordResult ] = await (await connection).execute('SELECT * FROM timeline WHERE player_name = ? ORDER BY created_at DESC LIMIT 1', [player.name])
+      const LatestRecord = LatestRecordResult[0]
+      await (await connection).query('INSERT INTO players (player_name, ranking, achievement, chara, point, effective_average, deviation_value) VALUES (?)', [[LatestRecord.player_name, LatestRecord.ranking, LatestRecord.achievement, LatestRecord.chara, LatestRecord.point, player.availAverage, deviationValue]])
+    }
+    console.log(`${player.name} ${deviationValue.toFixed(3)}`)
+  })
 }
+
+//calculateDeviationValue()
 
 setInterval(() => {
   main()
