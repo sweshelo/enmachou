@@ -154,6 +154,51 @@ const calculateStandardDeviation = async() => {
   })
 }
 
+// プレイヤーの偏差値を算出
+const calculateDeviationValue = async() => {
+  console.log('== START Calc. DV')
+  // プレイヤーの総数を取得
+  console.log('  ** GET players')
+  const [ allPlayersNameResult ] = await (await connection).execute('SELECT DISTINCT player_name FROM timeline WHERE player_name <> "プレーヤー" AND diff BETWEEN 50 AND 500;')
+  const allPlayersName = allPlayersNameResult.map(r => r.player_name)
+  console.log(`  ** Done. ${allPlayersName.length} players found. Index 0 is '${allPlayersName[0]}'.`)
+
+  // プレイヤーのデータを取得する
+  console.log('  ** GET records')
+  const allPlayersRecordPromise = allPlayersName.map(async(playerName) => {
+    const [ result ] = await (await connection).execute('SELECT diff FROM timeline WHERE player_name = ? AND elapsed < 600 AND diff BETWEEN 50 AND 500 ORDER BY created_at DESC LIMIT 110;', [playerName])
+    return result
+  })
+  const allPlayersRecord = await Promise.all(allPlayersRecordPromise)
+  console.log(`  ** Done. ${allPlayersRecord.length} players' records found. Index 0 is ${allPlayersRecord[0][0].diff} P.`)
+
+  // 各プレイヤーの有効平均貢献ポイントを算出する
+  const allPlayersData = allPlayersRecord.map((records, index) => {
+    return records.length < 110 ? null : ({
+      name: allPlayersName[index],
+      records,
+      availAverage: records.sort((a, b) => a.diff > b.diff).slice(5, -5).reduce((acc, value) => acc + value.diff, 0) / 100
+    })
+  }).filter(r => r !== null)
+  console.log(`  ** There are ${allPlayersData.length} players who has more than 110 records.`)
+
+  // 全体の有効平均貢献ポイントの平均を算出する
+  const averageOfAvailAverageOfAllPlayer = allPlayersData.map((player) => player.availAverage).reduce((acc, value) => acc + value, 0) / allPlayersData.length
+
+  // 分散と偏差を算出する
+  const squaredDifferencesSum = allPlayersData.map((player) => player.availAverage).reduce((acc, value) => acc + Math.pow(value - averageOfAvailAverageOfAllPlayer, 2), 0)
+  const variance = squaredDifferencesSum / allPlayersData.length
+  const standardDeviation = Math.sqrt(variance)
+
+  // TEST
+  /*
+  const sweshelo = allPlayersData.find(data => data.name === 'Ｓｗｅｓｈｅｌｏ')
+  console.log(`Sweshelo:`)
+  console.log(`  平均値 -> ${sweshelo.availAverage}`)
+  console.log(`  偏差値 -> ${((sweshelo.availAverage - averageOfAvailAverageOfAllPlayer) / standardDeviation * 10 + 50).toFixed(3)}`)
+  */
+}
+
 setInterval(() => {
   main()
   calculateStandardDeviation()
