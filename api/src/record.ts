@@ -2,7 +2,7 @@ import {createConnection, Connection} from 'mysql2/promise'
 import Logger from './logging'
 import {Request, Response} from 'express'
 import { hideDetailPlayTime, toFullWidth } from './helper'
-import {Timeline} from './types/table'
+import {Timeline, Players} from './types/table'
 import {onlineRequestBody} from './types/request'
 
 const status = {
@@ -57,6 +57,8 @@ class Record {
           'ranking': 0,
           'online': false,
           'average': null,
+          'effective_average': 0.00,
+          'diviation_value': 0.00,
           'diff': [],
           'log': [],
         }
@@ -131,6 +133,10 @@ class Record {
         ]
         const achievementArray = prefectureResult.map(r => r.achievement)
 
+        // 有効平均貢献度類
+        const [ playerInfoResult ] = await (await this.connection).execute('SELECT * FROM players WHERE player_name = ?', [ toFullWidth(req.params.playername) ])
+        const playerInfo = (playerInfoResult as Players[]).length > 0 ? playerInfoResult[0] as Players : null
+
         // 増分を計算する
         const latestRecord = playLogResult[playLogResult.length - 1]
         const response = {
@@ -145,7 +151,9 @@ class Record {
             created_at: hideDetailPlayTime(r.created_at)
           }),
           ).reverse(),
-          'prefectures': prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n)
+          'prefectures': prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n),
+          'effective_average': playerInfo ? playerInfo.effective_average : null,
+          'deviation_value': playerInfo ? playerInfo.deviation_value : null,
         }
 
         res.send({

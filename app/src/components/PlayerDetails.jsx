@@ -7,7 +7,7 @@ import Map from './Map';
 import './PlayerDetails.css';
 import { BiHide } from 'react-icons/bi';
 import { MdDeleteForever } from 'react-icons/md';
-import { BsYoutube } from 'react-icons/bs';
+import { BsQuestionCircle, BsYoutube } from 'react-icons/bs';
 import { GiBattleAxe } from 'react-icons/gi';
 
 const OnlineIndicator = ({online}) => {
@@ -31,33 +31,32 @@ const DetailBoard = (props) => {
     <div className="report">
       <div className="float-reset">
         <div className="stats-block">
-          <p className="stats-key">瞬間最高ランキング</p>
+          <p className="stats-key">瞬間最高Rkg.</p>
           <p className="stats-value">{props.ranking}位</p>
         </div>
         <div className="stats-block">
-          <p className="stats-key">最高貢献ポイント</p>
+          <p className="stats-key">最高貢献P</p>
           <p className="stats-value">{props.point || 'データなし'}</p>
         </div>
         <div className="stats-block">
-          <p className="stats-key">平均貢献ポイント</p>
+          <p className="stats-key">平均貢献P</p>
           <p className="stats-value">{props.average?.toFixed(3) || 'データなし'}</p>
         </div>
       </div>
       <div className="float-reset">
         <div className="stats-block">
-          <p className="stats-key">有効平均貢献ポイント</p>
-          <p className="stats-value">{props.availAverage?.toFixed(3) || 'データなし'}</p>
+          <p className="stats-key">有効平均貢献P <BsQuestionCircle /></p>
+          <p className="stats-value">{props.effectiveAverage || 'データなし'}</p>
         </div>
         <div className="stats-block">
-          <p className="stats-key">自己標準偏差</p>
+          <p className="stats-key">自己標準偏差 <BsQuestionCircle /></p>
           <p className="stats-value">{props.standardDeviation?.toFixed(3) || 'データなし'}</p>
         </div>
         <div className="stats-block">
-          <p className="stats-key">全国偏差値 ‹参考値›</p>
-          <p className="stats-value">{props.dv || 'データなし'}</p>
+          <p className="stats-key">全国偏差値 <BsQuestionCircle /></p>
+          <p className="stats-value">{props.deviationValue || 'データなし'}</p>
         </div>
       </div>
-      <p className='mini-script'>※「偏差」と「偏差値」は異なるものです</p>
     </div>
   )
 }
@@ -209,16 +208,13 @@ const PlayerDetails = () => {
             average={
               standardAverage || null
             }
-            availAverage={
-              pointAfter0506DiffArray.length >= 110
-                ? pointAfter0506DiffArray.sort((a, b) => a.id > b.id).slice(0, 110).sort((a, b) => a.diff > b.diff).slice( 5, -5 ).reduce((sum, obj) => sum + obj.diff, 0) / 100
-                : null
-            }
+            effectiveAverage={playerDetail?.effective_average}
             standardDeviation={
               Math.sqrt(
               pointDiffArray.map(val => Math.pow(val - standardAverage, 2)).reduce((acc, val) => acc + val, 0) / pointDiffArray.length
             )
             }
+            deviationValue={playerDetail?.deviation_value}
           />
         </div>
         <div id="table-wrapper">
