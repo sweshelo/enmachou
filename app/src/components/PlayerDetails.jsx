@@ -33,6 +33,9 @@ const DetailBoard = (props) => {
     maxWidth: 'calc(100% - 10px)',
     padding: '8px 5px',
   }
+
+  const TooltipHTML = (element) => ReactDOMServer.renderToStaticMarkup(element)
+
   return(
     <div className="report">
       <div className="float-reset">
@@ -51,17 +54,16 @@ const DetailBoard = (props) => {
       </div>
       <div className="float-reset">
         <div className="stats-block">
-          <p className="stats-key">有効平均貢献P <BsQuestionCircle id='effective-average'/></p>
+          <p className="stats-key">有効平均貢献P <BsQuestionCircle id='effective-average' data-tooltip-html={TooltipHTML(<div>直近110件のプレイのうち、最高/最低5件を除く貢献度の平均値です<br />登録レコードが110件未満の場合は「データなし」となります</div>)}/></p>
           <p className="stats-value">{props.effectiveAverage || 'データなし'}</p>
           <ReactTooltip
             anchorId='effective-average'
-            content='直近110件のプレイのうち、最高/最低5件を除く貢献度の平均値です'
             place='top'
             style={tooltipStyle}
           />
         </div>
         <div className="stats-block">
-          <p className="stats-key">自己標準偏差 <BsQuestionCircle id='standard-deviation' data-tooltip-html={ReactDOMServer.renderToStaticMarkup(<div>このプレイヤーの獲得貢献度の偏差です<br />この値が大きいほど貢献度にばらつきがあります</div>)}/></p>
+          <p className="stats-key">自己標準偏差 <BsQuestionCircle id='standard-deviation' data-tooltip-html={TooltipHTML(<div>プレイヤーの獲得貢献度の偏差です<br />この値が大きいほど貢献度にばらつきがあります</div>)}/></p>
           <p className="stats-value">{props.standardDeviation?.toFixed(3) || 'データなし'}</p>
           <ReactTooltip
             anchorId='standard-deviation'
@@ -70,7 +72,7 @@ const DetailBoard = (props) => {
           />
         </div>
         <div className="stats-block">
-          <p className="stats-key">全国偏差値 <BsQuestionCircle id='deviation-value' data-tooltip-html={ReactDOMServer.renderToStaticMarkup(<div>プレイヤーの有効平均貢献度から算出された偏差値です<br />この値が50に近いほど平均に近づきます</div>)}/></p>
+          <p className="stats-key">全国偏差値 <BsQuestionCircle id='deviation-value' data-tooltip-html={TooltipHTML(<div>プレイヤーの有効平均貢献度から算出された偏差値です<br />この値が50に近いほど平均に近づきます</div>)}/></p>
           <p className="stats-value">{props.deviationValue || 'データなし'}</p>
           <ReactTooltip
             anchorId='deviation-value'
@@ -174,7 +176,7 @@ const AverageGraph = (props) => {
       <div className='centerize'>
         <LineChart
           id='chart'
-          width={380}
+          width={Math.min(window.innerWidth - 20, 600)}
           height={300}
           data={average}
           margin={{
@@ -206,10 +208,10 @@ const PlayerDetails = () => {
   }, [])
 
   const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
-  const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r : null)
-    .filter(r => r?.diff > 0) || [];
+  const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
+    .filter(r => r > 0) || [];
   const standardAverage = (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length)
-  console.log(pointAfter0506DiffArray.sort((a, b) => a.timeline_id > b.timeline_id).slice(0, 110).sort((a, b) => a.diff > b.diff).slice( 5, -5 ).reduce((sum, obj) => sum + obj.diff, 0))
+  console.log(pointAfter0506DiffArray)
 
   return (
     <div id="player-detail-wrapper">
