@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
+import ReactDOMServer from 'react-dom/server';
 import { useParams } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import actions from '../redux/records/actions.ts';
@@ -9,6 +10,7 @@ import { BiHide } from 'react-icons/bi';
 import { MdDeleteForever } from 'react-icons/md';
 import { BsQuestionCircle, BsYoutube } from 'react-icons/bs';
 import { GiBattleAxe } from 'react-icons/gi';
+import { Tooltip as ReactTooltip } from "react-tooltip";
 
 const OnlineIndicator = ({online}) => {
   return(
@@ -27,6 +29,10 @@ const Achievement = ({title}) => {
 }
 
 const DetailBoard = (props) => {
+  const tooltipStyle = {
+    maxWidth: 'calc(100% - 10px)',
+    padding: '8px 5px',
+  }
   return(
     <div className="report">
       <div className="float-reset">
@@ -45,16 +51,32 @@ const DetailBoard = (props) => {
       </div>
       <div className="float-reset">
         <div className="stats-block">
-          <p className="stats-key">有効平均貢献P <BsQuestionCircle /></p>
+          <p className="stats-key">有効平均貢献P <BsQuestionCircle id='effective-average'/></p>
           <p className="stats-value">{props.effectiveAverage || 'データなし'}</p>
+          <ReactTooltip
+            anchorId='effective-average'
+            content='直近110件のプレイのうち、最高/最低5件を除く貢献度の平均値です'
+            place='top'
+            style={tooltipStyle}
+          />
         </div>
         <div className="stats-block">
-          <p className="stats-key">自己標準偏差 <BsQuestionCircle /></p>
+          <p className="stats-key">自己標準偏差 <BsQuestionCircle id='standard-deviation' data-tooltip-html={ReactDOMServer.renderToStaticMarkup(<div>このプレイヤーの獲得貢献度の偏差です<br />この値が大きいほど貢献度にばらつきがあります</div>)}/></p>
           <p className="stats-value">{props.standardDeviation?.toFixed(3) || 'データなし'}</p>
+          <ReactTooltip
+            anchorId='standard-deviation'
+            place='top'
+            style={tooltipStyle}
+          />
         </div>
         <div className="stats-block">
-          <p className="stats-key">全国偏差値 <BsQuestionCircle /></p>
+          <p className="stats-key">全国偏差値 <BsQuestionCircle id='deviation-value' data-tooltip-html={ReactDOMServer.renderToStaticMarkup(<div>プレイヤーの有効平均貢献度から算出された偏差値です<br />この値が50に近いほど平均に近づきます</div>)}/></p>
           <p className="stats-value">{props.deviationValue || 'データなし'}</p>
+          <ReactTooltip
+            anchorId='deviation-value'
+            place='top'
+            style={tooltipStyle}
+          />
         </div>
       </div>
     </div>
