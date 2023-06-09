@@ -3,7 +3,7 @@ import Logger from './logging'
 import {Request, Response} from 'express'
 import { hideDetailPlayTime, toFullWidth } from './helper'
 import {Timeline, Players} from './types/table'
-import {onlineRequestBody} from './types/request'
+import {OnlineRequestBody} from './types/request'
 
 const status = {
   ok: 'ok',
@@ -249,7 +249,7 @@ class Record {
     }
   }
 
-  async getOnlinePlayers(req: Request<onlineRequestBody>, res: Response){
+  async getOnlinePlayers(req: Request<OnlineRequestBody>, res: Response){
     type TimelineForOnlinePlayer = Pick<Timeline, 'player_name' | 'ranking' | 'point' | 'chara' | 'created_at'>
 
     try{

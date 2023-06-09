@@ -26,3 +26,13 @@ export type Players = {
   created_at: string
   updated_at: string
 };
+
+export type User = {
+  user_id: string
+  player_id: number
+  token: string
+  is_hide_date: boolean
+  is_hide_time: boolean
+  online_threshold: number
+  is_authorized: boolean
+}
