@@ -11,7 +11,7 @@ const Player = ({props}) => {
         <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${props.chara}.png`} />
         <div className="playerinfo-wrapper">
           <p>{props.ranking}位 - {props.point}P</p>
-          <h2 className="playername">{props.player_name}</h2>
+          <h2 className="playername ccj-font">{props.player_name}</h2>
         </div>
       </a>
     </div>

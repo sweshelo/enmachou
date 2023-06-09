@@ -17,3 +17,7 @@ h2{
   font-size: 2em;
   font-weight: bold;
 }
+
+#invisible{
+  display: none;
+}

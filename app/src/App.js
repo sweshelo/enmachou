@@ -31,7 +31,7 @@ function App() {
   return (
     <div className="App">
       <header>
-        <h1><a href='/'>閻魔帳</a></h1>
+        <h1 className='ccj-font'><a href='/'>閻魔帳</a></h1>
         <span>v0.9 β - @sweshelo</span>
       </header>
       <DrawerMenu />
