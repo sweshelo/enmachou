@@ -2,21 +2,8 @@ import React, { useState, useEffect } from "react"
 import {useDispatch, useSelector} from "react-redux";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 import actions from "../redux/records/actions.ts";
+import {Player} from "./Player";
 import './Ranking.css';
-
-const Player = ({props}) => {
-  return(
-    <div>
-      <a href={props.player_name !== 'プレーヤー' ? `/player/${props.player_name}` : null} className="player">
-        <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${props.chara}.png`} />
-        <div className="playerinfo-wrapper">
-          <p>{props.ranking}位 - {props.point}P</p>
-          <h2 className="playername ccj-font">{props.player_name}</h2>
-        </div>
-      </a>
-    </div>
-  )
-}
 
 const renderActiveShape = (props) => {
   const RADIAN = Math.PI / 180;
@@ -139,7 +126,7 @@ const Ranking = () => {
         <div className="centerize">
           <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} clickHandler={charaFilterClickHandler} />
         </div>
-        {ranking?.standardRanking?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <Player key={index} props={r} />)}
+        {ranking?.standardRanking?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <Player key={index} name={r.player_name} chara={r.chara} header={`${r.ranking}位 - ${r.point}P`} isLink={true}/>)}
       </div>
     </div>
   )

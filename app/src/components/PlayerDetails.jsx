@@ -11,6 +11,7 @@ import { MdDeleteForever } from 'react-icons/md';
 import { BsQuestionCircle, BsYoutube } from 'react-icons/bs';
 import { GiBattleAxe } from 'react-icons/gi';
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import {Player} from './Player';
 
 const OnlineIndicator = ({online}) => {
   return(
@@ -217,13 +218,7 @@ const PlayerDetails = () => {
     <div id="player-detail-wrapper">
       <div className="player-detail">
         <Achievement title={playerDetail?.achievement} />
-        <div className="player">
-          { playerDetail?.chara && <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${playerDetail?.chara}.png`} /> }
-          <div className="playerinfo-wrapper">
-            <p>{playerDetail?.ranking}位 - {playerDetail?.point}P</p>
-            <h2 className="playername ccj-font">{playerDetail?.player_name}</h2>
-          </div>
-        </div>
+        {playerDetail && <Player name={playerDetail.player_name} header={`${playerDetail.ranking}位 - ${playerDetail.point}P`} chara={playerDetail.chara} />}
         <div className="info">
           <OnlineIndicator online={playerDetail?.online} />
           <DetailBoard
