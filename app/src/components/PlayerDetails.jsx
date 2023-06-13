@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import actions from '../redux/records/actions.ts';
 import Map from './Map';
@@ -136,7 +136,7 @@ const PlayLog = (props) => {
                           </li>
                           */}
                           <li className='button-record-operation'>
-                            <a href={`/matching/${log.timeline_id}`}><GiBattleAxe/> 推定マッチング</a>
+                            <Link to={`/matching/${log.timeline_id}`}><GiBattleAxe/> 推定マッチング</Link>
                           </li>
                         </ul>
                       </td>

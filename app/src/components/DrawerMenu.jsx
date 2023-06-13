@@ -2,6 +2,7 @@ import React, {useState, useLayoutEffect} from "react"
 import Drawer from "react-modern-drawer"
 import "react-modern-drawer/dist/index.css"
 import {useSelector} from "react-redux";
+import {Link} from "react-router-dom";
 import "./DrawerMenu.css"
 
 const useWindowSize = () => {
@@ -24,25 +25,25 @@ const DrawerBody = () => {
   return(
     <>
       <ul>
-        <li><a href="/">月間ランキング</a></li>
-        <li><a href="/ranking/max">最高貢献ポイントランキング</a></li>
-        <li><a href="/online">オンラインのプレイヤー</a></li>
-        <li><a href="/stats">統計</a></li>
-        <li><a href="/about">このアプリについて</a></li>
+        <li><Link to="/">月間ランキング</Link></li>
+        <li><Link to="/ranking/max">最高貢献ポイントランキング</Link></li>
+        <li><Link to="/online">オンラインのプレイヤー</Link></li>
+        <li><Link to="/stats">統計</Link></li>
+        <li><Link to="/about">このアプリについて</Link></li>
       </ul>
       <div className="horizon-bar"></div>
       <ul>
         { !isLoggedIn
           ? (
             <>
-              <li><a href="/login">ログイン</a></li>
+              <li><Link to="/login">ログイン</Link></li>
             </>
           )
           : (
             <>
-              <li><a href="/mypage">マイページ</a></li>
-              <li><a href="/settings">設定</a></li>
-              <li><a href="/logout">ログアウト</a></li>
+              <li><Link to="/mypage">マイページ</Link></li>
+              <li><Link to="/settings">設定</Link></li>
+              <li><Link to="/logout">ログアウト</Link></li>
             </>
           )
         }
