@@ -1,3 +1,5 @@
+import {Link} from "react-router-dom";
+
 // 半角文字にする
 const toHalfWidth = (str) => {
   return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (s) => {
@@ -7,7 +9,7 @@ const toHalfWidth = (str) => {
 
 export const Player = ({header, chara, name, isLink}) => {
   return(
-    <a href={name !== 'プレーヤー' && isLink ? `/player/${name}` : null}>
+    <Link to={name !== 'プレーヤー' && isLink ? `/player/${name}` : null}>
       <div className="player">
         { chara && <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${chara}.png`} /> }
         <div className="playerinfo-wrapper">
@@ -15,6 +17,6 @@ export const Player = ({header, chara, name, isLink}) => {
           <h2 className="playername ccj-font">{toHalfWidth(name)}</h2>
         </div>
       </div>
-    </a>
+    </Link>
   )
 }
