@@ -1,8 +1,10 @@
 import {Request, Response} from "express";
 import {Connection} from "mysql2/promise";
 import {User} from "./types/table";
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs';
 import {Auth, CreateAccountBody} from "./types/request";
+import * as jwt from 'jsonwebtoken';
+import fs from 'fs';
 
 const status = {
   ok: 'ok',
@@ -12,9 +14,13 @@ const status = {
 
 class Account {
   connection: Promise<Connection>;
+  private privateKey: string;
+  private publicKey: string;
 
   constructor(connection: Promise<Connection>){
     this.connection = connection
+    this.privateKey = fs.readFileSync('signkey.pem').toString()
+    this.publicKey = fs.readFileSync('publickey.pem').toString()
   }
 
   throwAuthorizeError(res: Response){
@@ -59,11 +65,15 @@ class Account {
 
   async login(req: Request, res: Response){
     try{
-      const [userResult] = await (await this.connection).execute('SELECT * FROM users WHERE user_id = ?;', [req.body.auth.password])
+      const [userResult] = await (await this.connection).execute('SELECT * FROM users WHERE user_id = ?;', [req.body.auth.userId])
       if((userResult as []).length === 0 || !await bcrypt.compare(req.body.auth.password, userResult[0].passhash)) {
         this.throwAuthorizeError(res)
       }else{
-        const [generateTokenResult] = await (await this.connection).query('')
+        const payload = { user: req.body.auth.userId }
+        res.send({
+          status: status.ok,
+          token: jwt.sign(payload, this.privateKey, { algorithm: 'RS256' })
+        })
       }
     }catch(e){
       res.send({
@@ -79,12 +89,10 @@ class Account {
     return await bcrypt.compare(authObject.token, userResult[0].token)
   }
 
+  // TODO
   async changeSettings(req: Request, res: Response){
     try{
-      if (!await this.auth(req.body.auth)) {
-        this.throwAuthorizeError(res)
-        return
-      }
+      const decoded = jwt.verify(req.body.auth, this.publicKey)
       const settings = [ req.body.isHideDate, req.body.isHideTime, req.body.onlineThreshold ]
       res.send({
         status: status.ok
@@ -92,13 +100,10 @@ class Account {
     }catch(e){
       res.send({
         status: status.error,
-        message: e.message
+        message: e.message,
+        body: req.body
       })
     }
-  }
-
-  async authorizeOtherUser(req: Request, res: Response){
-
   }
 }
 

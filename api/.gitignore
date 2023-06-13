@@ -4,3 +4,4 @@ dump*.sql
 .env
 dist/
 *.log
+*.pem

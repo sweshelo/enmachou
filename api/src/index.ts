@@ -44,9 +44,9 @@ app.get('/api/online/:threshold?', (req: Request<OnlineRequestBody>, res) => rec
 app.get('/api/stats', (req, res) => record.statistics(req, res))
 
 app.post('/api/signup', (req: Request<CreateAccountBody>, res) => account.createAccount(req, res))
+app.post('/api/login', (req, res) => {(account.login(req, res))})
 app.post('/api/settings', (req: Request, res) => account.changeSettings(req, res))
 
 app.post('/api/tracker', (req, res) => generateTracker(req, res))
 app.post('/api/clean', (req, res) => record.cleanInvalidRecords(req, res))
 
-//app.post('/api/user/login', (req, res) => {(login(req, res))})
