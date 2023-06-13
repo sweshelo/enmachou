@@ -11,11 +11,6 @@ code {
   monospace;
 }
 
-* {
-  padding: 0;
-  margin: 0;
-}
-
 a {
   color: inherit;
   text-decoration: none;
@@ -25,4 +20,8 @@ a {
   padding: 0;
   font-size: inherit;
   font-family: inherit;
+}
+
+table, td, th{
+  text-align: center;
 }

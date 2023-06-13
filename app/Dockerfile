@@ -8,5 +8,8 @@ EXPOSE 5500
 
 ENV TZ=Asia/Tokyo
 
+COPY package.json ./
+COPY . ./
+
 # 起動コマンド
 CMD bash -c "yarn start" #"npm install && npm run build && npm start"

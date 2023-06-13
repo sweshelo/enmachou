@@ -33,6 +33,12 @@ export function* getStatsData(): Generator<unknown, void, any>{
   yield put(actions.setStats(result.body))
 }
 
+export function* getMatchingData({payload}): Generator<unknown, void, any>{
+  const response = yield call(EnmaApi.getMatchingData, payload.timelineId)
+  const result = yield response.json()
+  yield put(actions.setMatching(result.body))
+}
+
 export default function* recordsSaga(): Generator<any, any, any>{
   yield all([
     takeEvery(actions.GET_RANKING, getRankingData),
@@ -40,5 +46,6 @@ export default function* recordsSaga(): Generator<any, any, any>{
     takeEvery(actions.GET_ONLINEPLAYER, getOnlinePlayer),
     takeEvery(actions.GET_PLAYER_DETAIL, getPlayerDetailData),
     takeEvery(actions.GET_STATS, getStatsData),
+    takeEvery(actions.GET_MATCHING, getMatchingData),
   ])
 }

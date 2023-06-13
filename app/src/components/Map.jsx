@@ -17,7 +17,7 @@ const Map = ({visited}) => {
     '沖縄県'
   ]
 
-  const w = 350;
+  const w = Math.min(window.innerWidth - 20, 600);
   const h = 450;
   // 地図の投影図法を設定する．
   const projection = d3.geoMercator()

@@ -1,5 +1,5 @@
 import actions from './actions.ts'
-import { Player, PlayerDetail, Stats } from '../type'
+import { Player, PlayerDetail, PlayLog, Stats } from '../type'
 
 type Action = {
   type: string;
@@ -10,6 +10,10 @@ type State = {
   onlinePlayer: Player[];
   standardRanking: Player[];
   maxRanking: Player[];
+  matching: {
+    id: string,
+    record: PlayLog[]
+  } | null;
   isLoading: boolean;
   playerDetail: PlayerDetail | null;
   stats: Stats | null;
@@ -19,6 +23,7 @@ const initialState: State = {
   onlinePlayer: [],
   standardRanking: [],
   maxRanking: [],
+  matching: null,
   isLoading: true,
   playerDetail: null,
   stats: null,
@@ -40,6 +45,8 @@ const recordsReducer = (state = initialState, action: Action) => {
       return { ...state, playerDetail: action.payload }
     case actions.SET_STATS:
       return { ...state, stats: action.payload }
+    case actions.SET_MATCHING:
+      return { ...state, matching: action.payload }
     default:
       return { ...state }
   }
