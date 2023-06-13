@@ -34,7 +34,7 @@ function App() {
     <div className="App">
       <header>
         <h1 className='ccj-font'><a href='/'>閻魔帳</a></h1>
-        <span>v0.9 β - @sweshelo</span>
+        <span>v0.9 - @sweshelo</span>
       </header>
       <DrawerMenu />
       <Router>
