@@ -12,6 +12,7 @@ import { BsQuestionCircle, BsYoutube } from 'react-icons/bs';
 import { GiBattleAxe } from 'react-icons/gi';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import {Player} from './Player';
+import { Spin } from 'antd';
 
 const OnlineIndicator = ({online}) => {
   return(
@@ -216,39 +217,50 @@ const PlayerDetails = () => {
 
   return (
     <div id="player-detail-wrapper">
-      <div className="player-detail">
-        <Achievement title={playerDetail?.achievement} />
-        {playerDetail && <Player name={playerDetail.player_name} header={`${playerDetail.ranking}位 - ${playerDetail.point}P`} chara={playerDetail.chara} />}
-        <div className="info">
-          <OnlineIndicator online={playerDetail?.online} />
-          <DetailBoard
-            ranking={!playerDetail?.log?.length ? null : Math.min(...playerDetail?.log.map(r => r.ranking))}
-            point={!pointAfter0506DiffArray.length ? null : Math.max(...pointAfter0506DiffArray)}
-            average={
-              standardAverage || null
-            }
-            effectiveAverage={playerDetail?.effective_average}
-            standardDeviation={
-              Math.sqrt(
-              pointDiffArray.map(val => Math.pow(val - standardAverage, 2)).reduce((acc, val) => acc + val, 0) / pointDiffArray.length
-            )
-            }
-            deviationValue={playerDetail?.deviation_value}
-          />
-        </div>
-        <div id="table-wrapper">
-          <div>
-            <AverageGraph log={playerDetail?.log?.slice(0, 300) || []}/>
-            <PlayLog log={playerDetail?.log || []} />
+      {playerDetail ? (
+        <div className="player-detail">
+          <Achievement title={playerDetail?.achievement} />
+          {playerDetail && <Player name={playerDetail.player_name} header={`${playerDetail.ranking}位 - ${playerDetail.point}P`} chara={playerDetail.chara} />}
+          <div className="info">
+            <OnlineIndicator online={playerDetail?.online} />
+            <DetailBoard
+              ranking={!playerDetail?.log?.length ? null : Math.min(...playerDetail?.log.map(r => r.ranking))}
+              point={!pointAfter0506DiffArray.length ? null : Math.max(...pointAfter0506DiffArray)}
+              average={
+                standardAverage || null
+              }
+              effectiveAverage={playerDetail?.effective_average}
+              standardDeviation={
+                Math.sqrt(
+                pointDiffArray.map(val => Math.pow(val - standardAverage, 2)).reduce((acc, val) => acc + val, 0) / pointDiffArray.length
+              )
+              }
+              deviationValue={playerDetail?.deviation_value}
+            />
           </div>
-        </div>
-        { playerDetail?.prefectures.length > 0 && (
-          <div id="prefectures">
-            <p className="title-paragraph">このユーザの制県度</p>
-            <Map visited={[...playerDetail?.prefectures]} />
+          <div id="table-wrapper">
+            <div>
+              <AverageGraph log={playerDetail?.log?.slice(0, 300) || []}/>
+              <PlayLog log={playerDetail?.log || []} />
+            </div>
           </div>
-        ) }
-      </div>
+          { playerDetail?.prefectures.length > 0 && (
+            <div id="prefectures">
+              <p className="title-paragraph">このユーザの制県度</p>
+              <Map visited={[...playerDetail?.prefectures]} />
+            </div>
+          ) }
+        </div>
+      ) : (
+        <>
+          <p style={{
+            position: 'absolute',
+            top: '50vh',
+            }}>
+            <Spin /> 読み込み中…
+          </p>
+        </>
+      )}
     </div>
   )
 
