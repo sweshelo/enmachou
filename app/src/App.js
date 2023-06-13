@@ -14,6 +14,7 @@ import MaxPointRanking from './components/MaxPointRanking';
 import Statistics from './components/Statistics';
 import {useState} from 'react';
 import {config} from './config';
+import {Login} from './components/LoginPage';
 
 function App() {
 
@@ -44,6 +45,7 @@ function App() {
           <Route path='/online' element={<Online />} />
           <Route path='/about' element={<About />} />
           <Route path='/stats' element={<Statistics />} />
+          <Route path='/login' element={<Login />} />
         </Routes>
       </Router>
     </div>
