@@ -3,6 +3,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
+  Link,
 } from "react-router-dom";
 import {useCookies} from 'react-cookie'
 import Ranking from './components/Ranking';
@@ -31,13 +32,13 @@ function App() {
   }, [])
 
   return (
-    <div className="App">
-      <header>
-        <h1 className='ccj-font'><a href='/'>閻魔帳</a></h1>
-        <span>v0.9 - @sweshelo</span>
-      </header>
-      <DrawerMenu />
-      <Router>
+    <Router>
+      <div className="App">
+        <header>
+          <h1 className='ccj-font'><Link to='/'>閻魔帳</Link></h1>
+          <span>v0.9.7 - @sweshelo</span>
+        </header>
+        <DrawerMenu />
         <Routes>
           <Route path="/" element={<Ranking />} />
           <Route path="/ranking" element={<Ranking />} />
@@ -49,8 +50,8 @@ function App() {
           <Route path='/stats' element={<Statistics />} />
           <Route path='/login' element={<Login />} />
         </Routes>
-      </Router>
-    </div>
+      </div>
+    </Router>
   );
 }
 

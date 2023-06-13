@@ -1,3 +1,4 @@
+import {Link} from "react-router-dom"
 import "./About.css"
 
 export const About = () => {
@@ -5,7 +6,7 @@ export const About = () => {
     <div id="about">
       <div id="about-header">
         <h2>閻魔帳</h2>
-        <p><a href="https://twitter.com/sweshelo">@sweshelo</a></p>
+        <p><Link to="https://twitter.com/sweshelo">@sweshelo</Link></p>
       </div>
       <p className="about-description">閻魔帳は、アーケードゲーム『チェイスチェイスジョーカーズ』のランキングを自動で収集することで、ランキング上位のプレイヤーのプレイ履歴を可視化するツールです。</p>
       <p className="about-description">公式のランキングを参照している関係上、ランキング圏外の方は記録の参照が出来ません。また、ランキングで名前を非表示にされている方も記録の参照が出来ませんので予めご了承下さい。</p>

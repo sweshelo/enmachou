@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react"
 import {useDispatch, useSelector} from "react-redux";
+import {Link} from "react-router-dom";
 import actions from "../redux/records/actions.ts";
 import './Ranking.css';
 
 const Player = ({props}) => {
   return(
     <div>
-      <a href={props.player_name !== 'プレーヤー' ? `/player/${props.player_name}` : null} className="player">
+      <Link to={props.player_name !== 'プレーヤー' ? `/player/${props.player_name}` : null} className="player">
         <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${props.chara}.png`} />
         <div className="playerinfo-wrapper">
           <p>{props.diff}P - @ {props.created_at}</p>
           <h2 className="playername">{props.player_name}</h2>
         </div>
-      </a>
+      </Link>
     </div>
   )
 }
