@@ -9,7 +9,7 @@ export const toFullWidth = (str: string) => {
 export const toHalfWidth = (str: string) => {
   return str.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (s) => {
     return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-  }).replace('．', '.');
+  }).replace('．', '.').replace('：', ':');
 }
 
 // 時間帯フィルタリング
