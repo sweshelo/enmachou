@@ -124,6 +124,7 @@ const PlayLog = (props) => {
                     <tr>
                       <td colSpan={3} className='record-operation'>
                         <ul>
+                          {/*
                           <li className='button-record-operation'>
                             <button><BiHide/> 記録を非表示</button>
                           </li>
@@ -133,8 +134,9 @@ const PlayLog = (props) => {
                           <li className='button-record-operation'>
                             <button><BsYoutube/> 動画を紐付け</button>
                           </li>
+                          */}
                           <li className='button-record-operation'>
-                            <button><GiBattleAxe/> 推定マッチング</button>
+                            <a href={`/matching/${log.timeline_id}`}><GiBattleAxe/> 推定マッチング</a>
                           </li>
                         </ul>
                       </td>

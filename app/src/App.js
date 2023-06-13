@@ -15,6 +15,7 @@ import Statistics from './components/Statistics';
 import {useState} from 'react';
 import {config} from './config';
 import {Login} from './components/LoginPage';
+import Matching from './components/Matching';
 
 function App() {
 
@@ -42,6 +43,7 @@ function App() {
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/ranking/max" element={<MaxPointRanking />} />
           <Route path='/player/:playername' element={<PlayerDetails />} />
+          <Route path='/matching/:timelineId' element={<Matching />} />
           <Route path='/online' element={<Online />} />
           <Route path='/about' element={<About />} />
           <Route path='/stats' element={<Statistics />} />

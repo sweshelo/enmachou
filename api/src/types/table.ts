@@ -6,9 +6,10 @@ export type Timeline = {
   chara: string
   point: number
   created_at: string
-  diff: number
-  last_timeline_id: number
-  elapsed: number
+  updated_at: string | null
+  diff: number | null
+  last_timeline_id: number | null
+  elapsed: number | null
 };
 
 export type Players = {

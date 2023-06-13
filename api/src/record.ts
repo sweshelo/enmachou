@@ -4,6 +4,7 @@ import {Request, Response} from 'express'
 import { hideDetailPlayTime, toFullWidth } from './helper'
 import {Timeline, Players} from './types/table'
 import {OnlineRequestBody} from './types/request'
+import {isNull} from 'util'
 
 const status = {
   ok: 'ok',
@@ -436,6 +437,35 @@ class Record {
     res.send({
       'status': status.ok
     })
+  }
+
+  async getMatching(req: Request, res: Response) {
+    try{
+      const [ baseRecord ] = await (await (this.connection)).execute('SELECT * FROM timeline WHERE timeline_id = ?;', [ req.params.timelineId ])
+      console.log(baseRecord[0])
+      const { created_at, updated_at } = baseRecord[0] as Timeline
+      const targetDateTime = isNull(updated_at) ? created_at : updated_at
+
+      const [ targetRecords ] = await (await this.connection).execute(`SELECT * FROM timeline WHERE ${isNull(updated_at) ? 'created_at' : 'updated_at'} = ? AND diff > 0;`, [targetDateTime])
+      const response = {
+        id: req.params.timelineId,
+        records: []
+      }
+      response.records = (targetRecords as Timeline[]).map((r: Timeline) => ({
+        player_name: r.player_name,
+        diff: r.diff,
+        chara: r.chara,
+      }))
+      res.send({
+        status: status.ok,
+        body: response
+      })
+    }catch(e){
+      res.send({
+        status: status.error,
+        message: e.message
+      })
+    }
   }
 
 }
