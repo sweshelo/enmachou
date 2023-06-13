@@ -13,6 +13,8 @@ const actions = {
   SET_PLAYER_DETAIL: 'SET_PLAYER_DETAIL',
   GET_STATS: 'GET_STATS',
   SET_STATS: 'SET_STATS',
+  GET_MATCHING: 'GET_MATCHING',
+  SET_MATCHING: 'SET_MATCHING',
 
   getRankingPlayerList: () => ({
     type: actions.GET_RANKING
@@ -58,6 +60,16 @@ const actions = {
     type: actions.SET_STATS,
     payload
   }),
+  getMatching: (timelineId: Pick<PlayLog, 'timeline_id'>) => ({
+    type: actions.GET_MATCHING,
+    payload: {
+      timelineId
+    }
+  }),
+  setMatching: (payload: any) => ({
+    type: actions.SET_MATCHING,
+    payload
+  })
 }
 
 export default actions

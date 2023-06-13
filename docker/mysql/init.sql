@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS `ccj`.`players` (
   `point` INT,
   `rank_diff` INT DEFAULT NULL,
   `point_diff` INT DEFAULT NULL,
+  `average` DECIMAL(10, 2) DEFAULT 0.00,
+  `effective_average` DECIMAL(10, 2) DEFAULT 0.00,
+  `deviation_value` DECIMAL(10, 2) DEFAULT 0.00,
+  `user_id` VARCHAR(32) DEFAULT NULL,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME DEFAULT NULL
 );

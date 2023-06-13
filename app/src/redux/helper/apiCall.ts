@@ -34,6 +34,9 @@ class EnmaApi {
   static getStatsData(){
     return EnmaApi.httpGet(`stats`)
   }
+  static getMatchingData(timelineId: string){
+    return EnmaApi.httpGet(`matching/${timelineId}`)
+  }
 }
 
 export { EnmaApi }

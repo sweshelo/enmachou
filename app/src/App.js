@@ -14,6 +14,8 @@ import MaxPointRanking from './components/MaxPointRanking';
 import Statistics from './components/Statistics';
 import {useState} from 'react';
 import {config} from './config';
+import {Login} from './components/LoginPage';
+import Matching from './components/Matching';
 
 function App() {
 
@@ -31,8 +33,8 @@ function App() {
   return (
     <div className="App">
       <header>
-        <h1><a href='/'>閻魔帳</a></h1>
-        <span>v0.8 - @sweshelo</span>
+        <h1 className='ccj-font'><a href='/'>閻魔帳</a></h1>
+        <span>v0.9 - @sweshelo</span>
       </header>
       <DrawerMenu />
       <Router>
@@ -41,9 +43,11 @@ function App() {
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/ranking/max" element={<MaxPointRanking />} />
           <Route path='/player/:playername' element={<PlayerDetails />} />
+          <Route path='/matching/:timelineId' element={<Matching />} />
           <Route path='/online' element={<Online />} />
           <Route path='/about' element={<About />} />
           <Route path='/stats' element={<Statistics />} />
+          <Route path='/login' element={<Login />} />
         </Routes>
       </Router>
     </div>

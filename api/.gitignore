@@ -1,4 +1,7 @@
 2023*.json
 node_modules
-*.sql
+dump*.sql
 .env
+dist/
+*.log
+*.pem

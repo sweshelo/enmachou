@@ -8,11 +8,19 @@ type Action = {
 type State = {
   tracker: string;
   token: string;
+  isLoggedIn: boolean;
+  user: {
+    playerName: string;
+    userId: string;
+    hideDateTime: boolean;
+  } | undefined | null
 }
 
 const initialState: State = {
   tracker: '',
-  token: ''
+  token: '',
+  isLoggedIn: false,
+  user: null
 }
 
 const accountReducer = (state = initialState, action: Action) => {
@@ -20,7 +28,6 @@ const accountReducer = (state = initialState, action: Action) => {
     case actions.DONE_LOGIN:
       return { ...action.payload }
     case actions.TEST:
-      console.log('hello.')
       return { ...state }
     default:
       return { ...state }
