@@ -208,6 +208,7 @@ const PlayerDetails = () => {
   const { playername } = useParams()
   const dispatch = useDispatch()
   useEffect(() => {
+    if (playerDetail.player_name !== playername) dispatch(actions.setPlayerDetail(null))
     dispatch(actions.getPlayerDetail(playername))
   }, [])
 
@@ -215,7 +216,6 @@ const PlayerDetails = () => {
   const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
     .filter(r => r > 0) || [];
   const standardAverage = (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length)
-  console.log(pointAfter0506DiffArray)
 
   return (
     <div id="player-detail-wrapper">
