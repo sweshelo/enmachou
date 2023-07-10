@@ -25,3 +25,8 @@ a {
 table, td, th{
   text-align: center;
 }
+
+@font-face{
+  font-family: 'mplus-2p-regular';
+  src: url('https://enma.sweshelo.jp/mplus-2p-heavy.woff') format('woff');
+}

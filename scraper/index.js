@@ -208,7 +208,7 @@ const calculateDeviationValue = async() => {
 }
 
 setInterval(() => {
-  main()
   const date = new Date()
-  if(date.getHours() === 4 && date.getMinutes() === 0) calculateDeviationValue()
-}, 1000 * 60)
+  if(date.getHours() <= 0 || date.getHours() >= 7 ) main()
+  if(date.getHours() === 4 && date.getMinutes() < 2) calculateDeviationValue()
+}, 1000 * 120)
