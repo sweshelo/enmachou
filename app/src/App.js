@@ -36,7 +36,7 @@ function App() {
       <div className="App">
         <header>
           <h1 className='ccj-font'><Link to='/'>閻魔帳</Link></h1>
-          <span>v0.9.9 - @sweshelo</span>
+          <span>v0.9.10 - @sweshelo</span>
         </header>
         <DrawerMenu />
         <Routes>
