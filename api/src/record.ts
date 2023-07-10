@@ -114,7 +114,7 @@ class Record {
           { name: '兵庫県', achievement: 'Soldier Warehouse' },
           { name: '奈良県', achievement: 'Nice Apple' },
           { name: '和歌山県', achievement: 'Mt. Gentle Song' },
-          { name: '鳥取県', achievement: 'Bird get' },
+          { name: '鳥取県', achievement: 'Bird Get' },
           { name: '島根県', achievement: 'Island Root' },
           { name: '岡山県', achievement: 'Mt. Hill' },
           { name: '広島県', achievement: 'Wide Island' },
@@ -215,7 +215,7 @@ class Record {
           { name: '兵庫県', achievement: 'Soldier Warehouse' },
           { name: '奈良県', achievement: 'Nice Apple' },
           { name: '和歌山県', achievement: 'Mt. Gentle Song' },
-          { name: '鳥取県', achievement: 'Bird get' },
+          { name: '鳥取県', achievement: 'Bird Get' },
           { name: '島根県', achievement: 'Island Root' },
           { name: '岡山県', achievement: 'Mt. Hill' },
           { name: '広島県', achievement: 'Wide Island' },
@@ -292,7 +292,7 @@ class Record {
   async getMaxPointRanking(req: Request, res: Response) {
     try{
       if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
-      const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE player_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-05-06 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
+      const getMaxPointsFromTimelineQuery = "SELECT * FROM timeline WHERE player_name <> 'プレーヤー' AND elapsed < 360 AND created_at > '2023-06-01 08:00:00' AND diff > 0 ORDER BY diff desc LIMIT 100;";
       const [ result ] = await (await this.connection).execute(getMaxPointsFromTimelineQuery)
       const timelineResult = result as Timeline[]
 
@@ -355,8 +355,8 @@ class Record {
               '5': { name: '首塚ツバキ', count: 0, color: 'gainsboro' },
               '6': { name: '紅刃', count: 0, color: 'crimson' },
               '7': { name: '首塚ボタン', count: 0, color: 'orchid' },
-              //'8': { name: null, count: null, color: null },
-              //'9': { name: null, count: null, color: null },
+              '8': { name: null, count: null, color: null },
+              '9': { name: 'クルル', count: null, color: 'green' },
               '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
               '11': { name: 'マラリヤ', count: 0, color: 'purple' },
               '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
@@ -370,7 +370,7 @@ class Record {
               '5': { name: '首塚ツバキ', count: 0, color: 'gainsboro' },
               '6': { name: '紅刃', count: 0, color: 'crimson' },
               '7': { name: '首塚ボタン', count: 0, color: 'orchid' },
-              //'8': { name: null, count: null, color: null },
+              '8': { name: 'クルル', count: null, color: 'green' },
               //'9': { name: null, count: null, color: null },
               '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
               '11': { name: 'マラリヤ', count: 0, color: 'purple' },
