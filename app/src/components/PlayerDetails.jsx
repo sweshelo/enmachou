@@ -208,7 +208,7 @@ const PlayerDetails = () => {
   const { playername } = useParams()
   const dispatch = useDispatch()
   useEffect(() => {
-    if (playerDetail.player_name !== playername) dispatch(actions.setPlayerDetail(null))
+    if (playerDetail?.player_name !== playername) dispatch(actions.setPlayerDetail(null))
     dispatch(actions.getPlayerDetail(playername))
   }, [])
 
