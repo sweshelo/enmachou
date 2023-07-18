@@ -1,6 +1,8 @@
 const mysql = require('mysql2/promise');
 const { JSDOM } = require('jsdom')
 
+var processing = false
+
 const connection = mysql.createConnection({
   host: 'mysql',
   user: 'ccj',
@@ -62,6 +64,7 @@ const fetchRankingPage = async(pageIndex) => {
 }
 
 const main = async() => {
+  processing = true
   console.log(new Date())
   console.log('** START')
   // 最終更新を取得
@@ -127,6 +130,7 @@ AND t.created_at = (
 
   console.log('** All Done.')
   console.log(new Date())
+  processing = false
 }
 
 const calculateStandardDeviation = async() => {
@@ -209,6 +213,6 @@ const calculateDeviationValue = async() => {
 
 setInterval(() => {
   const date = new Date()
-  if(date.getHours() <= 0 || date.getHours() >= 7 ) main()
+  if(!processing && (date.getHours() <= 0 || date.getHours() >= 7 )) main()
   if(date.getHours() === 4 && date.getMinutes() < 2) calculateDeviationValue()
 }, 1000 * 120)
