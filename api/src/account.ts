@@ -105,6 +105,23 @@ class Account {
       })
     }
   }
+
+  async miAuth(req: Request, res: Response){
+    try{
+      const origin = req.body.origin
+      const session = req.body.session
+      const response = await fetch(`${origin}api/miauth/${session}/check`, {method: 'POST'})
+      const result = await response.json()
+      res.send({
+        status: result.ok ? status.ok : status.error
+      })
+    }catch(e){
+      res.send({
+        status: status.error,
+        message: e.message,
+      })
+    }
+  }
 }
 
 export default Account

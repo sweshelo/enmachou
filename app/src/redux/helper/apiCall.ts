@@ -4,10 +4,14 @@ import {Player} from '../type';
 const base = config.baseEndpoint + '/api'
 
 class EnmaApi {
-  static httpPost(uri: string){
+  static httpPost(uri: string, body: any){
     return fetch(`${base}/${uri}`, {
       method: 'POST',
-      credentials: 'include'
+      credentials: 'include',
+      headers:{
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body),
     }).then(response => response)
   }
   static httpGet(uri: string){
@@ -36,6 +40,11 @@ class EnmaApi {
   }
   static getMatchingData(timelineId: string){
     return EnmaApi.httpGet(`matching/${timelineId}`)
+  }
+  static verifyMisskeyAccount(origin: string, session: string){
+    return EnmaApi.httpPost(`miauth`, {
+      origin, session
+    })
   }
 }
 

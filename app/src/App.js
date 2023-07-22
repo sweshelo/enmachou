@@ -17,6 +17,7 @@ import {useState} from 'react';
 import {config} from './config';
 import {Login} from './components/LoginPage';
 import Matching from './components/Matching';
+import {MiAuth} from './components/MiAuthPage';
 
 function App() {
 
@@ -49,6 +50,7 @@ function App() {
           <Route path='/about' element={<About />} />
           <Route path='/stats' element={<Statistics />} />
           <Route path='/login' element={<Login />} />
+          <Route path='/miauth' element={<MiAuth />} />
         </Routes>
       </div>
     </Router>

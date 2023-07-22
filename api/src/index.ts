@@ -47,6 +47,7 @@ app.get('/api/matching/:timelineId', (req, res) => record.getMatching(req, res))
 app.post('/api/signup', (req: Request<CreateAccountBody>, res) => account.createAccount(req, res))
 app.post('/api/login', (req, res) => {(account.login(req, res))})
 app.post('/api/settings', (req: Request, res) => account.changeSettings(req, res))
+app.post('/api/miauth', (req, res) => account.miAuth(req, res))
 
 app.post('/api/tracker', (req, res) => generateTracker(req, res))
 app.post('/api/clean', (req, res) => record.cleanInvalidRecords(req, res))
