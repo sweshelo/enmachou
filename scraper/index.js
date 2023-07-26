@@ -225,7 +225,7 @@ const present_campaign_2 = async() => {
   console.log(itemList)
   const ePassRemain = [...itemList].map((item) => {
     return{
-      product: 'e-pass' + item.getElementsByTagName('img')[0].alt,
+      product: 'e-pass 『' + item.getElementsByTagName('img')[0].alt + '』',
       count: Number(item.getElementsByTagName('p')[0].innerHTML.match(/\d+/g)[0]),
       remain: Number(item.getElementsByTagName('p')[2].innerHTML.match(/\d+/g)[0]),
     }
