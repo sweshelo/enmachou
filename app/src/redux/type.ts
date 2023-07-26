@@ -46,4 +46,17 @@ type Stats = {
   dateKeys: string[];
 }
 
-export { Player, PlayerDetail, PlayLog, Stats }
+type PresentsItemHistory = {
+  count: number,
+  remain: number,
+  diff: number,
+  updatedAt: string
+}
+
+type PresentsItem = {
+  original_name: string,
+  identify_name: string,
+  history: Array<PresentsItemHistory>
+}
+
+export { Player, PlayerDetail, PlayLog, Stats, PresentsItem, PresentsItemHistory }
