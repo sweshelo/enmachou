@@ -3,6 +3,7 @@ import {useDispatch, useSelector} from "react-redux";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer } from 'recharts';
 import actions from "../redux/records/actions.ts";
 import {Player} from "./Player";
+import PresentModule from "./PresentModule.tsx";
 import './Ranking.css';
 
 const renderActiveShape = (props) => {
@@ -121,6 +122,9 @@ const Ranking = () => {
   return (
     <div id="ranking-wrapper">
       <div className="ranking">
+        <h2 className="page-title rainbow-grad-back">夏のプレゼントキャンペーン</h2>
+        <p className="title-paragraph">グッズの残り先着枠</p>
+        <PresentModule />
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
         <p className="title-paragraph">現在のキャラクター構成比率</p>
         <div className="centerize">

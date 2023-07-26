@@ -7,6 +7,7 @@ import cors from 'cors'
 import Record from './record'
 import {CreateAccountBody, OnlineRequestBody} from './types/request'
 import Account from './account'
+import Presents from './presents'
 
 const connection = createConnection({
   host: 'mysql',
@@ -19,7 +20,7 @@ const connection = createConnection({
 const app = express();
 const server = app.listen(4400, () => console.log("Node.js is listening to PORT:" + (server.address() as AddressInfo).port));
 app.use(cors({
-  origin: 'http://localhost:3001',
+  origin: 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json())
@@ -35,6 +36,7 @@ const generateTracker = (req: Request, res: Response) => {
 
 const record = new Record(connection)
 const account = new Account(connection)
+const presents = new Presents(connection)
 
 app.get('/api/ranking', (req, res) => record.getRanking(req, res))
 app.get('/api/max-ranking', (req, res) => record.getMaxPointRanking(req, res))
@@ -43,6 +45,7 @@ app.get('/api/players/:playername/prefectures', (req, res) => record.getPrefectu
 app.get('/api/online/:threshold?', (req: Request<OnlineRequestBody>, res) => record.getOnlinePlayers(req, res))
 app.get('/api/stats', (req, res) => record.statistics(req, res))
 app.get('/api/matching/:timelineId', (req, res) => record.getMatching(req, res))
+app.get('/api/presents', (req, res) => presents.getPresents(req, res))
 
 app.post('/api/signup', (req: Request<CreateAccountBody>, res) => account.createAccount(req, res))
 app.post('/api/login', (req, res) => {(account.login(req, res))})
