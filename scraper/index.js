@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+const util = require('util');
 const { JSDOM } = require('jsdom')
 
 var processing = false
@@ -77,6 +78,7 @@ const main = async() => {
   console.log(`   Updated at ${new Date(lastUpdatedAtResult[0].updated_at)} <DB>`)
   if (new Date(lastUpdatedAtResult[0].updated_at).getTime() === page.updatedAt.getTime()){
     console.log(`** Escape.`)
+    processing = false
     return
   }
 
@@ -211,8 +213,44 @@ const calculateDeviationValue = async() => {
   })
 }
 
+// 注) 関数名の`2`はCCJのcampaignの番号を指す
+const present_campaign_2 = async() => {
+  const campaignPrefix = '2023summer'
+  const page = await fetch(`https://p.eagate.573.jp/game/chase2jokers/ccj/campaign/2/`)
+  const html = await page.text()
+  const dom = new JSDOM(html, 'text/html')
+  const document = dom.window.document
+  const itemList = document.getElementsByClassName('item_list')[0].children
+  const standElm = document.getElementById('chara_stand').getElementsByTagName('li')
+  console.log(itemList)
+  const ePassRemain = [...itemList].map((item) => {
+    return{
+      product: 'e-pass 『' + item.getElementsByTagName('img')[0].alt + '』',
+      count: Number(item.getElementsByTagName('p')[0].innerHTML.match(/\d+/g)[0]),
+      remain: Number(item.getElementsByTagName('p')[2].innerHTML.match(/\d+/g)[0]),
+    }
+  })
+  const standRemain = {
+    product: standElm[0].textContent.replaceAll(' ', ''),
+    count: Number(standElm[2].getElementsByTagName('p')[0].innerHTML.match(/\d+/g)[0]),
+    remain: Number(standElm[2].getElementsByTagName('p')[2].innerHTML.match(/\d+/g)[0]),
+  };
+  console.log(standRemain, ePassRemain);
+  ([ standRemain, ...ePassRemain ]).map(async(item) => {
+    const identify_name = campaignPrefix + item.product
+    const [ dbItem ] = await (await connection).execute(`SELECT * FROM presents WHERE identify_name = '${identify_name}' order by updated_at limit 1`)
+    if (dbItem.length <= 0 || dbItem[0].remain != item.remain){
+      await (await connection).query(`INSERT INTO presents (identify_name, original_name, count, remain, diff) VALUES (?)`, [[ identify_name, item.product, item.count, item.remain, dbItem.length > 0 ? dbItem[0].remain - item.remain : 0 ]])
+    }
+  })
+}
+
+present_campaign_2()
 setInterval(() => {
   const date = new Date()
-  if(!processing && (date.getHours() <= 0 || date.getHours() >= 7 )) main()
+  if(!processing && (date.getHours() <= 0 || date.getHours() >= 7 )) {
+    main()
+    present_campaign_2()
+  }
   if(date.getHours() === 4 && date.getMinutes() < 2) calculateDeviationValue()
 }, 1000 * 120)
