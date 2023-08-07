@@ -1,4 +1,6 @@
 import { Form, Input, Button } from 'antd';
+import {useState} from 'react';
+import {config} from '../config';
 import './LoginPage.css';
 
 export const Login = () => {
@@ -19,7 +21,13 @@ export const Login = () => {
 
   console.log(crypto.randomUUID())
 
-  const generateMiAuthURL = (domain) => `https://${domain}/miauth/${crypto.randomUUID()}?name=閻魔帳&callback=http://localhost:3001/miauth&permission=read:account,read:following`
+  const generateMiAuthURL = (domain) => `https://${domain}/miauth/${crypto.randomUUID()}?name=閻魔帳&callback=${config.enmaAppOrigin}/miauth&permission=read:account,read:following`
+
+  const [ misskeyServerDomain, setMisskeyServerDomaian ] = useState('')
+  const handleChange = (e) => {
+    console.log(e.target.value)
+    setMisskeyServerDomaian(e.target.value)
+  }
 
   return(
     <div id="login" style={pageStyle}>
@@ -36,8 +44,8 @@ export const Login = () => {
         </Button>
       </div>
       <div className='misskey-server-button-ex'>
-        <Input type={'text'} placeholder={'rhythmisskey.games'} style={{width: '90%', margin: '5px'}}></Input>
-        <Button style={{width: '90%'}} href={generateMiAuthURL()}>
+        <Input type={'text'} placeholder={'rhythmisskey.games'} style={{width: '90%', margin: '5px'}} onChange={handleChange}></Input>
+        <Button style={{width: '90%'}} href={generateMiAuthURL(misskeyServerDomain)}>
           <img src='img/misskey.png' height={'22px'}/> その他のMisskeyサーバでログイン
         </Button>
       </div>

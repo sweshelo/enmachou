@@ -7,7 +7,7 @@ export const MiAuth = () => {
   const search = useLocation().search
   const query = new URLSearchParams(search)
   const session = query.get('session')
-  const origin = document.referrer
+  const origin = new URL(document.referrer).hostname
   const authStatus = '認証中'
   const dispatch = useDispatch()
 

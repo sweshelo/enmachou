@@ -8,6 +8,7 @@ import Record from './record'
 import {CreateAccountBody, OnlineRequestBody} from './types/request'
 import Account from './account'
 import Presents from './presents'
+import { config } from './config'
 
 const connection = createConnection({
   host: 'mysql',
@@ -20,7 +21,7 @@ const connection = createConnection({
 const app = express();
 const server = app.listen(4400, () => console.log("Node.js is listening to PORT:" + (server.address() as AddressInfo).port));
 app.use(cors({
-  origin: 'https://enma.sweshelo.jp',
+  origin: config.origin,
   credentials: true
 }));
 app.use(express.json())

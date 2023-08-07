@@ -60,9 +60,9 @@ export const DrawerMenu = () => {
   const [width, height] = useWindowSize();
   return width >= 959
     ? (
-      <div className="view-on-pc">
+      <aside className="view-on-pc">
         <DrawerBody />
-      </div>
+      </aside>
     )
     : (
       <div>

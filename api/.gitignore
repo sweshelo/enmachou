@@ -5,3 +5,5 @@ dump*.sql
 dist/
 *.log
 *.pem
+
+src/config.ts

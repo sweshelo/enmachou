@@ -39,19 +39,23 @@ function App() {
           <h1 className='ccj-font'><Link to='/'>閻魔帳</Link></h1>
           <span>v0.9.12 - @sweshelo</span>
         </header>
-        <DrawerMenu />
-        <Routes>
-          <Route path="/" element={<Ranking />} />
-          <Route path="/ranking" element={<Ranking />} />
-          <Route path="/ranking/max" element={<MaxPointRanking />} />
-          <Route path='/player/:playername' element={<PlayerDetails />} />
-          <Route path='/matching/:timelineId' element={<Matching />} />
-          <Route path='/online' element={<Online />} />
-          <Route path='/about' element={<About />} />
-          <Route path='/stats' element={<Statistics />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/miauth' element={<MiAuth />} />
-        </Routes>
+        <div id='container'>
+          <DrawerMenu />
+          <main>
+            <Routes>
+              <Route path="/" element={<Ranking />} />
+              <Route path="/ranking" element={<Ranking />} />
+              <Route path="/ranking/max" element={<MaxPointRanking />} />
+              <Route path='/player/:playername' element={<PlayerDetails />} />
+              <Route path='/matching/:timelineId' element={<Matching />} />
+              <Route path='/online' element={<Online />} />
+              <Route path='/about' element={<About />} />
+              <Route path='/stats' element={<Statistics />} />
+              <Route path='/login' element={<Login />} />
+              <Route path='/miauth' element={<MiAuth />} />
+            </Routes>
+          </main>
+        </div>
       </div>
     </Router>
   );

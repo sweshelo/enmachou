@@ -21,3 +21,11 @@ h2{
 #invisible{
   display: none;
 }
+
+#container{
+  display: flex;
+}
+
+main{
+  width: 100%;
+}

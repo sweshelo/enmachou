@@ -108,12 +108,28 @@ class Account {
 
   async miAuth(req: Request, res: Response){
     try{
-      const origin = req.body.origin
+      const domain = req.body.origin
       const session = req.body.session
-      const response = await fetch(`${origin}api/miauth/${session}/check`, {method: 'POST'})
+      const response = await fetch(`https://${domain}/api/miauth/${session}/check`, {method: 'POST'})
       const result = await response.json()
+      const userId = `@${result.user.username}@${domain}`
+
+      // アカウントの存在チェック
+      const [userResult] = await (await this.connection).execute('SELECT token, player_id FROM users WHERE user_id = ?;', [userId])
+      const isExist = (userResult as []).length !== 0
+      const [ updateOrCreateAccountResult ] = (isExist)
+        ? await (await this.connection).query(`UPDATE users SET token = '${result.token}' WHERE user_id = ?;`, [[ userId ]])
+        : await (await this.connection).query('INSERT INTO users (user_id, token) VALUES (?);', [[ userId, result.token ]])
+      const [ suggestPlayers ] = (!isExist || !userResult[0].player_id)
+        ? [ null ]
+        : await (await this.connection).execute(`SELECT * FROM players WHERE player_name like '%${result.user.name}%';`)
+
+      // レスポンス返す
+      const payload = { user: userId }
       res.send({
-        status: result.ok ? status.ok : status.error
+        status: result.ok ? status.ok : status.error,
+        token: jwt.sign(payload, this.privateKey, { algorithm: 'RS256' }),
+        suggestPlayers
       })
     }catch(e){
       res.send({
