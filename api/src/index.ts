@@ -20,7 +20,7 @@ const connection = createConnection({
 const app = express();
 const server = app.listen(4400, () => console.log("Node.js is listening to PORT:" + (server.address() as AddressInfo).port));
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'https://enma.sweshelo.jp',
   credentials: true
 }));
 app.use(express.json())

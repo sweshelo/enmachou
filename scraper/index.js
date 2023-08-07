@@ -238,7 +238,7 @@ const present_campaign_2 = async() => {
   console.log(standRemain, ePassRemain);
   ([ standRemain, ...ePassRemain ]).map(async(item) => {
     const identify_name = campaignPrefix + item.product
-    const [ dbItem ] = await (await connection).execute(`SELECT * FROM presents WHERE identify_name = '${identify_name}' order by updated_at limit 1`)
+    const [ dbItem ] = await (await connection).execute(`SELECT * FROM presents WHERE identify_name = '${identify_name}' order by updated_at DESC limit 1`)
     if (dbItem.length <= 0 || dbItem[0].remain != item.remain){
       await (await connection).query(`INSERT INTO presents (identify_name, original_name, count, remain, diff) VALUES (?)`, [[ identify_name, item.product, item.count, item.remain, dbItem.length > 0 ? dbItem[0].remain - item.remain : 0 ]])
     }

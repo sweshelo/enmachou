@@ -23,6 +23,21 @@ const PresentModule = () => {
     product: string
   }
 
+  const RemainAlart: React.FC<{remain: number}> = ({remain}) => {
+    const style = {
+      backgroundColor: 'lightpink',
+      borderRadius: '5px',
+      fontSize: '10px',
+      padding: '2px',
+      margin: '5px 0px'
+    }
+    return(
+      <div style={style}>
+        残り {remain} 個
+      </div>
+    )
+  }
+
   const ItemProgress: React.FC<ItemProgressProps> = ({percent, product}) => {
     const style = {
       margin: '5px 0',
@@ -30,8 +45,9 @@ const PresentModule = () => {
     }
     return(
       <div style={style}>
-        <p>{product}</p>
-        <Progress percent={percent} size="small" status={percent == 0 ? "exception" : "normal"}/>
+        <p>{product.original_name}</p>
+        { product.history[ product.history.length - 1 ].remain < 30 && <RemainAlart remain={product.history[ product.history.length - 1 ].remain} /> }
+        <Progress percent={Math.round(percent)} size="small" status={percent == 0 ? "exception" : "normal"}/>
       </div>
     )
   }
@@ -40,8 +56,8 @@ const PresentModule = () => {
     <div className="summer2023-present" style={divStyle}>
       {items?.map((item: PresentsItem) => {
         item.history.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())
-        const latestHistory = item.history[0]
-        return (<ItemProgress percent={latestHistory.remain / latestHistory.count * 100} product={item.original_name} />)
+        const latestHistory = item.history[ item.history.length - 1 ]
+        return latestHistory.remain === 0 ? null : (<ItemProgress percent={latestHistory.remain / latestHistory.count * 100} product={item} />)
       })}
     </div>
   )
