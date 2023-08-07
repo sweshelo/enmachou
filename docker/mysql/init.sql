@@ -34,3 +34,12 @@ CREATE TABLE IF NOT EXISTS `ccj`.`log` (
   `visit` TEXT,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS `ccj`.`presents` (
+  `original_name` TEXT,
+  `identify_name` TEXT,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `count` INT,
+  `remain` INT,
+  `diff` INT,
+);

@@ -12,4 +12,4 @@ COPY package.json ./
 COPY . ./
 
 # 起動コマンド
-CMD bash -c "yarn start" #"npm install && npm run build && npm start"
+CMD bash -c "npm install && npm run build && npm start"

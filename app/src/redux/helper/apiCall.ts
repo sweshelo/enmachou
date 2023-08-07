@@ -46,6 +46,9 @@ class EnmaApi {
       origin, session
     })
   }
+  static getPresentsData(){
+    return EnmaApi.httpGet(`presents`)
+  }
 }
 
 export { EnmaApi }

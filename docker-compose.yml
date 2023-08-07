@@ -17,7 +17,7 @@ services:
   app:
     build: ./api
     ports:
-      - "4400:4400"
+      - "4480:4400"
     volumes:
       - ./api:/app
     environment:
@@ -43,7 +43,7 @@ services:
   front:
     build: ./app
     ports:
-      - "5500:5500"
+      - "5580:5500"
     volumes:
       - ./app:/app
     depends_on:
@@ -55,3 +55,9 @@ services:
 volumes:
   mysql-data:
     driver: local
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.45.0.0/16
