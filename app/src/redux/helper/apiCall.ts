@@ -14,10 +14,13 @@ class EnmaApi {
       body: JSON.stringify(body),
     }).then(response => response)
   }
-  static httpGet(uri: string){
+  static httpGet(uri: string, token: string | undefined){
     return fetch(`${base}/${uri}`, {
       method: 'GET',
-      credentials: 'include'
+      credentials: 'include',
+      headers: {
+        'Authorization': token ?? ''
+      }
     }).then(response => response)
   }
   static getRankingData(){
@@ -26,8 +29,8 @@ class EnmaApi {
   static getMaxRankingData(){
     return EnmaApi.httpGet('max-ranking')
   }
-  static getPlayerDetailData(playerName: string){
-    return EnmaApi.httpGet(`players/${playerName}`)
+  static getPlayerDetailData(payload: {playerName: string, token: string}){
+    return EnmaApi.httpGet(`players/${payload.playerName}`, payload.token)
   }
   static getPlayerPrefecturesData(playerName: string){
     return EnmaApi.httpGet(`players/${playerName}/prefectures`)

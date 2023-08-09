@@ -1,6 +1,9 @@
-import { all, call, put, takeEvery } from 'redux-saga/effects';
+import { all, call, put, select, takeEvery } from 'redux-saga/effects';
 import {EnmaApi} from '../helper/apiCall.ts';
+import rootReducer from '../reducer';
 import actions from './actions.ts';
+
+const getAccount = (state: ReturnType<typeof rootReducer>) => state.accountReducer
 
 export function* getOnlinePlayer(): Generator<unknown, void, any>{
   const response = yield call(EnmaApi.getOnlinePlayerData)
@@ -22,7 +25,9 @@ export function* getMaxRankingData(): Generator<unknown, void, any>{
 }
 
 export function* getPlayerDetailData({payload}): Generator<unknown, void, any>{
-  const response = yield call(EnmaApi.getPlayerDetailData, payload.playerName)
+  const { token } = yield select(getAccount)
+  console.log(token)
+  const response = yield call(EnmaApi.getPlayerDetailData, {playerName: payload.playerName, token})
   const result = yield response.json()
   yield put(actions.setPlayerDetail(result.body))
 }
