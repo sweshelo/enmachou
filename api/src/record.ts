@@ -1,7 +1,7 @@
 import {createConnection, Connection} from 'mysql2/promise'
 import Logger from './logging'
 import {Request, Response} from 'express'
-import { hideDetailPlayTime, toFullWidth } from './helper'
+import { hideDetailPlayTime, identifyStage, toFullWidth } from './helper'
 import {Timeline, Players} from './types/table'
 import {OnlineRequestBody} from './types/request'
 import {isNull} from 'util'
@@ -149,7 +149,8 @@ class Record {
           'online': (new Date().getTime() - new Date(latestRecord.created_at).getTime()) <= this.defaultOnlineThreshold * 60 * 1000,
           'log': playLogResult.map((r) => ({
             ...r,
-            created_at: hideDetailPlayTime(r.created_at)
+            created_at: hideDetailPlayTime(r.created_at),
+            stage: identifyStage(r.updated_at ?? r.created_at),
           }),
           ).reverse(),
           'prefectures': prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n),

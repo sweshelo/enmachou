@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import { Link, useParams } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, PieChart, Pie, Cell } from 'recharts';
 import actions from '../redux/records/actions.ts';
 import Map from './Map';
 import './PlayerPage.css';
@@ -204,23 +204,6 @@ const AverageGraph = (props) => {
   )
 }
 
-const identifyStage = (targetDate) => {
-  const schedule = [
-    { start: new Date('7/11/2023 10:00'), end: new Date('7/18/2023 9:59'), evenHour: 'ウラオオサカ２', oddHour: 'ウラシブヤ３' },
-    { start: new Date('7/18/2023 10:00'), end: new Date('7/25/2023 9:59'), evenHour: 'ウラシブヤ', oddHour: 'ウラオオサカ' },
-    { start: new Date('7/25/2023 10:00'), end: new Date('8/1/2023 9:59'), evenHour: 'ウラシブヤ２', oddHour: 'ウラオオサカ２' },
-    { start: new Date('8/1/2023 10:00'), end: new Date('8/8/2023 9:59'), evenHour: 'ウラシブヤ３', oddHour: 'ウラシブヤ' },
-    { start: new Date('8/8/2023 10:00'), end: new Date('8/15/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオキナワ' },
-    { start: new Date('8/15/2023 10:00'), end: new Date('8/22/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ' },
-    { start: new Date('8/22/2023 10:00'), end: new Date('8/29/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラシブヤ２' },
-    { start: new Date('8/29/2023 10:00'), end: new Date('9/5/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ２' },
-  ]
-
-  const foundRecord = schedule.find(record => new Date(targetDate) >= record.start && new Date(targetDate) <= record.end)
-  const isEvenHour = new Date(targetDate).getHours() % 2 === 0
-  return isEvenHour ? foundRecord.evenHour : foundRecord.oddHour
-}
-
 const PlayerDetailPage = () => {
   const { playerDetails } = useSelector((state) => state.recordsReducer)
   const { playername } = useParams()
@@ -234,6 +217,88 @@ const PlayerDetailPage = () => {
   const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
     .filter(r => r > 0) || [];
   const standardAverage = (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length)
+
+  const DetailEachStage = () => {
+    // Logをステージ毎のObjectに変換
+    const eachStageLog = playerDetail?.log?.reduce((acc, item) => {
+      if (item.elapsed < 600 && item.stage){
+        const existingStage = acc.find(stageObj => stageObj.stage === item.stage);
+        if (existingStage) {
+          existingStage.records.push(item);
+        } else {
+          acc.push({ stage: item.stage, records: [item] });
+        }
+      }
+      return acc;
+    }, []);
+    console.log(eachStageLog)
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF8042', '#FF8042', '#FF8042'];
+    return(
+      <>
+        <p className='title-paragraph'>ステージ別プレイ比率</p>
+        <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
+          <Pie
+            data={eachStageLog.map((item) => { return ({name: item.stage, value: item.records.length})})}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            //label={renderCustomizedLabel}
+            outerRadius={60}
+            fill="#8884d8"
+            dataKey="value"
+          >
+            {eachStageLog.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Legend height={'16px'} layout={'vertical'} align={'right'} verticalAlign={'top'} />
+        </PieChart>
+        <p className='title-paragraph'>ステージ別総貢献度比率</p>
+        <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
+          <Pie
+            data={eachStageLog.map((item) => { return ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0)})})}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            //label={renderCustomizedLabel}
+            outerRadius={60}
+            fill="#8884d8"
+            dataKey="value"
+          >
+            {eachStageLog.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Legend height={'16px'} layout={'vertical'} align={'right'} verticalAlign={'top'} />
+        </PieChart>
+        <p className='title-paragraph'>ステージ別貢献度平均</p>
+        <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
+          <Pie
+            data={eachStageLog.map((item) => { return ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0) / item.records.length })})}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            //label={renderCustomizedLabel}
+            outerRadius={60}
+            fill="#8884d8"
+            dataKey="value"
+          >
+            {eachStageLog.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Legend height={'16px'} layout={'vertical'} align={'right'} verticalAlign={'top'} />
+        </PieChart>
+
+      </>
+    )
+  }
+
+  const DetailEachHour = () => {
+    return(
+      <></>
+    )
+  }
 
   return (
     <div id="player-detail-wrapper">
@@ -257,6 +322,8 @@ const PlayerDetailPage = () => {
               }
               deviationValue={playerDetail?.deviation_value}
             />
+            <DetailEachStage />
+            <DetailEachHour />
           </div>
           <div id="table-wrapper">
             <div>

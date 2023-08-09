@@ -55,3 +55,22 @@ export const hideDetailPlayTime = (datetimeString: string) => {
       return dateString + '深夜'
   }
 }
+
+// ステージ特定
+export const identifyStage = (targetDate: string) => {
+  const schedule = [
+    { start: new Date('7/11/2023 10:00'), end: new Date('7/18/2023 9:59'), evenHour: 'ウラオオサカ２', oddHour: 'ウラシブヤ３' },
+    { start: new Date('7/18/2023 10:00'), end: new Date('7/25/2023 9:59'), evenHour: 'ウラシブヤ', oddHour: 'ウラオオサカ' },
+    { start: new Date('7/25/2023 10:00'), end: new Date('8/1/2023 9:59'), evenHour: 'ウラシブヤ２', oddHour: 'ウラオオサカ２' },
+    { start: new Date('8/1/2023 10:00'), end: new Date('8/8/2023 9:59'), evenHour: 'ウラシブヤ３', oddHour: 'ウラシブヤ' },
+    { start: new Date('8/8/2023 10:00'), end: new Date('8/15/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオキナワ' },
+    { start: new Date('8/15/2023 10:00'), end: new Date('8/22/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ' },
+    { start: new Date('8/22/2023 10:00'), end: new Date('8/29/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラシブヤ２' },
+    { start: new Date('8/29/2023 10:00'), end: new Date('9/5/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ２' },
+  ]
+
+  const foundRecord = schedule.find(record => new Date(targetDate) >= record.start && new Date(targetDate) <= record.end)
+  const isEvenHour = new Date(targetDate).getHours() % 2 === 0
+  return foundRecord ? isEvenHour ? foundRecord.evenHour : foundRecord.oddHour : null
+}
+
