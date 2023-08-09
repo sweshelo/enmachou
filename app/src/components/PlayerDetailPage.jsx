@@ -5,11 +5,12 @@ import { Link, useParams } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import actions from '../redux/records/actions.ts';
 import Map from './Map';
-import './PlayerDetails.css';
+import './PlayerPage.css';
 import { BiHide } from 'react-icons/bi';
 import { MdDeleteForever } from 'react-icons/md';
 import { BsQuestionCircle, BsYoutube } from 'react-icons/bs';
 import { GiBattleAxe } from 'react-icons/gi';
+import { TbPresentationAnalytics } from 'react-icons/tb';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import {Player} from './Player';
 import { Spin } from 'antd';
@@ -203,12 +204,29 @@ const AverageGraph = (props) => {
   )
 }
 
-const PlayerDetails = () => {
-  const { playerDetail } = useSelector((state) => state.recordsReducer)
+const identifyStage = (targetDate) => {
+  const schedule = [
+    { start: new Date('7/11/2023 10:00'), end: new Date('7/18/2023 9:59'), evenHour: 'ウラオオサカ２', oddHour: 'ウラシブヤ３' },
+    { start: new Date('7/18/2023 10:00'), end: new Date('7/25/2023 9:59'), evenHour: 'ウラシブヤ', oddHour: 'ウラオオサカ' },
+    { start: new Date('7/25/2023 10:00'), end: new Date('8/1/2023 9:59'), evenHour: 'ウラシブヤ２', oddHour: 'ウラオオサカ２' },
+    { start: new Date('8/1/2023 10:00'), end: new Date('8/8/2023 9:59'), evenHour: 'ウラシブヤ３', oddHour: 'ウラシブヤ' },
+    { start: new Date('8/8/2023 10:00'), end: new Date('8/15/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオキナワ' },
+    { start: new Date('8/15/2023 10:00'), end: new Date('8/22/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ' },
+    { start: new Date('8/22/2023 10:00'), end: new Date('8/29/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラシブヤ２' },
+    { start: new Date('8/29/2023 10:00'), end: new Date('9/5/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ２' },
+  ]
+
+  const foundRecord = schedule.find(record => new Date(targetDate) >= record.start && new Date(targetDate) <= record.end)
+  const isEvenHour = new Date(targetDate).getHours() % 2 === 0
+  return isEvenHour ? foundRecord.evenHour : foundRecord.oddHour
+}
+
+const PlayerDetailPage = () => {
+  const { playerDetails } = useSelector((state) => state.recordsReducer)
   const { playername } = useParams()
+  const playerDetail = playerDetails[playername]
   const dispatch = useDispatch()
   useEffect(() => {
-    if (playerDetail?.player_name !== playername) dispatch(actions.setPlayerDetail(null))
     dispatch(actions.getPlayerDetail(playername))
   }, [])
 
@@ -258,7 +276,7 @@ const PlayerDetails = () => {
           <p style={{
             position: 'absolute',
             top: '50vh',
-            }}>
+          }}>
             <Spin /> 読み込み中…
           </p>
         </>
@@ -268,4 +286,4 @@ const PlayerDetails = () => {
 
 }
 
-export default PlayerDetails
+export default PlayerDetailPage

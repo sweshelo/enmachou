@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import {useCookies} from 'react-cookie'
 import Ranking from './components/Ranking';
-import PlayerDetails from './components/PlayerDetails';
 import {DrawerMenu} from './components/DrawerMenu';
 import Online from './components/Online';
 import {About} from './components/About';
@@ -18,6 +17,8 @@ import {config} from './config';
 import {Login} from './components/LoginPage';
 import Matching from './components/Matching';
 import {MiAuth} from './components/MiAuthPage';
+import PlayerPage from './components/PlayerPage';
+import PlayerDetailPage from './components/PlayerDetailPage';
 
 function App() {
 
@@ -46,7 +47,8 @@ function App() {
               <Route path="/" element={<Ranking />} />
               <Route path="/ranking" element={<Ranking />} />
               <Route path="/ranking/max" element={<MaxPointRanking />} />
-              <Route path='/player/:playername' element={<PlayerDetails />} />
+              <Route path='/player/:playername' element={<PlayerPage />} />
+              <Route path='/player/detail/:playername' element={<PlayerDetailPage />} />
               <Route path='/matching/:timelineId' element={<Matching />} />
               <Route path='/online' element={<Online />} />
               <Route path='/about' element={<About />} />

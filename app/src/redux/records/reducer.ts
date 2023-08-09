@@ -15,7 +15,9 @@ type State = {
     record: PlayLog[]
   } | null;
   isLoading: boolean;
-  playerDetail: PlayerDetail | null;
+  playerDetails: {
+    [key: string]: PlayerDetail | null
+  } | null;
   stats: Stats | null;
 }
 
@@ -25,7 +27,7 @@ const initialState: State = {
   maxRanking: [],
   matching: null,
   isLoading: true,
-  playerDetail: null,
+  playerDetails: {},
   stats: null,
 }
 
@@ -42,7 +44,15 @@ const recordsReducer = (state = initialState, action: Action) => {
     case actions.SET_MAX_RANKING:
       return { ...state, maxRanking: action.payload }
     case actions.SET_PLAYER_DETAIL:
-      return { ...state, playerDetail: action.payload }
+      console.log(action.payload)
+      if (!action.payload) return {...state}
+      return {
+        ...state,
+        playerDetails: {
+          ...state.playerDetails,
+          [action.payload.player_name]: action.payload
+        }
+      }
     case actions.SET_STATS:
       return { ...state, stats: action.payload }
     case actions.SET_MATCHING:

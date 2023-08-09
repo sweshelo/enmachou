@@ -29,3 +29,13 @@ h2{
 main{
   width: 100%;
 }
+
+.link:link{
+  color: #5050f0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: none;
+}
