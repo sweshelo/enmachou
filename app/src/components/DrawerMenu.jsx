@@ -21,7 +21,7 @@ const useWindowSize = () => {
 };
 
 const DrawerBody = () => {
-  const { isLoggedIn } = useSelector((state) => state.accountReducer)
+  const { token } = useSelector((state) => state.accountReducer)
   return(
     <>
       <ul>
@@ -34,7 +34,7 @@ const DrawerBody = () => {
       </ul>
       <div className="horizon-bar"></div>
       <ul>
-        { !isLoggedIn
+        { !token
           ? (
             <>
               <li><Link to="/login">ログイン</Link></li>
@@ -42,9 +42,8 @@ const DrawerBody = () => {
           )
           : (
             <>
-              <li><Link to="/mypage">マイページ</Link></li>
+              {/*<li><Link to="/mypage">マイページ</Link></li>*/}
               <li><Link to="/settings">設定</Link></li>
-              <li><Link to="/logout">ログアウト</Link></li>
             </>
           )
         }
