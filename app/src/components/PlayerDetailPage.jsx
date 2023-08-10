@@ -209,7 +209,7 @@ const AverageGraph = (props) => {
   )
 }
 
-const StagePieCharts = ({data, log}) => {
+const StagePieCharts = ({data, log, toolTipFunc}) => {
   const COLORS = ['#0088FE', '#55AAFF', '#00C49F', '#FFBB28', '#FF8042', '#F05040',];
   return(
     <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
@@ -221,11 +221,14 @@ const StagePieCharts = ({data, log}) => {
         outerRadius={60}
         fill="#8884d8"
         dataKey="value"
+        startAngle={90}
+        endAngle={-270}
       >
         {log.map((entry, index) => (
           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} name={entry.stage} />
         ))}
       </Pie>
+      <Tooltip formatter={toolTipFunc} />
       <Legend height={'16px'} layout={'vertical'} align={'right'} verticalAlign={'top'} wrapperStyle={{fontSize: '12px'}} />
     </PieChart>
   )
@@ -261,11 +264,23 @@ const PlayerDetailPage = () => {
     return(
       <>
         <p className='title-paragraph'>ステージ別プレイ比率</p>
-        <StagePieCharts data={eachStageLog.map((item) => ({name: item.stage, value: item.records.length}))} log={eachStageLog} />
+        <StagePieCharts
+          data={eachStageLog.map((item) => ({name: item.stage, value: item.records.length}))}
+          log={eachStageLog}
+          toolTipFunc={(value) => `${value}Play`}
+        />
         <p className='title-paragraph'>ステージ別総貢献度比率</p>
-        <StagePieCharts data={eachStageLog.map((item) => ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0)}))} log={eachStageLog} />
+        <StagePieCharts
+          data={eachStageLog.map((item) => ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0)}))}
+          log={eachStageLog}
+          toolTipFunc={(value) => `${value.toFixed(2)}P`}
+        />
         <p className='title-paragraph'>ステージ別貢献度平均</p>
-        <StagePieCharts data={eachStageLog.map((item) => ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0) / item.records.length }))} log={eachStageLog} />
+        <StagePieCharts
+          data={eachStageLog.map((item) => ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0) / item.records.length }))}
+          log={eachStageLog}
+          toolTipFunc={(value) => `${value.toFixed(2)}P`}
+        />
       </>
     )
   }
