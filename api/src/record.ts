@@ -1,10 +1,12 @@
 import {createConnection, Connection} from 'mysql2/promise'
 import Logger from './logging'
 import {Request, Response} from 'express'
-import { hideDetailPlayTime, identifyStage, toFullWidth } from './helper'
-import {Timeline, Players} from './types/table'
+import { datetimeToTimeframe, identifyStage, toFullWidth } from './helper'
+import {Timeline, Players, User} from './types/table'
 import {OnlineRequestBody} from './types/request'
 import {isNull} from 'util'
+import fs from 'fs'
+import * as jwt from 'jsonwebtoken';
 
 const status = {
   ok: 'ok',
@@ -15,9 +17,13 @@ const status = {
 class Record {
   connection: Promise<Connection>;
   defaultOnlineThreshold: number = 20;
+  private privateKey: string;
+  private publicKey: string;
 
   constructor(connection: Promise<Connection>){
     this.connection = connection
+    this.privateKey = fs.readFileSync('signkey.pem').toString()
+    this.publicKey = fs.readFileSync('publickey.pem').toString()
   }
 
   async getRanking(req: Request, res: Response){
@@ -49,6 +55,9 @@ class Record {
   async getPlayerinfo(req: Request, res: Response){
     try{
       if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
+      const decodedToken = jwt.verify(req.headers.authorization, this.publicKey)
+      const authorizedUserId = decodedToken ? decodedToken['user'] : null
+
       if( toFullWidth(req.params.playername) === 'プレーヤー' ){
         const response = {
           'player_name': toFullWidth(req.params.playername),
@@ -71,11 +80,12 @@ class Record {
         return
       }
 
-      const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at;"
+      const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at DESC LIMIT 110;"
       const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
+      const getUserAccountFromUsersQuery = "SELECT * FROM users WHERE player_id = ? LIMIT 1;"
       const [ [playLogQueryResult], [prefectureQueryResult] ] = await Promise.all([
         (await this.connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
-        (await this.connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.playername) ])
+        (await this.connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
       ])
 
       const playLogResult = playLogQueryResult as Timeline[]
@@ -137,6 +147,10 @@ class Record {
         // 有効平均貢献度類
         const [ playerInfoResult ] = await (await this.connection).execute('SELECT * FROM players WHERE player_name = ?', [ toFullWidth(req.params.playername) ])
         const playerInfo = (playerInfoResult as Players[]).length > 0 ? playerInfoResult[0] as Players : null
+        const [ userAccountResult ] = await (await this.connection).execute(getUserAccountFromUsersQuery, [ playerInfo.player_id ])
+        const userAccount = (userAccountResult as User[]).length > 0 ? userAccountResult[0] as User : null
+        const isAuthorized = userAccount?.user_id === authorizedUserId
+        console.log(isAuthorized)
 
         // 増分を計算する
         const latestRecord = playLogResult[playLogResult.length - 1]
@@ -149,8 +163,10 @@ class Record {
           'online': (new Date().getTime() - new Date(latestRecord.created_at).getTime()) <= this.defaultOnlineThreshold * 60 * 1000,
           'log': playLogResult.map((r) => ({
             ...r,
-            created_at: hideDetailPlayTime(r.created_at),
+            datetime: datetimeToTimeframe(r.updated_at ?? r.created_at, !isAuthorized),
             stage: identifyStage(r.updated_at ?? r.created_at),
+            updated_at: undefined,
+            created_at: undefined,
           }),
           ).reverse(),
           'prefectures': prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n),
@@ -300,7 +316,9 @@ class Record {
       if (timelineResult.length > 0) {
         const response = timelineResult.map((r: Timeline) => ({
           ...r,
-          created_at: hideDetailPlayTime(r.created_at)
+          created_at: undefined,
+          updated_at: undefined,
+          datetime: datetimeToTimeframe(r.updated_at ?? r.created_at, false)
         }))
         res.send({
           status: status.ok,

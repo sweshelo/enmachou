@@ -107,7 +107,10 @@ const PlayLog = (props) => {
         </thead>
         <tbody>
           {
-            props.log.slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
+            props.log.sort((a, b) => a.timeline_id < b.timeline_id).slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
+              const date = new Date(log.datetime.date)
+              const isHiddenDateTime = (date.getHours() + date.getMinutes() + date.getSeconds() + date.getMilliseconds()) === 0
+              const time = isHiddenDateTime ? log.datetime.timeframe : `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
               return(
                 <>
                   <tr
@@ -117,7 +120,7 @@ const PlayLog = (props) => {
                       setFocusRecord(focusRecord === log.timeline_id ? null : log.timeline_id)
                     }}
                   >
-                    <td className="datetime">{log.created_at}</td>
+                    <td className="datetime">{`${date.getMonth() + 1}/${date.getDate()} ${time}`}</td>
                     <td className="point">{log.point}P</td>
                     <td className="diff">+{log.diff}</td>
                   </tr>
@@ -159,20 +162,21 @@ const AverageGraph = (props) => {
     const calc = {}
     props.log.forEach((r) => {
       if(r.elapsed > 600) return
-      const date = r.created_at.split(' ')[0]
-      if(!calc[date]){
-        calc[date] = {
-          date,
+      const date = new Date(r.datetime.date)
+      const dateKey = `${date.getMonth() + 1}/${date.getDate()}`
+      if(!calc[dateKey]){
+        calc[dateKey] = {
+          date: dateKey,
           sum: 0,
           max: r.diff,
           count: 0
         }
       }
-      if(calc[date].max < r.diff) calc[date].max = r.diff
-      calc[date].sum += r.diff
-      calc[date].count++
+      if(calc[dateKey].max < r.diff) calc[dateKey].max = r.diff
+      calc[dateKey].sum += r.diff
+      calc[dateKey].count++
     })
-    setAverage(Object.values(calc).reverse().map((r) => ({...r, ave: r.sum / r.count})))
+    setAverage(Object.values(calc).map((r) => ({...r, ave: r.sum / r.count})))
   }, [props?.log])
 
   return (
@@ -214,7 +218,7 @@ const PlayerDetailPage = () => {
   }, [])
 
   const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
-  const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
+  const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date(r.datetime.date) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
     .filter(r => r > 0) || [];
   const standardAverage = (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length)
 

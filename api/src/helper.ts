@@ -13,46 +13,74 @@ export const toHalfWidth = (str: string) => {
 }
 
 // 時間帯フィルタリング
-export const hideDetailPlayTime = (datetimeString: string) => {
+export const datetimeToTimeframe = (datetimeString: string, hideDetailPlayTime: boolean) => {
   const datetime = new Date(datetimeString)
-  const month = datetime.getMonth() + 1
-  const date = datetime.getDate()
-  const dateString = ("00" + month).slice(-2) + "/" + ("00" + date).slice(-2) + " "
 
   const h = datetime.getHours()
+  if (hideDetailPlayTime) {
+    datetime.setHours(0)
+    datetime.setMinutes(0)
+    datetime.setSeconds(0)
+    datetime.setMilliseconds(0)
+  }
+
   switch(h){
     case 2:
     case 3:
     case 4:
-      return dateString + '未明'
+      return {
+        date: datetime,
+        timeframe: '未明'
+      }
     case 5:
     case 6:
     case 7:
-      return dateString + '早朝'
+      return {
+        date: datetime,
+        timeframe: '早朝'
+      }
     case 8:
     case 9:
     case 10:
-      return dateString + '朝'
+      return {
+        date: datetime,
+        timeframe: '朝'
+      }
     case 11:
     case 12:
     case 13:
-      return dateString + '昼'
+      return {
+        date: datetime,
+        timeframe: '昼'
+      }
     case 14:
     case 15:
     case 16:
-      return dateString + '午下'
+      return {
+        date: datetime,
+        timeframe: '午下'
+      }
     case 17:
     case 18:
     case 19:
-      return dateString + '夕'
+      return {
+        date: datetime,
+        timeframe: '夕'
+      }
     case 20:
     case 21:
     case 22:
-      return dateString + '夜'
+      return {
+        date: datetime,
+        timeframe: '夜'
+      }
     case 23:
     case 0:
     case 1:
-      return dateString + '深夜'
+      return {
+        date: datetime,
+        timeframe: '深夜'
+      }
   }
 }
 
