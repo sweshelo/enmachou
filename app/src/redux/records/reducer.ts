@@ -10,6 +10,7 @@ type State = {
   onlinePlayer: Player[];
   standardRanking: Player[];
   maxRanking: Player[];
+  AverageRanking: Player[];
   matching: {
     id: string,
     record: PlayLog[]
@@ -25,6 +26,7 @@ const initialState: State = {
   onlinePlayer: [],
   standardRanking: [],
   maxRanking: [],
+  AverageRanking: [],
   matching: null,
   isLoading: true,
   playerDetails: {},
@@ -43,6 +45,8 @@ const recordsReducer = (state = initialState, action: Action) => {
       return { ...state, standardRanking: action.payload }
     case actions.SET_MAX_RANKING:
       return { ...state, maxRanking: action.payload }
+    case actions.SET_AVERAGE_RANKING:
+      return { ...state, AverageRanking: action.payload }
     case actions.SET_PLAYER_DETAIL:
       console.log(action.payload)
       if (!action.payload) return {...state}

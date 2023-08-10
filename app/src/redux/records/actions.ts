@@ -15,6 +15,8 @@ const actions = {
   SET_STATS: 'SET_STATS',
   GET_MATCHING: 'GET_MATCHING',
   SET_MATCHING: 'SET_MATCHING',
+  GET_AVERAGE_RANKING: 'GET_AVERAGE_RANKING',
+  SET_AVERAGE_RANKING: 'SET_AVERAGE_RANKING',
 
   getRankingPlayerList: () => ({
     type: actions.GET_RANKING
@@ -29,6 +31,13 @@ const actions = {
   setMaxRankingPlayerList: (payload: Player[]) => ({
     type: actions.SET_MAX_RANKING,
     payload,
+  }),
+  getAverageRankingPlayerList: () => ({
+    type: actions.GET_AVERAGE_RANKING
+  }),
+  setAverageRankingPlayerList: (payload: Player[]) => ({
+    type: actions.SET_AVERAGE_RANKING,
+    payload
   }),
   getOnlinePlayerList: () => ({
     type: actions.GET_ONLINEPLAYER,

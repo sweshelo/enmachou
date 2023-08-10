@@ -41,6 +41,7 @@ const presents = new Presents(connection)
 
 app.get('/api/ranking', (req, res) => record.getRanking(req, res))
 app.get('/api/max-ranking', (req, res) => record.getMaxPointRanking(req, res))
+app.get('/api/average-ranking', (req, res) => record.getAverageRanking(req, res))
 app.get('/api/players/:playername', (req, res) => record.getPlayerinfo(req, res))
 app.get('/api/players/:playername/prefectures', (req, res) => record.getPrefectures(req, res))
 app.get('/api/online/:threshold?', (req: Request<OnlineRequestBody>, res) => record.getOnlinePlayers(req, res))

@@ -19,6 +19,7 @@ import Matching from './components/Matching';
 import {MiAuth} from './components/MiAuthPage';
 import PlayerPage from './components/PlayerPage';
 import PlayerDetailPage from './components/PlayerDetailPage';
+import AverageRanking from './components/AverageRanking';
 
 function App() {
 
@@ -47,6 +48,7 @@ function App() {
               <Route path="/" element={<Ranking />} />
               <Route path="/ranking" element={<Ranking />} />
               <Route path="/ranking/max" element={<MaxPointRanking />} />
+              <Route path="/ranking/average" element={<AverageRanking />} />
               <Route path='/player/:playername' element={<PlayerPage />} />
               <Route path='/player/detail/:playername' element={<PlayerDetailPage />} />
               <Route path='/matching/:timelineId' element={<Matching />} />

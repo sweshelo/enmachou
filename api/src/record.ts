@@ -340,6 +340,34 @@ class Record {
     }
   }
 
+  async getAverageRanking(req: Request, res: Response) {
+    try{
+      if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
+      const getUsersFromTimelineQuery = "SELECT player_name, chara, effective_average, deviation_value FROM players WHERE deviation_value > 50 ORDER BY effective_average DESC;";
+      const [ result ] = await (await this.connection).execute(getUsersFromTimelineQuery)
+      const usersResult = result as Pick<Players, 'player_name' | 'chara' | 'effective_average' | 'deviation_value'>[]
+
+      if (usersResult.length > 0) {
+        res.send({
+          status: status.ok,
+          body: usersResult
+        })
+      }else{
+        res.send({
+          status: status.undefined,
+          body: [],
+          message: 'データがありません。'
+        })
+      }
+    }catch(e){
+      res.send({
+        status: status.error,
+        message: e.message
+      })
+    }
+  }
+
+
   async statistics(req: Request, res: Response) {
     try{
       if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
