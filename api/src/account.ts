@@ -120,7 +120,7 @@ class Account {
       const [ updateOrCreateAccountResult ] = (isExist)
         ? await (await this.connection).query(`UPDATE users SET token = '${result.token}' WHERE user_id = ?;`, [[ userId ]])
         : await (await this.connection).query('INSERT INTO users (user_id, token) VALUES (?);', [[ userId, result.token ]])
-      const [ suggestPlayers ] = (!isExist || !userResult[0].player_id)
+      const [ suggestPlayers ] = (isExist && userResult[0].player_id)
         ? [ null ]
         : await (await this.connection).execute(`SELECT * FROM players WHERE player_name like '%${result.user.name}%';`)
 
@@ -135,6 +135,36 @@ class Account {
       res.send({
         status: status.error,
         message: e.message,
+        error: e
+      })
+    }
+  }
+
+  async accountLink(req: Request, res: Response){
+    try{
+      const decoded = jwt.verify(req.headers.authorization, this.publicKey)
+      console.log(decoded['user'])
+      const [ userResult ] = await (await this.connection).execute('SELECT * from users WHERE user_id = ?;', [decoded['user']])
+      if ((userResult as []).length === 0) throw new Error(`Account does not exist ${decoded['user']}`)
+      if (userResult[0].player_id !== null) throw new Error(`Account already linked`)
+      console.log(req.body, req.params)
+
+      const [ playerResult ] = await ((await this.connection).execute('SELECT * from players WHERE player_name = ?;', [req.body.playerName]))
+      if ((playerResult as []).length === 0) throw new Error(`Player does not exist ${req.body.playerName}`)
+      if (playerResult[0].user_id !== null) throw new Error(`Specified player already linked by another user.`)
+
+      const playerId = playerResult[0].player_id
+      await (await this.connection).query(`UPDATE players SET user_id = "${decoded['user']}" WHERE player_id = ${playerId};`)
+      await (await this.connection).query(`UPDATE users SET player_id = ${playerId} WHERE user_id = "${decoded['user']}";`)
+
+      res.send({
+        status: status.ok
+      })
+    }catch(e){
+      res.send({
+        status: status.error,
+        message: e.message,
+        error: JSON.stringify(e)
       })
     }
   }

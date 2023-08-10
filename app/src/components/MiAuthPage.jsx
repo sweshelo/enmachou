@@ -1,24 +1,41 @@
-import React, {useEffect} from 'react';
-import {useDispatch} from 'react-redux';
+import React, {useEffect, useMemo} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {useLocation, useParams} from 'react-router-dom';
 import actions from '../redux/account/actions.ts';
+import {Player} from './Player';
 
 export const MiAuth = () => {
   const search = useLocation().search
   const query = new URLSearchParams(search)
   const session = query.get('session')
-  const origin = new URL(document.referrer).hostname
-  const authStatus = '認証中'
+  const origin = document.referrer ? new URL(document.referrer).hostname : null
   const dispatch = useDispatch()
 
+  const { token, suggestPlayers } = useSelector(state => state.accountReducer)
+  const authStatus = useMemo(() => token !== null, [token])
+
   useEffect(() => {
-    dispatch(actions.miAuth(origin, session))
+    if (query && session && origin) dispatch(actions.miAuth(origin, session))
   }, [])
-  console.log(origin, session)
+
+  const clickHandler = (player_name) => {
+    const yn = window.confirm(`${player_name}でお間違いないですか？`)
+    if (yn === true) dispatch(actions.linkPlayer(player_name))
+  }
 
   return(
     <>
-      { authStatus }
+      <div id="ranking-wrapper">
+      <div className="ranking">
+        <p>あなたのプレイヤーアカウントを選択してください</p>
+        <p>この操作は一度しか行えません</p>
+        {suggestPlayers?.map((player) => (
+          <div onClick={()=>{clickHandler(player.player_name)}}>
+            <Player chara={player.chara} name={player.player_name} isLink={false} />
+          </div>
+        ))}
+      </div>
+      </div>
     </>
   )
 }

@@ -14,6 +14,7 @@ import { TbPresentationAnalytics } from 'react-icons/tb';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import {Player} from './Player';
 import { Spin } from 'antd';
+import {TimeframeChart} from './Statistics';
 
 const OnlineIndicator = ({online}) => {
   return(
@@ -208,6 +209,28 @@ const AverageGraph = (props) => {
   )
 }
 
+const StagePieCharts = ({data, log}) => {
+  const COLORS = ['#0088FE', '#55AAFF', '#00C49F', '#FFBB28', '#FF8042', '#F05040',];
+  return(
+    <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
+      <Pie
+        data={data}
+        cx="50%"
+        cy="50%"
+        labelLine={false}
+        outerRadius={60}
+        fill="#8884d8"
+        dataKey="value"
+      >
+        {log.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} name={entry.stage} />
+        ))}
+      </Pie>
+      <Legend height={'16px'} layout={'vertical'} align={'right'} verticalAlign={'top'} wrapperStyle={{fontSize: '12px'}} />
+    </PieChart>
+  )
+}
+
 const PlayerDetailPage = () => {
   const { playerDetails } = useSelector((state) => state.recordsReducer)
   const { playername } = useParams()
@@ -235,74 +258,51 @@ const PlayerDetailPage = () => {
       }
       return acc;
     }, []);
-    console.log(eachStageLog)
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF8042', '#FF8042', '#FF8042'];
     return(
       <>
         <p className='title-paragraph'>ステージ別プレイ比率</p>
-        <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
-          <Pie
-            data={eachStageLog.map((item) => { return ({name: item.stage, value: item.records.length})})}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            //label={renderCustomizedLabel}
-            outerRadius={60}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {eachStageLog.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Legend height={'16px'} layout={'vertical'} align={'right'} verticalAlign={'top'} />
-        </PieChart>
+        <StagePieCharts data={eachStageLog.map((item) => ({name: item.stage, value: item.records.length}))} log={eachStageLog} />
         <p className='title-paragraph'>ステージ別総貢献度比率</p>
-        <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
-          <Pie
-            data={eachStageLog.map((item) => { return ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0)})})}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            //label={renderCustomizedLabel}
-            outerRadius={60}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {eachStageLog.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Legend height={'16px'} layout={'vertical'} align={'right'} verticalAlign={'top'} />
-        </PieChart>
+        <StagePieCharts data={eachStageLog.map((item) => ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0)}))} log={eachStageLog} />
         <p className='title-paragraph'>ステージ別貢献度平均</p>
-        <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
-          <Pie
-            data={eachStageLog.map((item) => { return ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0) / item.records.length })})}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            //label={renderCustomizedLabel}
-            outerRadius={60}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {eachStageLog.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Legend height={'16px'} layout={'vertical'} align={'right'} verticalAlign={'top'} />
-        </PieChart>
-
+        <StagePieCharts data={eachStageLog.map((item) => ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0) / item.records.length }))} log={eachStageLog} />
       </>
     )
   }
 
   const DetailEachHour = () => {
+    const playHourLogs = playerDetail?.log?.map((item) => new Date(item.datetime.date).getHours())
+    console.log(playHourLogs)
+    const playCount = playHourLogs.reduce((acc, time) => {
+      acc[time] = (acc[time] || 0) + 1;
+      return acc;
+    }, {});
+    const result = [];
+    for (let i = 0; i <= 23; i++) {
+      result.push(playCount[i] || 0);
+    }
+
     return(
-      <></>
+      <>
+        <p className='title-paragraph'>プレイ時間傾向</p>
+        <div className='centerize'>
+          <TimeframeChart data={result}/>
+        </div>
+      </>
     )
   }
+
+  if (playerDetail && !playerDetail.isPublicDetail) return(
+    <>
+      <div id="player-detail-wrapper">
+        <div className="player-detail">
+          <Achievement title={playerDetail?.achievement} />
+          {playerDetail && <Player name={playerDetail.player_name} header={`${playerDetail.ranking}位 - ${playerDetail.point}P`} chara={playerDetail.chara} />}
+          <p className='description'>このユーザの詳細データは非公開です</p>
+        </div>
+      </div>
+    </>
+  )
 
   return (
     <div id="player-detail-wrapper">

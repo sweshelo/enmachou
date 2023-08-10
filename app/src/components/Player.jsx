@@ -8,15 +8,19 @@ const toHalfWidth = (str) => {
 }
 
 export const Player = ({header, chara, name, isLink}) => {
-  return(
-    <Link to={name !== 'プレーヤー' && isLink ? `/player/${name}` : null}>
-      <div className="player">
-        { chara && <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${chara}.png`} /> }
-        <div className="playerinfo-wrapper">
-          <p>{header}</p>
-          <h2 className="playername ccj-font">{toHalfWidth(name)}</h2>
-        </div>
+  const Core = () => (
+    <div className="player">
+      { chara && <img className="character" src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${chara}.png`} /> }
+      <div className="playerinfo-wrapper">
+        <p>{header}</p>
+        <h2 className="playername ccj-font">{toHalfWidth(name)}</h2>
       </div>
-    </Link>
+    </div>
   )
+
+  return isLink ? (
+    <Link to={name !== 'プレーヤー' ? `/player/${name}` : null}>
+      <Core />
+    </Link>
+  ) : <Core />
 }

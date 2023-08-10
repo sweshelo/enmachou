@@ -1,3 +1,4 @@
+import {Player} from '../type';
 import actions from './actions.ts'
 
 type Action = {
@@ -14,19 +15,21 @@ type State = {
     userId: string;
     hideDateTime: boolean;
   } | undefined | null
+  suggestPlayers: Player[] | undefined | null
 }
 
 const initialState: State = {
   tracker: '',
   token: '',
   isLoggedIn: false,
-  user: null
+  user: null,
+  suggestPlayers: null
 }
 
 const accountReducer = (state = initialState, action: Action) => {
   switch(action.type){
-    case actions.SET_TOKEN:
-      return { ...state, token: action.payload.token }
+    case actions.SET_AUTHORIZE:
+      return { ...state, token: action.payload.token, suggestPlayers: action.payload.suggestPlayers }
     case actions.TEST:
       return { ...state }
     default:

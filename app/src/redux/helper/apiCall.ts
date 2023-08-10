@@ -4,12 +4,13 @@ import {Player} from '../type';
 const base = config.baseEndpoint + '/api'
 
 class EnmaApi {
-  static httpPost(uri: string, body: any){
+  static httpPost(uri: string, body: any, token: string | undefined = undefined){
     return fetch(`${base}/${uri}`, {
       method: 'POST',
       credentials: 'include',
       headers:{
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': token ?? '',
       },
       body: JSON.stringify(body),
     }).then(response => response)
@@ -51,6 +52,15 @@ class EnmaApi {
   }
   static getPresentsData(){
     return EnmaApi.httpGet(`presents`)
+  }
+  static LinkPlayerData(payload: {playerName: string, token: string}){
+    console.log(payload.token)
+    return EnmaApi.httpPost(`link-player`,
+      {
+        playerName: payload.playerName
+      },
+      payload.token
+    )
   }
 }
 

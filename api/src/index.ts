@@ -52,6 +52,7 @@ app.post('/api/signup', (req: Request<CreateAccountBody>, res) => account.create
 app.post('/api/login', (req, res) => {(account.login(req, res))})
 app.post('/api/settings', (req: Request, res) => account.changeSettings(req, res))
 app.post('/api/miauth', (req, res) => account.miAuth(req, res))
+app.post('/api/link-player', (req, res) => account.accountLink(req, res))
 
 app.post('/api/tracker', (req, res) => generateTracker(req, res))
 app.post('/api/clean', (req, res) => record.cleanInvalidRecords(req, res))

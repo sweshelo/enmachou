@@ -1,9 +1,12 @@
+import {Player} from "../type"
+
 const actions = {
   MIAUTH: 'MIAUTH',
   TRY_LOGIN: 'TRY_LOGIN',
   DONE_LOGIN: 'DONE_LOGIN',
   TEST: 'TEST',
-  SET_TOKEN: 'SET_TOKEN',
+  SET_AUTHORIZE: 'SET_AUTHORIZE',
+  LINK_PLAYER: 'LINK_PLAYER',
 
   miAuth: (origin: string, session: string) => ({
     type: actions.MIAUTH,
@@ -13,12 +16,20 @@ const actions = {
     }
   }),
 
-  setToken: (token: string) => ({
-    type: actions.SET_TOKEN,
+  setAuthorize: (payload: {token: string, suggestPlayers: Player[]}) => ({
+    type: actions.SET_AUTHORIZE,
     payload: {
-      token
+      token: payload.token,
+      suggestPlayers: payload.suggestPlayers,
     }
   }),
+
+  linkPlayer: (playerName: string) => ({
+    type: actions.LINK_PLAYER,
+    payload: {
+      playerName
+    }
+  })
 }
 
 export default actions

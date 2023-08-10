@@ -164,7 +164,7 @@ class Record {
           'log': playLogResult.map((r) => ({
             ...r,
             datetime: datetimeToTimeframe(r.updated_at ?? r.created_at, !isAuthorized),
-            stage: identifyStage(r.updated_at ?? r.created_at),
+            stage: isAuthorized ? identifyStage(r.updated_at ?? r.created_at) : null,
             updated_at: undefined,
             created_at: undefined,
           }),
@@ -172,6 +172,7 @@ class Record {
           'prefectures': prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n),
           'effective_average': playerInfo ? playerInfo.effective_average : null,
           'deviation_value': playerInfo ? playerInfo.deviation_value : null,
+          'isPublicDetail': isAuthorized || (userAccount?.is_hide_time === false && userAccount?.is_hide_date === false)
         }
 
         res.send({
