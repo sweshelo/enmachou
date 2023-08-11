@@ -115,7 +115,7 @@ class Account {
       const userId = `@${result.user.username}@${domain}`
 
       // アカウントの存在チェック
-      const [userResult] = await (await this.connection).execute('SELECT token, player_id FROM users WHERE user_id = ?;', [userId])
+      const [userResult] = await (await this.connection).execute('SELECT * FROM users WHERE user_id = ?;', [userId])
       const isExist = (userResult as []).length !== 0
       const [ updateOrCreateAccountResult ] = (isExist)
         ? await (await this.connection).query(`UPDATE users SET token = '${result.token}' WHERE user_id = ?;`, [[ userId ]])
@@ -123,13 +123,17 @@ class Account {
       const [ suggestPlayers ] = (isExist && userResult[0].player_id)
         ? [ null ]
         : await (await this.connection).execute(`SELECT * FROM players WHERE player_name like '%${result.user.name}%';`)
+      const userObject = (isExist)
+        ? { userId, playerId: userResult[0].player_name, isHideDate: userResult[0].is_hide_date, isHideTime: userResult[0].is_hide_time }
+        : { userId, playerId: null, isHideDate: 0, isHideTime: 0}
 
       // レスポンス返す
       const payload = { user: userId }
       res.send({
         status: result.ok ? status.ok : status.error,
         token: jwt.sign(payload, this.privateKey, { algorithm: 'RS256' }),
-        suggestPlayers
+        suggestPlayers,
+        user: userObject
       })
     }catch(e){
       res.send({

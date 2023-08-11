@@ -11,7 +11,7 @@ export function* MiAuth({payload}): Generator<unknown, void, any>{
     const result = yield response.json()
     if (result.status === 'error') throw Error(result.message)
     console.log(result, result.token, result.suggestPlayers)
-    yield put(actions.setAuthorize({token: result.token, suggestPlayers: result.suggestPlayers}))
+    yield put(actions.setAuthorize({token: result.token, suggestPlayers: result.suggestPlayers, user: result.user}))
   }catch(e){
     console.error(e)
   }

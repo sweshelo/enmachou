@@ -1,4 +1,4 @@
-import {Player} from "../type"
+import {Player, User} from "../type"
 
 const actions = {
   MIAUTH: 'MIAUTH',
@@ -16,11 +16,12 @@ const actions = {
     }
   }),
 
-  setAuthorize: (payload: {token: string, suggestPlayers: Player[]}) => ({
+  setAuthorize: (payload: {token: string, suggestPlayers: Player[], user: User}) => ({
     type: actions.SET_AUTHORIZE,
     payload: {
       token: payload.token,
       suggestPlayers: payload.suggestPlayers,
+      user: payload.user,
     }
   }),
 

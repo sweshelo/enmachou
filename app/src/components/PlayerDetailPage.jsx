@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import { Link, useParams } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import actions from '../redux/records/actions.ts';
 import Map from './Map';
 import './PlayerPage.css';
@@ -15,199 +15,7 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 import {Player} from './Player';
 import { Spin } from 'antd';
 import {TimeframeChart} from './Statistics';
-
-const OnlineIndicator = ({online}) => {
-  return(
-    <div className={`online-status ${online ? 'online' : 'offline'}`}>
-      <span>{online ? 'online' : 'offline'}</span>
-    </div>
-  )
-}
-
-const Achievement = ({title}) => {
-  return(
-    <div className="achievement gray-grad-back">
-      <span>{title}</span>
-    </div>
-  )
-}
-
-const DetailBoard = (props) => {
-  const tooltipStyle = {
-    maxWidth: 'calc(100% - 10px)',
-    padding: '8px 5px',
-  }
-
-  const TooltipHTML = (element) => ReactDOMServer.renderToStaticMarkup(element)
-
-  return(
-    <div className="report">
-      <div className="float-reset">
-        <div className="stats-block">
-          <p className="stats-key">瞬間最高Rkg.</p>
-          <p className="stats-value">{props.ranking}位</p>
-        </div>
-        <div className="stats-block">
-          <p className="stats-key">最高貢献P</p>
-          <p className="stats-value">{props.point || 'データなし'}</p>
-        </div>
-        <div className="stats-block">
-          <p className="stats-key">平均貢献P</p>
-          <p className="stats-value">{props.average?.toFixed(3) || 'データなし'}</p>
-        </div>
-      </div>
-      <div className="float-reset">
-        <div className="stats-block">
-          <p className="stats-key">有効平均貢献P <BsQuestionCircle id='effective-average' data-tooltip-html={TooltipHTML(<div>直近110件のプレイのうち、最高/最低5件を除く貢献度の平均値です<br />登録レコードが110件未満の場合は「データなし」となります</div>)}/></p>
-          <p className="stats-value">{props.effectiveAverage || 'データなし'}</p>
-          <ReactTooltip
-            anchorId='effective-average'
-            place='top'
-            style={tooltipStyle}
-          />
-        </div>
-        <div className="stats-block">
-          <p className="stats-key">自己標準偏差 <BsQuestionCircle id='standard-deviation' data-tooltip-html={TooltipHTML(<div>プレイヤーの獲得貢献度の偏差です<br />この値が大きいほど貢献度にばらつきがあります</div>)}/></p>
-          <p className="stats-value">{props.standardDeviation?.toFixed(3) || 'データなし'}</p>
-          <ReactTooltip
-            anchorId='standard-deviation'
-            place='top'
-            style={tooltipStyle}
-          />
-        </div>
-        <div className="stats-block">
-          <p className="stats-key">全国偏差値 <BsQuestionCircle id='deviation-value' data-tooltip-html={TooltipHTML(<div>プレイヤーの有効平均貢献度から算出された偏差値です<br />この値が50に近いほど平均に近づきます</div>)}/></p>
-          <p className="stats-value">{props.deviationValue || 'データなし'}</p>
-          <ReactTooltip
-            anchorId='deviation-value'
-            place='top'
-            style={tooltipStyle}
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const PlayLog = (props) => {
-  const [ isLimit10, setLimit10 ] = useState(true)
-  const [ focusRecord, setFocusRecord ] = useState(null)
-  return props.log?.length > 0 ? (
-    <div className="playlog">
-      <p
-        className="title-paragraph"
-        onClick={() => setLimit10(!isLimit10)}
-      >{`${isLimit10 ? '直近10件' : 'すべて'}のプレイ履歴`}</p>
-      <table>
-        <thead>
-          <tr>
-            <th className="datetime">日時</th>
-            <th className="point">累計貢献P</th>
-            <th className="diff">推定獲得P</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            props.log.sort((a, b) => a.timeline_id < b.timeline_id).slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
-              const date = new Date(log.datetime.date)
-              const isHiddenDateTime = (date.getHours() + date.getMinutes() + date.getSeconds() + date.getMilliseconds()) === 0
-              const time = isHiddenDateTime ? log.datetime.timeframe : `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
-              return(
-                <>
-                  <tr
-                    key={`timeline-${index}`}
-                    className={`${(log.elapsed >= 600 || log.diff === null) ? 'invalid-record' : ''} ${(focusRecord == log.timeline_id) ? 'focus-record' : ''}`}
-                    onClick={()=>{
-                      setFocusRecord(focusRecord === log.timeline_id ? null : log.timeline_id)
-                    }}
-                  >
-                    <td className="datetime">{`${date.getMonth() + 1}/${date.getDate()} ${time}`}</td>
-                    <td className="point">{log.point}P</td>
-                    <td className="diff">+{log.diff}</td>
-                  </tr>
-                  { focusRecord === log.timeline_id && (
-                    <tr>
-                      <td colSpan={3} className='record-operation'>
-                        <ul>
-                          {/*
-                          <li className='button-record-operation'>
-                            <button><BiHide/> 記録を非表示</button>
-                          </li>
-                          <li className='button-record-operation'>
-                            <button><MdDeleteForever/> 記録を削除</button>
-                          </li>
-                          <li className='button-record-operation'>
-                            <button><BsYoutube/> 動画を紐付け</button>
-                          </li>
-                          */}
-                          <li className='button-record-operation'>
-                            <Link to={`/matching/${log.timeline_id}`}><GiBattleAxe/> 推定マッチング</Link>
-                          </li>
-                        </ul>
-                      </td>
-                    </tr>
-                  )}
-                </>
-              )
-            })
-          }
-        </tbody>
-      </table>
-    </div>
-  ) : null
-}
-
-const AverageGraph = (props) => {
-  const [ average, setAverage ] = useState([])
-  useEffect(() => {
-    const calc = {}
-    props.log.forEach((r) => {
-      if(r.elapsed > 600) return
-      const date = new Date(r.datetime.date)
-      const dateKey = `${date.getMonth() + 1}/${date.getDate()}`
-      if(!calc[dateKey]){
-        calc[dateKey] = {
-          date: dateKey,
-          sum: 0,
-          max: r.diff,
-          count: 0
-        }
-      }
-      if(calc[dateKey].max < r.diff) calc[dateKey].max = r.diff
-      calc[dateKey].sum += r.diff
-      calc[dateKey].count++
-    })
-    setAverage(Object.values(calc).map((r) => ({...r, ave: r.sum / r.count})))
-  }, [props?.log])
-
-  return (
-    <div className="playlog">
-      <p className="title-paragraph">貢献度の推移</p>
-      <div className='centerize'>
-        <LineChart
-          id='chart'
-          width={Math.min(window.innerWidth - 20, 600)}
-          height={300}
-          data={average}
-          margin={{
-            top: 15,
-            right: 25,
-            left: 25,
-            bottom: 0,
-          }}
-        >
-          <CartesianGrid strokeDasharray="4 4" />
-          <XAxis dataKey="date" fontSize={10} height={15}/>
-          <YAxis min={50} width={5} fontSize={10} domain={[50, 'dataMax']}/>
-          <Tooltip formatter={(value) => value.toFixed(2)}/>
-          <Legend />
-          <Line type="monotone" dataKey="ave" stroke="#8884d8" activeDot={{ r: 8 }} />
-          <Line type="monotone" dataKey="max" stroke="#82ca9d" />
-        </LineChart>
-      </div>
-    </div>
-  )
-}
+import {Achievement, AverageGraph, DetailBoard, OnlineIndicator, PlayLog} from './PlayerPage';
 
 const StagePieCharts = ({data, log, toolTipFunc}) => {
   const COLORS = ['#0088FE', '#55AAFF', '#00C49F', '#FFBB28', '#FF8042', '#F05040',];
@@ -307,7 +115,84 @@ const PlayerDetailPage = () => {
     )
   }
 
-  if (playerDetail && !playerDetail.isPublicDetail) return(
+  const CharaChart = () => {
+    const charaChartMock = [
+      { name: null, count: null },
+      { name: '赤鬼カギコ', count: 0, color: 'deeppink' },
+      { name: '悪亜チノン', count: 0, color: 'deepskyblue' },
+      { name: '不死ミヨミ', count: 0, color: 'gold' },
+      { name: 'パイン', count: 0, color: 'yellow' },
+      { name: '首塚ツバキ', count: 0, color: 'gainsboro' },
+      { name: '紅刃', count: 0, color: 'crimson' },
+      { name: '首塚ボタン', count: 0, color: 'orchid' },
+      { name: 'クルル', count: 0, color: 'green' },
+      { name: null, count: null },
+      { name: '最愛チアモ', count: 0, color: 'lightpink' },
+      { name: 'マラリヤ', count: 0, color: 'purple' },
+      { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
+    ]
+
+    const maxChara = charaChartMock.length
+
+    // 日付ごとにデータを集計するためのオブジェクトを作成
+    const dateMap = playerDetail?.log?.reduce((acc, { datetime, chara }) => {
+      const date = new Date(datetime.date)
+      const shortDate = `${date.getMonth() + 1}/${date.getDate()}`
+      const charaKey = charaChartMock[chara].name
+
+      if (!acc[shortDate]) {
+        acc[shortDate] = { date: shortDate }
+        for (let i = 1; i < maxChara; i++) {
+          acc[shortDate][charaChartMock[i].name] = 0
+        }
+      }
+
+      acc[shortDate][charaKey] += 1; // キャラクターのカウントをインクリメント
+
+      return acc;
+    }, {});
+
+    // 最終結果の配列を作成
+    const result = Object.values(dateMap);
+    const toPercent = (decimal, fixed = 0) => `${(decimal * 100).toFixed(fixed)}%`;
+
+    const getPercent = (value, total) => {
+      const ratio = total > 0 ? value / total : 0;
+
+      return toPercent(ratio, 2);
+    };
+
+    console.log(result, dateMap);
+    return(
+      <>
+        <p className='title-paragraph'>ランキング上のキャラクター変遷</p>
+        <AreaChart
+          width={Math.min(window.innerWidth - 20, 600)}
+          height={160}
+          data={result}
+          stackOffset="expand"
+          margin={{
+            top: 10,
+            right: 30,
+            left: 0,
+            bottom: 0,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" />
+          <YAxis tickFormatter={(decimal) => `${decimal * 100}%`} />
+          {
+            charaChartMock.map((chara, index) => {
+              return(<Area type={"monotone"} dataKey={chara.name} stackId={1} stroke="#aaa" fill={chara.color} />)
+            })
+          }
+          <Tooltip />
+        </AreaChart>
+      </>
+    )
+  }
+
+  if (false) return( //playerDetail && !playerDetail.isPublicDetail) return(
     <>
       <div id="player-detail-wrapper">
         <div className="player-detail">
@@ -343,10 +228,11 @@ const PlayerDetailPage = () => {
             />
             <DetailEachStage />
             <DetailEachHour />
+            <CharaChart />
           </div>
           <div id="table-wrapper">
             <div>
-              <AverageGraph log={playerDetail?.log?.slice(0, 300) || []}/>
+              <AverageGraph log={playerDetail?.log?.slice(0, 300) || []} average={playerDetail?.effective_average}/>
               <PlayLog log={playerDetail?.log || []} />
             </div>
           </div>

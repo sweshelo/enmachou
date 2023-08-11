@@ -55,7 +55,7 @@ class Record {
   async getPlayerinfo(req: Request, res: Response){
     try{
       if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
-      const decodedToken = jwt.verify(req.headers.authorization, this.publicKey)
+      const decodedToken = req.headers.authorization ? jwt.verify(req.headers.authorization, this.publicKey) : null
       const authorizedUserId = decodedToken ? decodedToken['user'] : null
 
       if( toFullWidth(req.params.playername) === 'プレーヤー' ){
@@ -80,7 +80,7 @@ class Record {
         return
       }
 
-      const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at DESC LIMIT 110;"
+      const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at DESC;"
       const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
       const getUserAccountFromUsersQuery = "SELECT * FROM users WHERE player_id = ? LIMIT 1;"
       const [ [playLogQueryResult], [prefectureQueryResult] ] = await Promise.all([

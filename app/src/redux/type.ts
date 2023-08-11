@@ -59,4 +59,12 @@ type PresentsItem = {
   history: Array<PresentsItemHistory>
 }
 
-export { Player, PlayerDetail, PlayLog, Stats, PresentsItem, PresentsItemHistory }
+type User = {
+  userId: string,
+  playerName: string,
+  isHideDate: number,
+  isHideTime: number,
+  onlineThreshold: number,
+}
+
+export { Player, PlayerDetail, PlayLog, Stats, PresentsItem, PresentsItemHistory, User }

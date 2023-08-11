@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import { Link, useParams } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, ReferenceLine } from 'recharts';
 import actions from '../redux/records/actions.ts';
 import Map from './Map';
 import './PlayerPage.css';
@@ -15,7 +15,7 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 import {Player} from './Player';
 import { Spin } from 'antd';
 
-const OnlineIndicator = ({online}) => {
+export const OnlineIndicator = ({online}) => {
   return(
     <div className={`online-status ${online ? 'online' : 'offline'}`}>
       <span>{online ? 'online' : 'offline'}</span>
@@ -23,7 +23,7 @@ const OnlineIndicator = ({online}) => {
   )
 }
 
-const Achievement = ({title}) => {
+export const Achievement = ({title}) => {
   return(
     <div className="achievement gray-grad-back">
       <span>{title}</span>
@@ -31,7 +31,7 @@ const Achievement = ({title}) => {
   )
 }
 
-const DetailBoard = (props) => {
+export const DetailBoard = (props) => {
   const tooltipStyle = {
     maxWidth: 'calc(100% - 10px)',
     padding: '8px 5px',
@@ -88,9 +88,18 @@ const DetailBoard = (props) => {
   )
 }
 
-const PlayLog = (props) => {
+export const PlayLog = (props) => {
   const [ isLimit10, setLimit10 ] = useState(true)
   const [ focusRecord, setFocusRecord ] = useState(null)
+
+  const StageMark = ({stage}) => {
+    return(
+      <span className='stage-mark'>
+        {stage.split('ウラ')}
+      </span>
+    )
+  }
+
   return props.log?.length > 0 ? (
     <div className="playlog">
       <p
@@ -120,7 +129,7 @@ const PlayLog = (props) => {
                       setFocusRecord(focusRecord === log.timeline_id ? null : log.timeline_id)
                     }}
                   >
-                    <td className="datetime">{`${date.getMonth() + 1}/${date.getDate()} ${time}`}</td>
+                    <td className="datetime">{`${date.getMonth() + 1}/${date.getDate()} ${time}`}{log.stage && <StageMark stage={log.stage}/>}</td>
                     <td className="point">{log.point}P</td>
                     <td className="diff">+{log.diff}</td>
                   </tr>
@@ -156,7 +165,7 @@ const PlayLog = (props) => {
   ) : null
 }
 
-const AverageGraph = (props) => {
+export const AverageGraph = (props) => {
   const [ average, setAverage ] = useState([])
   useEffect(() => {
     const calc = {}
@@ -199,6 +208,7 @@ const AverageGraph = (props) => {
           <XAxis dataKey="date" fontSize={10} height={15}/>
           <YAxis min={50} width={5} fontSize={10} domain={[50, 'dataMax']}/>
           <Tooltip formatter={(value) => value.toFixed(2)}/>
+          <ReferenceLine y={props.average} stroke="red" />
           <Legend />
           <Line type="monotone" dataKey="ave" stroke="#8884d8" activeDot={{ r: 8 }} />
           <Line type="monotone" dataKey="max" stroke="#82ca9d" />
@@ -248,7 +258,7 @@ const PlayerPage = () => {
           </div>
           <div id="table-wrapper">
             <div>
-              <AverageGraph log={playerDetail?.log?.slice(0, 300) || []}/>
+              <AverageGraph log={playerDetail?.log?.slice(0, 300) || []} average={playerDetail?.effective_average}/>
               <PlayLog log={playerDetail?.log || []} />
             </div>
           </div>
