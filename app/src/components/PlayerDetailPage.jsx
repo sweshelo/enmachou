@@ -1,17 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import { Link, useParams } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, PieChart, Pie, Cell, AreaChart, Area, ComposedChart, Bar, ZAxis, RectangleProps, Scatter } from 'recharts';
 import actions from '../redux/records/actions.ts';
 import Map from './Map';
 import './PlayerPage.css';
-import { BiHide } from 'react-icons/bi';
-import { MdDeleteForever } from 'react-icons/md';
-import { BsQuestionCircle, BsYoutube } from 'react-icons/bs';
-import { GiBattleAxe } from 'react-icons/gi';
-import { TbPresentationAnalytics } from 'react-icons/tb';
-import { Tooltip as ReactTooltip } from "react-tooltip";
 import {Player} from './Player';
 import { Spin } from 'antd';
 import {TimeframeChart} from './Statistics';
@@ -95,7 +89,6 @@ const PlayerDetailPage = () => {
 
   const DetailEachHour = () => {
     const playHourLogs = playerDetail?.log?.map((item) => new Date(item.datetime.date).getHours())
-    console.log(playHourLogs)
     const playCount = playHourLogs.reduce((acc, time) => {
       acc[time] = (acc[time] || 0) + 1;
       return acc;
@@ -131,8 +124,7 @@ const PlayerDetailPage = () => {
       { name: 'マラリヤ', count: 0, color: 'purple' },
       { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
     ]
-
-    const maxChara = charaChartMock.length
+    const listedChara = []
 
     // 日付ごとにデータを集計するためのオブジェクトを作成
     const dateMap = playerDetail?.log?.reduce((acc, { datetime, chara }) => {
@@ -142,27 +134,18 @@ const PlayerDetailPage = () => {
 
       if (!acc[shortDate]) {
         acc[shortDate] = { date: shortDate }
-        for (let i = 1; i < maxChara; i++) {
-          acc[shortDate][charaChartMock[i].name] = 0
-        }
       }
 
+      if (!acc[shortDate][charaKey]) acc[shortDate][charaKey] = 0
       acc[shortDate][charaKey] += 1; // キャラクターのカウントをインクリメント
+      if (!listedChara.includes(charaKey)) listedChara.push(charaKey)
 
       return acc;
     }, {});
 
     // 最終結果の配列を作成
     const result = Object.values(dateMap);
-    const toPercent = (decimal, fixed = 0) => `${(decimal * 100).toFixed(fixed)}%`;
 
-    const getPercent = (value, total) => {
-      const ratio = total > 0 ? value / total : 0;
-
-      return toPercent(ratio, 2);
-    };
-
-    console.log(result, dateMap);
     return(
       <>
         <p className='title-paragraph'>ランキング上のキャラクター変遷</p>
@@ -179,82 +162,197 @@ const PlayerDetailPage = () => {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis tickFormatter={(decimal) => `${decimal * 100}%`} />
+          <XAxis dataKey="date" fontSize={10}/>
+          <YAxis tickFormatter={(decimal) => `${decimal * 100}%`} fontSize={10}/>
           {
             charaChartMock.map((chara, index) => {
-              return(<Area type={"monotone"} dataKey={chara.name} stackId={1} stroke="#aaa" fill={chara.color} />)
+              return listedChara.includes(chara.name) ? (<Area type={"monotone"} dataKey={chara.name} stackId={1} stroke={chara.color} fill={chara.color} />) : null
             })
           }
           <Tooltip />
+          <Legend />
         </AreaChart>
       </>
     )
   }
 
-  if (false) return( //playerDetail && !playerDetail.isPublicDetail) return(
-    <>
-      <div id="player-detail-wrapper">
-        <div className="player-detail">
-          <Achievement title={playerDetail?.achievement} />
-          {playerDetail && <Player name={playerDetail.player_name} header={`${playerDetail.ranking}位 - ${playerDetail.point}P`} chara={playerDetail.chara} />}
-          <p className='description'>このユーザの詳細データは非公開です</p>
-        </div>
-      </div>
-    </>
-  )
+  {/*
+  const RecordsChartGraph = () => {
+    const calc = {}
+    playerDetail?.log?.slice(-300).forEach((r) => {
+      if(r.elapsed > 600) return
+      const date = new Date(r.datetime.date)
+      const dateKey = `${date.getMonth() + 1}/${date.getDate()}`
+      if(!calc[dateKey]){
+        calc[dateKey] = {
+          date: dateKey,
+          records: [r]
+        }
+      }else{
+        calc[dateKey].records.push(r)
+      }
+    })
 
-  return (
-    <div id="player-detail-wrapper">
-      {playerDetail ? (
-        <div className="player-detail">
-          <Achievement title={playerDetail?.achievement} />
-          {playerDetail && <Player name={playerDetail.player_name} header={`${playerDetail.ranking}位 - ${playerDetail.point}P`} chara={playerDetail.chara} />}
-          <div className="info">
-            <OnlineIndicator online={playerDetail?.online} />
-            <DetailBoard
-              ranking={!playerDetail?.log?.length ? null : Math.min(...playerDetail?.log.map(r => r.ranking))}
-              point={!pointAfter0506DiffArray.length ? null : Math.max(...pointAfter0506DiffArray)}
-              average={
-                standardAverage || null
-              }
-              effectiveAverage={playerDetail?.effective_average}
-              standardDeviation={
-                Math.sqrt(
-                pointDiffArray.map(val => Math.pow(val - standardAverage, 2)).reduce((acc, val) => acc + val, 0) / pointDiffArray.length
-              )
-              }
-              deviationValue={playerDetail?.deviation_value}
-            />
-            <DetailEachStage />
-            <DetailEachHour />
-            <CharaChart />
+    const data = Object.values(calc).slice(-30).map((item) => {
+      console.log(item)
+      const records = item.records;
+      records.sort((a, b) => a.diff - b.diff);
+      const min = records[0].diff;
+      const max = records[records.length - 1].diff;
+      const median = records[Math.floor(records.length / 2)].diff;
+      const firstQuartile = records[Math.floor(records.length / 4)].diff;
+      const thirdQuartile = records[Math.floor((3 * records.length) / 4)].diff;
+      console.log(max)
+
+      return {
+        name: item.date,
+        min,
+        max,
+        median,
+        lowerQuartile: firstQuartile,
+        upperQuartile: thirdQuartile,
+        average: records.reduce((acc, item) => acc += item.diff, 0) / records.length
+      };
+    });
+    console.log(`data: ${data}`)
+    console.log(data, calc)
+
+    const useBoxPlot = (boxPlots) => {
+      const data = useMemo(
+        () =>
+        boxPlots.map(v => {
+          return {
+            name: v.name,
+            min: v.min,
+            max: v.max,
+            bottomWhisker: v.lowerQuartile - v.min,
+            bottomBox: v.median - v.lowerQuartile,
+            topBox: v.upperQuartile - v.median,
+            topWhisker: v.max - v.upperQuartile,
+            average: v.average,
+            size: 500
+          };
+        }),
+        [boxPlots]
+      );
+
+      return data;
+    };
+
+    const DotBar = (props) => {
+      const { x, y, width, height } = props;
+      if (x == null || y == null || width == null || height == null) {
+        return null;
+      }
+      console.log(props)
+      return (
+        <line
+          x1={x + width / 2}
+          y1={y + height}
+          x2={x + width / 2}
+          y2={y}
+          stroke={'#000'}
+          strokeWidth={5}
+          stroke-dasharray={'5'}
+        />
+      );
+    };
+
+    const HorizonBar = (props) => {
+      const { x, y, width, height } = props;
+      if (x == null || y == null || width == null || height == null) {
+        return null;
+      }
+      return <line x1={x} y1={y} x2={x + width} y2={y} stroke={'#000'} strokeWidth={3} />;
+    };
+
+    return(
+      <ComposedChart width={600} height={400} data={useBoxPlot(data)}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <ZAxis type='number' dataKey='size' range={[0, 250]} />
+        <Tooltip />
+        <CartesianGrid strokeDasharray='3 3' />
+        <Bar stackId={'a'} dataKey={'min'} fill={'none'} />
+        <Bar stackId={'a'} dataKey={'max'} fill={'none'} />
+        <Bar stackId={'a'} dataKey={'bar'} shape={<HorizonBar />} />
+        <Bar stackId={'a'} dataKey={'bottomWhisker'} shape={<DotBar />} />
+        <Bar stackId={'a'} dataKey={'bottomBox'} fill={'#8884d8'} />
+        <Bar stackId={'a'} dataKey={'bar'} shape={<HorizonBar />} />
+        <Bar stackId={'a'} dataKey={'topBox'} fill={'#8884d8'} />
+        <Bar stackId={'a'} dataKey={'topWhisker'} shape={<DotBar />} />
+        <Bar stackId={'a'} dataKey={'bar'} shape={<HorizonBar />} />
+        <Line type="monotone" dataKey="average" stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line type="monotone" dataKey="max" stroke="#82ca9d" />
+      </ComposedChart>
+    )
+  }
+  */}
+
+  return (playerDetail && !playerDetail.isPublicDetail)
+    ? (
+      <>
+        <div id="player-detail-wrapper">
+          <div className="player-detail">
+            <Achievement title={playerDetail?.achievement} />
+            {playerDetail && <Player name={playerDetail.player_name} header={`${playerDetail.ranking}位 - ${playerDetail.point}P`} chara={playerDetail.chara} />}
+            <p className='description'>このユーザの詳細データは非公開です</p>
           </div>
-          <div id="table-wrapper">
-            <div>
-              <AverageGraph log={playerDetail?.log?.slice(0, 300) || []} average={playerDetail?.effective_average}/>
-              <PlayLog log={playerDetail?.log || []} />
-            </div>
-          </div>
-          { playerDetail?.prefectures.length > 0 && (
-            <div id="prefectures">
-              <p className="title-paragraph">このユーザの制県度</p>
-              <Map visited={[...playerDetail?.prefectures]} />
-            </div>
-          ) }
         </div>
-      ) : (
-        <>
-          <p style={{
-            position: 'absolute',
-            top: '50vh',
-          }}>
-            <Spin /> 読み込み中…
-          </p>
-        </>
-      )}
-    </div>
-  )
+      </>
+    )
+    : (
+      <div id="player-detail-wrapper">
+        {playerDetail ? (
+          <div className="player-detail">
+            <Achievement title={playerDetail?.achievement} />
+            {playerDetail && <Player name={playerDetail.player_name} header={`${playerDetail.ranking}位 - ${playerDetail.point}P`} chara={playerDetail.chara} />}
+            <div className="info">
+              <OnlineIndicator online={playerDetail?.online} />
+              <DetailBoard
+                ranking={!playerDetail?.log?.length ? null : Math.min(...playerDetail?.log.map(r => r.ranking))}
+                point={!pointAfter0506DiffArray.length ? null : Math.max(...pointAfter0506DiffArray)}
+                average={
+                  standardAverage || null
+                }
+                effectiveAverage={playerDetail?.effective_average}
+                standardDeviation={
+                  Math.sqrt(
+                  pointDiffArray.map(val => Math.pow(val - standardAverage, 2)).reduce((acc, val) => acc + val, 0) / pointDiffArray.length
+                )
+                }
+                deviationValue={playerDetail?.deviation_value}
+              />
+              <DetailEachStage />
+              <DetailEachHour />
+              <CharaChart />
+            </div>
+            <div id="table-wrapper">
+              <div>
+                <AverageGraph log={playerDetail?.log?.slice(-300) || []} average={playerDetail?.effective_average}/>
+                <PlayLog log={playerDetail?.log || []} />
+              </div>
+            </div>
+            { playerDetail?.prefectures.length > 0 && (
+              <div id="prefectures">
+                <p className="title-paragraph">このユーザの制県度</p>
+                <Map visited={[...playerDetail?.prefectures]} />
+              </div>
+            ) }
+          </div>
+        ) : (
+          <>
+            <p style={{
+              position: 'absolute',
+              top: '50vh',
+            }}>
+              <Spin /> 読み込み中…
+            </p>
+          </>
+        )}
+      </div>
+    )
 
 }
 

@@ -117,9 +117,9 @@ export const PlayLog = (props) => {
         <tbody>
           {
             props.log.sort((a, b) => a.timeline_id < b.timeline_id).slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
-              const date = new Date(log.datetime.date)
-              const isHiddenDateTime = (date.getHours() + date.getMinutes() + date.getSeconds() + date.getMilliseconds()) === 0
-              const time = isHiddenDateTime ? log.datetime.timeframe : `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+              const date = props.isHiddenDate ? null : new Date(log.datetime.date)
+              const displayDate = props.isHiddenDate ? '非表示' : `${date.getMonth() + 1}/${date.getDate()}`
+              const displayTime = props.isHiddenDate ? '' : props.isHiddenTime ? log.datetime.timeframe : `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
               return(
                 <>
                   <tr
@@ -129,7 +129,7 @@ export const PlayLog = (props) => {
                       setFocusRecord(focusRecord === log.timeline_id ? null : log.timeline_id)
                     }}
                   >
-                    <td className="datetime">{`${date.getMonth() + 1}/${date.getDate()} ${time}`}{log.stage && <StageMark stage={log.stage}/>}</td>
+                    <td className="datetime">{`${displayDate} ${displayTime}`}{log.stage && <StageMark stage={log.stage}/>}</td>
                     <td className="point">{log.point}P</td>
                     <td className="diff">+{log.diff}</td>
                   </tr>
@@ -228,7 +228,7 @@ const PlayerPage = () => {
   }, [])
 
   const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
-  const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date(r.datetime.date) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
+  const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date(r.datetime?.date) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
     .filter(r => r > 0) || [];
   const standardAverage = (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length)
 
@@ -258,8 +258,8 @@ const PlayerPage = () => {
           </div>
           <div id="table-wrapper">
             <div>
-              <AverageGraph log={playerDetail?.log?.slice(0, 300) || []} average={playerDetail?.effective_average}/>
-              <PlayLog log={playerDetail?.log || []} />
+              {!playerDetail.isHiddenDate && <AverageGraph log={playerDetail?.log?.slice(-300) || []} average={playerDetail?.effective_average}/>}
+              <PlayLog log={playerDetail?.log || []} isHiddenDate={playerDetail?.isHiddenDate} isHiddenTime={playerDetail.isHiddenTime} />
             </div>
           </div>
           { playerDetail?.prefectures.length > 0 && (

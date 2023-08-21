@@ -36,6 +36,10 @@ main{
   cursor: pointer;
 }
 
-.link:hover {
+.link:hover{
   text-decoration: none;
+}
+
+.switch{
+  margin: 5px;
 }

@@ -13,7 +13,8 @@ type State = {
   user: {
     playerName: string;
     userId: string;
-    hideDateTime: boolean;
+    isHiddenDate: number;
+    isHiddenTime: number;
   } | undefined | null
   suggestPlayers: Player[] | undefined | null
 }
@@ -29,9 +30,11 @@ const initialState: State = {
 const accountReducer = (state = initialState, action: Action) => {
   switch(action.type){
     case actions.SET_AUTHORIZE:
-      return { ...state, token: action.payload.token, suggestPlayers: action.payload.suggestPlayers }
-    case actions.TEST:
-      return { ...state }
+      return { ...state, token: action.payload.token, suggestPlayers: action.payload.suggestPlayers, user: action.payload.user }
+    case actions.LOGOUT:
+      return { ...state, token: '', user: null }
+    case actions.SET_SETTINGS:
+      return { ...state, user: {...state.user, isHiddenDate: action.payload.isHiddenDate, isHiddenTime: action.payload.isHiddenTime}}
     default:
       return { ...state }
   }

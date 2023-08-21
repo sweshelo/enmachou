@@ -10,6 +10,9 @@ type PlayerDetail = Player & {
   online: boolean;
   log: PlayLog[];
   prefectures: string[];
+  isPublicDetail: boolean;
+  isHiddenDate: boolean;
+  isHiddenTime: boolean;
 };
 
 type PlayLog = {

@@ -32,8 +32,8 @@ export type User = {
   user_id: string
   player_id: number
   token: string
-  is_hide_date: boolean
-  is_hide_time: boolean
+  is_hide_date: number
+  is_hide_time: number
   online_threshold: number
   is_authorized: boolean
 }

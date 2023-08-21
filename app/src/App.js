@@ -20,6 +20,7 @@ import {MiAuth} from './components/MiAuthPage';
 import PlayerPage from './components/PlayerPage';
 import PlayerDetailPage from './components/PlayerDetailPage';
 import AverageRanking from './components/AverageRanking';
+import {Settings} from './components/Settings';
 
 function App() {
 
@@ -39,7 +40,7 @@ function App() {
       <div className="App">
         <header>
           <h1 className='ccj-font'><Link to='/'>閻魔帳</Link></h1>
-          <span>v0.9.12 - @sweshelo</span>
+          <span>v1.0.0 - @sweshelo</span>
         </header>
         <div id='container'>
           <DrawerMenu />
@@ -57,6 +58,7 @@ function App() {
               <Route path='/stats' element={<Statistics />} />
               <Route path='/login' element={<Login />} />
               <Route path='/miauth' element={<MiAuth />} />
+              <Route path='/settings' element={<Settings />} />
             </Routes>
           </main>
         </div>

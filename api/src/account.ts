@@ -92,10 +92,14 @@ class Account {
   // TODO
   async changeSettings(req: Request, res: Response){
     try{
-      const decoded = jwt.verify(req.body.auth, this.publicKey)
-      const settings = [ req.body.isHideDate, req.body.isHideTime, req.body.onlineThreshold ]
+      const decoded = jwt.verify(req.headers.authorization, this.publicKey)
+      await (await this.connection).query('UPDATE users SET is_hide_date = ?, is_hide_time = ? WHERE user_id = ?;', [ req.body.isHiddenDate, req.body.isHiddenTime, decoded['user'] ])
       res.send({
-        status: status.ok
+        status: status.ok,
+        body: {
+          isHiddenDate: req.body.isHiddenDate,
+          isHiddenTime: req.body.isHiddenTime,
+        }
       })
     }catch(e){
       res.send({
@@ -124,8 +128,8 @@ class Account {
         ? [ null ]
         : await (await this.connection).execute(`SELECT * FROM players WHERE player_name like '%${result.user.name}%';`)
       const userObject = (isExist)
-        ? { userId, playerId: userResult[0].player_name, isHideDate: userResult[0].is_hide_date, isHideTime: userResult[0].is_hide_time }
-        : { userId, playerId: null, isHideDate: 0, isHideTime: 0}
+        ? { userId, playerId: userResult[0].player_id, isAuthorized: (userResult[0].is_authorized_at !== null), isHiddenDate: userResult[0].is_hide_date, isHiddenTime: userResult[0].is_hide_time }
+        : { userId, playerId: null, isAuthorized: false, isHiddenDate: 0, isHiddenTime: 0}
 
       // レスポンス返す
       const payload = { user: userId }

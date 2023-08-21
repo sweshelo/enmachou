@@ -57,13 +57,19 @@ class EnmaApi {
     return EnmaApi.httpGet(`presents`)
   }
   static LinkPlayerData(payload: {playerName: string, token: string}){
-    console.log(payload.token)
     return EnmaApi.httpPost(`link-player`,
       {
         playerName: payload.playerName
       },
       payload.token
     )
+  }
+  static changeSettings(payload: {isHiddenDate: boolean, isHiddenTime: boolean, token: string}){
+    console.log(payload.token)
+    return EnmaApi.httpPost(`settings`, {
+      isHiddenDate: payload.isHiddenDate,
+      isHiddenTime: payload.isHiddenTime,
+    }, payload.token)
   }
 }
 

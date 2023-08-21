@@ -1,3 +1,6 @@
+import * as jwt from 'jsonwebtoken';
+import fs from 'fs';
+
 // 全角文字にする
 export const toFullWidth = (str: string) => {
   return str.replace(/[A-Za-z0-9]/g, (s) => {
@@ -102,3 +105,8 @@ export const identifyStage = (targetDate: string) => {
   return foundRecord ? isEvenHour ? foundRecord.evenHour : foundRecord.oddHour : null
 }
 
+
+export const auth = (token: string) => {
+  const pubkey = fs.readFileSync('publickey.pem').toString()
+  return jwt.verify(token, pubkey)
+}

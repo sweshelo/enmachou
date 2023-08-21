@@ -11,7 +11,7 @@ export const MiAuth = () => {
   const origin = document.referrer ? new URL(document.referrer).hostname : null
   const dispatch = useDispatch()
 
-  const { token, suggestPlayers } = useSelector(state => state.accountReducer)
+  const { token, suggestPlayers, user } = useSelector(state => state.accountReducer)
   const authStatus = useMemo(() => token !== null, [token])
 
   useEffect(() => {
@@ -23,17 +23,27 @@ export const MiAuth = () => {
     if (yn === true) dispatch(actions.linkPlayer(player_name))
   }
 
+  console.log(user)
+
   return(
     <>
       <div id="ranking-wrapper">
       <div className="ranking">
-        <p>あなたのプレイヤーアカウントを選択してください</p>
-        <p>この操作は一度しか行えません</p>
-        {suggestPlayers?.map((player) => (
-          <div onClick={()=>{clickHandler(player.player_name)}}>
-            <Player chara={player.chara} name={player.player_name} isLink={false} />
-          </div>
-        ))}
+        {( user === null ) ? (
+          <>
+            <p>あなたのプレイヤーアカウントを選択してください</p>
+            <p>この操作は一度しか行えません</p>
+            {suggestPlayers?.map((player) => (
+              <div onClick={()=>{clickHandler(player.player_name)}}>
+                <Player chara={player.chara} name={player.player_name} isLink={false} />
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <p>ログインしました</p>
+          </>
+        )}
       </div>
       </div>
     </>

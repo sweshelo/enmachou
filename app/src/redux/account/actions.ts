@@ -4,9 +4,11 @@ const actions = {
   MIAUTH: 'MIAUTH',
   TRY_LOGIN: 'TRY_LOGIN',
   DONE_LOGIN: 'DONE_LOGIN',
-  TEST: 'TEST',
   SET_AUTHORIZE: 'SET_AUTHORIZE',
   LINK_PLAYER: 'LINK_PLAYER',
+  SET_SETTINGS: 'SET_SETTINGS',
+  CHANGE_SETTINGS: 'CHANGE_SETTINGS',
+  LOGOUT: 'LOGOUT',
 
   miAuth: (origin: string, session: string) => ({
     type: actions.MIAUTH,
@@ -30,6 +32,27 @@ const actions = {
     payload: {
       playerName
     }
+  }),
+
+  changeSettings: (payload: {isHiddenDate: boolean, isHiddenTime: boolean}) => ({
+    type: actions.CHANGE_SETTINGS,
+    payload: {
+      isHiddenDate: payload.isHiddenDate,
+      isHiddenTime: payload.isHiddenTime,
+    }
+  }),
+
+  setSettings: (payload: {isHiddenDate: boolean, isHiddenTime: boolean}) => ({
+    type: actions.SET_SETTINGS,
+    payload: {
+      isHiddenDate: payload.isHiddenDate,
+      isHiddenTime: payload.isHiddenTime,
+    }
+  }),
+
+
+  logout: () => ({
+    type: actions.LOGOUT
   })
 }
 

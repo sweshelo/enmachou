@@ -80,7 +80,7 @@ class Record {
         return
       }
 
-      const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at DESC;"
+      const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at DESC LIMIT 300;"
       const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
       const getUserAccountFromUsersQuery = "SELECT * FROM users WHERE player_id = ? LIMIT 1;"
       const [ [playLogQueryResult], [prefectureQueryResult] ] = await Promise.all([
@@ -150,10 +150,11 @@ class Record {
         const [ userAccountResult ] = await (await this.connection).execute(getUserAccountFromUsersQuery, [ playerInfo.player_id ])
         const userAccount = (userAccountResult as User[]).length > 0 ? userAccountResult[0] as User : null
         const isAuthorized = userAccount?.user_id === authorizedUserId
-        console.log(isAuthorized)
+        const shouldHideDate = !isAuthorized && (userAccount?.is_hide_date === -1)
+        const shouldHideTime = userAccount ? !isAuthorized && (userAccount.is_hide_time === -1) : true
 
         // 増分を計算する
-        const latestRecord = playLogResult[playLogResult.length - 1]
+        const latestRecord = playLogResult[0]
         const response = {
           'player_name': toFullWidth(req.params.playername),
           'achievement': latestRecord.achievement,
@@ -163,8 +164,8 @@ class Record {
           'online': (new Date().getTime() - new Date(latestRecord.created_at).getTime()) <= this.defaultOnlineThreshold * 60 * 1000,
           'log': playLogResult.map((r) => ({
             ...r,
-            datetime: datetimeToTimeframe(r.updated_at ?? r.created_at, !isAuthorized),
-            stage: isAuthorized ? identifyStage(r.updated_at ?? r.created_at) : null,
+            datetime: shouldHideDate ? null : datetimeToTimeframe(r.updated_at ?? r.created_at, shouldHideTime),
+            stage: shouldHideTime ? null : identifyStage(r.updated_at ?? r.created_at),
             updated_at: undefined,
             created_at: undefined,
           }),
@@ -172,7 +173,9 @@ class Record {
           'prefectures': prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n),
           'effective_average': playerInfo ? playerInfo.effective_average : null,
           'deviation_value': playerInfo ? playerInfo.deviation_value : null,
-          'isPublicDetail': isAuthorized || (userAccount?.is_hide_time === false && userAccount?.is_hide_date === false)
+          'isPublicDetail': !(shouldHideDate || shouldHideTime),
+          'isHiddenDate': shouldHideDate,
+          'isHiddenTime': shouldHideTime,
         }
 
         res.send({

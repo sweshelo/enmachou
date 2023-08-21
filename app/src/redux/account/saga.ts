@@ -30,9 +30,24 @@ function* LinkPlayer({payload}): Generator<unknown, void, any>{
   }
 }
 
+function* changeSettings({payload}): Generator<unknown, void, any>{
+  try{
+    const { token } = yield select(getAccount)
+    console.log(token)
+    const response = yield call(EnmaApi.changeSettings, {
+      ...payload,
+      token,
+    })
+    yield put(actions.setSettings(response.body))
+  }catch(e){
+    console.error(e)
+  }
+}
+
 export default function* accountSaga(){
   yield all([
     takeEvery(actions.MIAUTH, MiAuth),
-    takeEvery(actions.LINK_PLAYER, LinkPlayer)
+    takeEvery(actions.LINK_PLAYER, LinkPlayer),
+    takeEvery(actions.CHANGE_SETTINGS, changeSettings),
   ])
 }
