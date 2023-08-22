@@ -275,7 +275,16 @@ class Record {
     type TimelineForOnlinePlayer = Pick<Timeline, 'player_name' | 'ranking' | 'point' | 'chara' | 'created_at'>
 
     try{
-      if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
+      if(!req.headers.authorization){
+        res.send({
+          status: status.error,
+          message: 'この機能を利用するにはログインが必要です。'
+        })
+        return
+      }
+      const decoded = jwt.verify(req.headers.authorization, this.publicKey)
+      Logger.createLog(decoded['user'], req.originalUrl, this.connection)
+
       const getOnlineUserFromUsersQuery = "SELECT DISTINCT player_name, ranking, point, chara, created_at FROM timeline WHERE created_at > ? and player_name <> 'プレーヤー' and diff > 0;"
       const nMinutesAgoTime = (new Date(Date.now() - (req.params.threshold ? req.params.threshold : this.defaultOnlineThreshold) * 1000 * 60))
       const [ result ] = await (await this.connection).execute(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ])
@@ -345,7 +354,16 @@ class Record {
 
   async getAverageRanking(req: Request, res: Response) {
     try{
-      if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
+      if(!req.headers.authorization){
+        res.send({
+          status: status.error,
+          message: 'この機能を利用するにはログインが必要です。'
+        })
+        return
+      }
+      const decoded = jwt.verify(req.headers.authorization, this.publicKey)
+      Logger.createLog(decoded['user'], req.originalUrl, this.connection)
+
       const getUsersFromTimelineQuery = "SELECT player_name, chara, effective_average, deviation_value FROM players WHERE deviation_value > 50 ORDER BY effective_average DESC;";
       const [ result ] = await (await this.connection).execute(getUsersFromTimelineQuery)
       const usersResult = result as Pick<Players, 'player_name' | 'chara' | 'effective_average' | 'deviation_value'>[]

@@ -6,7 +6,8 @@ import actions from './actions.ts';
 const getAccount = (state: ReturnType<typeof rootReducer>) => state.accountReducer
 
 export function* getOnlinePlayer(): Generator<unknown, void, any>{
-  const response = yield call(EnmaApi.getOnlinePlayerData)
+  const { token } = yield select(getAccount)
+  const response = yield call(EnmaApi.getOnlinePlayerData, token)
   const result = yield response.json()
   yield put(actions.setOnlinePlayerList(result.body))
   yield put(actions.finishLoading())
@@ -25,7 +26,8 @@ export function* getMaxRankingData(): Generator<unknown, void, any>{
 }
 
 export function* getAverageRankingData(): Generator<unknown, void, any>{
-  const response = yield call(EnmaApi.getAverageRankingData)
+  const { token } = yield select(getAccount)
+  const response = yield call(EnmaApi.getAverageRankingData, token)
   const result = yield response.json()
   yield put(actions.setAverageRankingPlayerList(result.body))
 }

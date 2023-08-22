@@ -225,7 +225,7 @@ const PlayerPage = () => {
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(actions.getPlayerDetail(playername))
-  }, [])
+  }, [dispatch])
 
   const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
   const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date(r.datetime?.date) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
@@ -257,7 +257,7 @@ const PlayerPage = () => {
             <p className='description'><Link to={`/player/detail/${playerDetail?.player_name}`} className='link'><TbPresentationAnalytics /> もっと詳しく見る</Link></p>
           </div>
           <div id="table-wrapper">
-            <div>
+            <div style={{width: '100%'}}>
               {!playerDetail.isHiddenDate && <AverageGraph log={playerDetail?.log?.slice(-300) || []} average={playerDetail?.effective_average}/>}
               <PlayLog log={playerDetail?.log || []} isHiddenDate={playerDetail?.isHiddenDate} isHiddenTime={playerDetail.isHiddenTime} />
             </div>

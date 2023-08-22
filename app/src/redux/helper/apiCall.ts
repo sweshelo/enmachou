@@ -30,8 +30,8 @@ class EnmaApi {
   static getMaxRankingData(){
     return EnmaApi.httpGet('max-ranking')
   }
-  static getAverageRankingData(){
-    return EnmaApi.httpGet('average-ranking')
+  static getAverageRankingData(token: string){
+    return EnmaApi.httpGet('average-ranking', token)
   }
   static getPlayerDetailData(payload: {playerName: string, token: string}){
     return EnmaApi.httpGet(`players/${payload.playerName}`, payload.token)
@@ -39,8 +39,8 @@ class EnmaApi {
   static getPlayerPrefecturesData(playerName: string){
     return EnmaApi.httpGet(`players/${playerName}/prefectures`)
   }
-  static getOnlinePlayerData(){
-    return EnmaApi.httpGet(`online`)
+  static getOnlinePlayerData(token: string){
+    return EnmaApi.httpGet(`online`, token)
   }
   static getStatsData(){
     return EnmaApi.httpGet(`stats`)

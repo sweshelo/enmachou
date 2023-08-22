@@ -23,13 +23,18 @@ export const MiAuth = () => {
     if (yn === true) dispatch(actions.linkPlayer(player_name))
   }
 
-  console.log(user)
+  console.log(token)
 
   return(
     <>
       <div id="ranking-wrapper">
       <div className="ranking">
-        {( user === null ) ? (
+        {(!token) ? (
+          <>
+            エラーが発生しました
+          </>
+        )
+        : ( user?.playerId === null ) ? (
           <>
             <p>あなたのプレイヤーアカウントを選択してください</p>
             <p>この操作は一度しか行えません</p>

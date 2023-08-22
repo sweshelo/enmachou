@@ -10,9 +10,9 @@ export function* MiAuth({payload}): Generator<unknown, void, any>{
     const response = yield call(EnmaApi.verifyMisskeyAccount, payload.origin, payload.session)
     const result = yield response.json()
     if (result.status === 'error') throw Error(result.message)
-    console.log(result, result.token, result.suggestPlayers)
     yield put(actions.setAuthorize({token: result.token, suggestPlayers: result.suggestPlayers, user: result.user}))
   }catch(e){
+    alert(e.message)
     console.error(e)
   }
 }
@@ -24,7 +24,6 @@ function* LinkPlayer({payload}): Generator<unknown, void, any>{
       playerName: payload.playerName,
       token,
     })
-    console.log(response)
   }catch(e){
     console.error(e)
   }
@@ -33,7 +32,6 @@ function* LinkPlayer({payload}): Generator<unknown, void, any>{
 function* changeSettings({payload}): Generator<unknown, void, any>{
   try{
     const { token } = yield select(getAccount)
-    console.log(token)
     const response = yield call(EnmaApi.changeSettings, {
       ...payload,
       token,

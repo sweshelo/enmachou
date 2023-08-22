@@ -12,6 +12,7 @@ export const Settings = () => {
   const authStatus = useMemo(() => token !== null, [token])
   const logout = () => {
     dispatch(actions.logout())
+    window.location = '/login'
   }
 
   const [ hiddenTime, setHiddenTime ] = useState(false)
