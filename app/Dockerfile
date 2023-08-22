@@ -8,8 +8,8 @@ EXPOSE 5500
 
 ENV TZ=Asia/Tokyo
 
-COPY package.json ./
-COPY . ./
+#COPY package.json ./
+#COPY . ./
 
 # 起動コマンド
-CMD bash -c "npm install && npm run build && npm start"
+CMD bash -c "npm start"

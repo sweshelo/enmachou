@@ -21,19 +21,20 @@ const useWindowSize = () => {
 };
 
 const DrawerBody = () => {
-  const { isLoggedIn } = useSelector((state) => state.accountReducer)
+  const { token } = useSelector((state) => state.accountReducer)
   return(
     <>
       <ul>
         <li><Link to="/">月間ランキング</Link></li>
         <li><Link to="/ranking/max">最高貢献ポイントランキング</Link></li>
+        <li><Link to="/ranking/average">平均貢献ポイントランキング</Link></li>
         <li><Link to="/online">オンラインのプレイヤー</Link></li>
         <li><Link to="/stats">統計</Link></li>
         <li><Link to="/about">このアプリについて</Link></li>
       </ul>
       <div className="horizon-bar"></div>
       <ul>
-        { !isLoggedIn
+        { !token
           ? (
             <>
               <li><Link to="/login">ログイン</Link></li>
@@ -41,9 +42,8 @@ const DrawerBody = () => {
           )
           : (
             <>
-              <li><Link to="/mypage">マイページ</Link></li>
+              {/*<li><Link to="/mypage">マイページ</Link></li>*/}
               <li><Link to="/settings">設定</Link></li>
-              <li><Link to="/logout">ログアウト</Link></li>
             </>
           )
         }
@@ -60,9 +60,9 @@ export const DrawerMenu = () => {
   const [width, height] = useWindowSize();
   return width >= 959
     ? (
-      <div className="view-on-pc">
+      <aside className="view-on-pc">
         <DrawerBody />
-      </div>
+      </aside>
     )
     : (
       <div>

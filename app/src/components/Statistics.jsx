@@ -77,8 +77,9 @@ const CharaChart = ({data}) => {
   )
 }
 
-const TimeframeChart = ({data}) => {
+export const TimeframeChart = ({data}) => {
   if (!data) return null
+  console.log(data)
   const timeframeObject = data.map(r => ({ play: r }))
   return(
     <BarChart width={350} height={250} data={timeframeObject}>

@@ -15,10 +15,6 @@ const Online = () => {
     <div id="ranking-wrapper">
       <div className="ranking">
         <h2 className="page-title rainbow-grad-back">オンラインのプレイヤー</h2>
-        <p className="description">
-          【重要なお知らせ】<br/>
-          <span className="mini-script" >フォントの配信が有料であることや、負荷の低減を主目的として、閻魔帳は来るv1.0のアップデートより、『オンラインのプレイヤー』確認機能を含む幾つかの機能についてMisskeyアカウントが必須となります。認証のために<a href="https://misskey.sweshelo.jp/@enma">@enma@misskey.sweshelo.jp</a>のフォローが必要です。どのサーバのアカウントでもご利用いただけますが、<a href="https://misskey.sweshelo.jp">閻魔帳 Misskey支部</a>のサーバも用意しています。</span>
-        </p>
         <p className="description">{
           isLoading
             ? `読み込み中です…`

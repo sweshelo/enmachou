@@ -1,3 +1,4 @@
 export const config = {
-  baseEndpoint: 'http://localhost:4400'
+  baseEndpoint: 'https://enma.sweshelo.jp',
+  enmaAppOrigin: 'https://enma.sweshelo.jp',
 }

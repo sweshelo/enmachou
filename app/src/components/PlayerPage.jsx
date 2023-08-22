@@ -2,19 +2,20 @@ import React, { useState, useEffect } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import { Link, useParams } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, ReferenceLine } from 'recharts';
 import actions from '../redux/records/actions.ts';
 import Map from './Map';
-import './PlayerDetails.css';
+import './PlayerPage.css';
 import { BiHide } from 'react-icons/bi';
 import { MdDeleteForever } from 'react-icons/md';
 import { BsQuestionCircle, BsYoutube } from 'react-icons/bs';
 import { GiBattleAxe } from 'react-icons/gi';
+import { TbPresentationAnalytics } from 'react-icons/tb';
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import {Player} from './Player';
 import { Spin } from 'antd';
 
-const OnlineIndicator = ({online}) => {
+export const OnlineIndicator = ({online}) => {
   return(
     <div className={`online-status ${online ? 'online' : 'offline'}`}>
       <span>{online ? 'online' : 'offline'}</span>
@@ -22,7 +23,7 @@ const OnlineIndicator = ({online}) => {
   )
 }
 
-const Achievement = ({title}) => {
+export const Achievement = ({title}) => {
   return(
     <div className="achievement gray-grad-back">
       <span>{title}</span>
@@ -30,7 +31,7 @@ const Achievement = ({title}) => {
   )
 }
 
-const DetailBoard = (props) => {
+export const DetailBoard = (props) => {
   const tooltipStyle = {
     maxWidth: 'calc(100% - 10px)',
     padding: '8px 5px',
@@ -87,9 +88,18 @@ const DetailBoard = (props) => {
   )
 }
 
-const PlayLog = (props) => {
+export const PlayLog = (props) => {
   const [ isLimit10, setLimit10 ] = useState(true)
   const [ focusRecord, setFocusRecord ] = useState(null)
+
+  const StageMark = ({stage}) => {
+    return(
+      <span className='stage-mark'>
+        {stage.split('ウラ')}
+      </span>
+    )
+  }
+
   return props.log?.length > 0 ? (
     <div className="playlog">
       <p
@@ -106,7 +116,10 @@ const PlayLog = (props) => {
         </thead>
         <tbody>
           {
-            props.log.slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
+            props.log.sort((a, b) => a.timeline_id < b.timeline_id).slice(0, (isLimit10 ? 10 : props.log.length)).map((log, index) => {
+              const date = props.isHiddenDate ? null : new Date(log.datetime.date)
+              const displayDate = props.isHiddenDate ? '非表示' : `${date.getMonth() + 1}/${date.getDate()}`
+              const displayTime = props.isHiddenDate ? '' : props.isHiddenTime ? log.datetime.timeframe : `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
               return(
                 <>
                   <tr
@@ -116,7 +129,7 @@ const PlayLog = (props) => {
                       setFocusRecord(focusRecord === log.timeline_id ? null : log.timeline_id)
                     }}
                   >
-                    <td className="datetime">{log.created_at}</td>
+                    <td className="datetime">{`${displayDate} ${displayTime}`}{log.stage && <StageMark stage={log.stage}/>}</td>
                     <td className="point">{log.point}P</td>
                     <td className="diff">+{log.diff}</td>
                   </tr>
@@ -152,26 +165,27 @@ const PlayLog = (props) => {
   ) : null
 }
 
-const AverageGraph = (props) => {
+export const AverageGraph = (props) => {
   const [ average, setAverage ] = useState([])
   useEffect(() => {
     const calc = {}
     props.log.forEach((r) => {
       if(r.elapsed > 600) return
-      const date = r.created_at.split(' ')[0]
-      if(!calc[date]){
-        calc[date] = {
-          date,
+      const date = new Date(r.datetime.date)
+      const dateKey = `${date.getMonth() + 1}/${date.getDate()}`
+      if(!calc[dateKey]){
+        calc[dateKey] = {
+          date: dateKey,
           sum: 0,
           max: r.diff,
           count: 0
         }
       }
-      if(calc[date].max < r.diff) calc[date].max = r.diff
-      calc[date].sum += r.diff
-      calc[date].count++
+      if(calc[dateKey].max < r.diff) calc[dateKey].max = r.diff
+      calc[dateKey].sum += r.diff
+      calc[dateKey].count++
     })
-    setAverage(Object.values(calc).reverse().map((r) => ({...r, ave: r.sum / r.count})))
+    setAverage(Object.values(calc).map((r) => ({...r, ave: r.sum / r.count})))
   }, [props?.log])
 
   return (
@@ -194,6 +208,7 @@ const AverageGraph = (props) => {
           <XAxis dataKey="date" fontSize={10} height={15}/>
           <YAxis min={50} width={5} fontSize={10} domain={[50, 'dataMax']}/>
           <Tooltip formatter={(value) => value.toFixed(2)}/>
+          <ReferenceLine y={props.average} stroke="red" />
           <Legend />
           <Line type="monotone" dataKey="ave" stroke="#8884d8" activeDot={{ r: 8 }} />
           <Line type="monotone" dataKey="max" stroke="#82ca9d" />
@@ -203,17 +218,17 @@ const AverageGraph = (props) => {
   )
 }
 
-const PlayerDetails = () => {
-  const { playerDetail } = useSelector((state) => state.recordsReducer)
+const PlayerPage = () => {
+  const { playerDetails } = useSelector((state) => state.recordsReducer)
   const { playername } = useParams()
+  const playerDetail = playerDetails[playername]
   const dispatch = useDispatch()
   useEffect(() => {
-    if (playerDetail?.player_name !== playername) dispatch(actions.setPlayerDetail(null))
     dispatch(actions.getPlayerDetail(playername))
-  }, [])
+  }, [dispatch])
 
   const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
-  const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date('2023/' + r.created_at.split(' ')[0]) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
+  const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date(r.datetime?.date) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
     .filter(r => r > 0) || [];
   const standardAverage = (pointDiffArray.reduce((x, y) => x + y, 0) / pointDiffArray.length)
 
@@ -239,11 +254,12 @@ const PlayerDetails = () => {
               }
               deviationValue={playerDetail?.deviation_value}
             />
+            <p className='description'><Link to={`/player/detail/${playerDetail?.player_name}`} className='link'><TbPresentationAnalytics /> もっと詳しく見る</Link></p>
           </div>
           <div id="table-wrapper">
-            <div>
-              <AverageGraph log={playerDetail?.log?.slice(0, 300) || []}/>
-              <PlayLog log={playerDetail?.log || []} />
+            <div style={{width: '100%'}}>
+              {!playerDetail.isHiddenDate && <AverageGraph log={playerDetail?.log?.slice(-300) || []} average={playerDetail?.effective_average}/>}
+              <PlayLog log={playerDetail?.log || []} isHiddenDate={playerDetail?.isHiddenDate} isHiddenTime={playerDetail.isHiddenTime} />
             </div>
           </div>
           { playerDetail?.prefectures.length > 0 && (
@@ -268,4 +284,4 @@ const PlayerDetails = () => {
 
 }
 
-export default PlayerDetails
+export default PlayerPage

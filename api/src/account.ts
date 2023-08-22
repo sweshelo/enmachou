@@ -92,8 +92,122 @@ class Account {
   // TODO
   async changeSettings(req: Request, res: Response){
     try{
-      const decoded = jwt.verify(req.body.auth, this.publicKey)
-      const settings = [ req.body.isHideDate, req.body.isHideTime, req.body.onlineThreshold ]
+      const decoded = jwt.verify(req.headers.authorization, this.publicKey)
+      await (await this.connection).query('UPDATE users SET is_hide_date = ?, is_hide_time = ? WHERE user_id = ?;', [ req.body.isHiddenDate, req.body.isHiddenTime, decoded['user'] ])
+      res.send({
+        status: status.ok,
+        body: {
+          isHiddenDate: req.body.isHiddenDate,
+          isHiddenTime: req.body.isHiddenTime,
+        }
+      })
+    }catch(e){
+      res.send({
+        status: status.error,
+        message: e.message,
+        body: req.body
+      })
+    }
+  }
+
+  async miAuth(req: Request, res: Response){
+    try{
+      const domain = req.body.origin
+      const session = req.body.session
+      const response = await fetch(`https://${domain}/api/miauth/${session}/check`, {method: 'POST'})
+      const result = await response.json()
+      const userId = `@${result.user.username}@${domain}`
+
+      // アカウントの存在チェック
+      const [userResult] = await (await this.connection).execute('SELECT * FROM users WHERE user_id = ?;', [userId])
+      const isExist = (userResult as []).length !== 0
+      // アカウント情報チェック
+      if(!isExist){
+        const i = await (await fetch(`https://${domain}/api/i`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json'},
+          body: JSON.stringify({i: result.token})
+        })).json()
+        if(new Date(i.createdAt).getTime() >= new Date('2023/08/21 00:00:00').getTime() && domain === 'misskey.io'){
+          res.send({
+            status: status.error,
+            message: '2023年8月21日以降に作られたmisskey.ioのアカウントでは閻魔帳をご利用頂けません。'
+          })
+          return
+        }
+
+        const follow = await (await fetch(`https://${domain}/api/users/following`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json'},
+          body: JSON.stringify({i: result.token, userId: result.user.id})
+        })).json()
+        const enma = follow.find((user: any) => user.followee.username === 'enma' && (user.followee.host === 'misskey.sweshelo.jp' || user.followee.host ===  null))
+        if(!enma){
+          res.send({
+            status: status.error,
+            message: '@enma@misskey.sweshelo.jpをフォローしてください。'
+          })
+          return
+        }
+
+        const notes = await (await fetch(`https://${domain}/api/users/notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json'},
+          body: JSON.stringify({i: result.token, userId: result.user.id})
+        })).json()
+        if(notes.length < 10){
+          res.send({
+            status: status.error,
+            message: '指定されたアカウントは投稿数が少なすぎます。普段ご利用のアカウントをご指定ください。'
+          })
+          return
+        }
+      }
+
+      const [ updateOrCreateAccountResult ] = (isExist)
+        ? await (await this.connection).query(`UPDATE users SET token = '${result.token}' WHERE user_id = ?;`, [[ userId ]])
+        : await (await this.connection).query('INSERT INTO users (user_id, token) VALUES (?);', [[ userId, result.token ]])
+      const [ suggestPlayers ] = (isExist && userResult[0].player_id)
+        ? [ null ]
+        : await (await this.connection).execute(`SELECT * FROM players WHERE player_name like '%${result.user.name}%';`)
+      const userObject = (isExist)
+        ? { userId, playerId: userResult[0].player_id, isAuthorized: (userResult[0].is_authorized_at !== null), isHiddenDate: userResult[0].is_hide_date, isHiddenTime: userResult[0].is_hide_time }
+        : { userId, playerId: null, isAuthorized: false, isHiddenDate: 0, isHiddenTime: 0}
+
+      // レスポンス返す
+      const payload = { user: userId }
+      res.send({
+        status: result.ok ? status.ok : status.error,
+        token: jwt.sign(payload, this.privateKey, { algorithm: 'RS256' }),
+        suggestPlayers,
+        user: userObject
+      })
+    }catch(e){
+      res.send({
+        status: status.error,
+        message: e.message,
+        error: e
+      })
+    }
+  }
+
+  async accountLink(req: Request, res: Response){
+    try{
+      const decoded = jwt.verify(req.headers.authorization, this.publicKey)
+      console.log(decoded['user'])
+      const [ userResult ] = await (await this.connection).execute('SELECT * from users WHERE user_id = ?;', [decoded['user']])
+      if ((userResult as []).length === 0) throw new Error(`Account does not exist ${decoded['user']}`)
+      if (userResult[0].player_id !== null) throw new Error(`Account already linked`)
+      console.log(req.body, req.params)
+
+      const [ playerResult ] = await ((await this.connection).execute('SELECT * from players WHERE player_name = ?;', [req.body.playerName]))
+      if ((playerResult as []).length === 0) throw new Error(`Player does not exist ${req.body.playerName}`)
+      if (playerResult[0].user_id !== null) throw new Error(`Specified player already linked by another user.`)
+
+      const playerId = playerResult[0].player_id
+      await (await this.connection).query(`UPDATE players SET user_id = "${decoded['user']}" WHERE player_id = ${playerId};`)
+      await (await this.connection).query(`UPDATE users SET player_id = ${playerId} WHERE user_id = "${decoded['user']}";`)
+
       res.send({
         status: status.ok
       })
@@ -101,7 +215,7 @@ class Account {
       res.send({
         status: status.error,
         message: e.message,
-        body: req.body
+        error: JSON.stringify(e)
       })
     }
   }

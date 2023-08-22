@@ -122,10 +122,12 @@ const Ranking = () => {
   return (
     <div id="ranking-wrapper">
       <div className="ranking">
+        {/*
         <h2 className="page-title rainbow-grad-back">夏のプレゼントキャンペーン</h2>
         <p className="description">7/28（金）10:00 ～ 8/31（木）09:59</p>
         <p className="title-paragraph">グッズの残り先着枠</p>
         <PresentModule />
+        */}
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
         <p className="title-paragraph">現在のキャラクター構成比率</p>
         <div className="centerize">

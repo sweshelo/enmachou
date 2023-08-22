@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import {useCookies} from 'react-cookie'
 import Ranking from './components/Ranking';
-import PlayerDetails from './components/PlayerDetails';
 import {DrawerMenu} from './components/DrawerMenu';
 import Online from './components/Online';
 import {About} from './components/About';
@@ -17,6 +16,11 @@ import {useState} from 'react';
 import {config} from './config';
 import {Login} from './components/LoginPage';
 import Matching from './components/Matching';
+import {MiAuth} from './components/MiAuthPage';
+import PlayerPage from './components/PlayerPage';
+import PlayerDetailPage from './components/PlayerDetailPage';
+import AverageRanking from './components/AverageRanking';
+import {Settings} from './components/Settings';
 
 function App() {
 
@@ -36,20 +40,28 @@ function App() {
       <div className="App">
         <header>
           <h1 className='ccj-font'><Link to='/'>閻魔帳</Link></h1>
-          <span>v0.9.12 - @sweshelo</span>
+          <span>v1.0.0 - @sweshelo</span>
         </header>
-        <DrawerMenu />
-        <Routes>
-          <Route path="/" element={<Ranking />} />
-          <Route path="/ranking" element={<Ranking />} />
-          <Route path="/ranking/max" element={<MaxPointRanking />} />
-          <Route path='/player/:playername' element={<PlayerDetails />} />
-          <Route path='/matching/:timelineId' element={<Matching />} />
-          <Route path='/online' element={<Online />} />
-          <Route path='/about' element={<About />} />
-          <Route path='/stats' element={<Statistics />} />
-          <Route path='/login' element={<Login />} />
-        </Routes>
+        <div id='container'>
+          <DrawerMenu />
+          <main>
+            <Routes>
+              <Route path="/" element={<Ranking />} />
+              <Route path="/ranking" element={<Ranking />} />
+              <Route path="/ranking/max" element={<MaxPointRanking />} />
+              <Route path="/ranking/average" element={<AverageRanking />} />
+              <Route path='/player/:playername' element={<PlayerPage />} />
+              <Route path='/player/detail/:playername' element={<PlayerDetailPage />} />
+              <Route path='/matching/:timelineId' element={<Matching />} />
+              <Route path='/online' element={<Online />} />
+              <Route path='/about' element={<About />} />
+              <Route path='/stats' element={<Statistics />} />
+              <Route path='/login' element={<Login />} />
+              <Route path='/miauth' element={<MiAuth />} />
+              <Route path='/settings' element={<Settings />} />
+            </Routes>
+          </main>
+        </div>
       </div>
     </Router>
   );
