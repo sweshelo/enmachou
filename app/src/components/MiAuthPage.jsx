@@ -38,6 +38,7 @@ export const MiAuth = () => {
           <>
             <p>あなたのプレイヤーアカウントを選択してください</p>
             <p>この操作は一度しか行えません</p>
+            <p>以下に候補となるあなたのアカウントがない場合はSwesheloに問い合わせてください</p>
             {suggestPlayers?.map((player) => (
               <div onClick={()=>{clickHandler(player.player_name)}}>
                 <Player chara={player.chara} name={player.player_name} isLink={false} />
