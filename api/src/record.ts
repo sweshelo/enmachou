@@ -57,6 +57,8 @@ class Record {
       if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
       const decodedToken = req.headers.authorization ? jwt.verify(req.headers.authorization, this.publicKey) : null
       const authorizedUserId = decodedToken ? decodedToken['user'] : null
+      const limit = req.query.limit ? Number(req.query.limit) : 300
+      console.log(req.query.limit, limit)
 
       if( toFullWidth(req.params.playername) === 'プレーヤー' ){
         const response = {
@@ -80,11 +82,11 @@ class Record {
         return
       }
 
-      const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at DESC LIMIT 300;"
+      const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at DESC LIMIT ?;"
       const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
       const getUserAccountFromUsersQuery = "SELECT * FROM users WHERE player_id = ? LIMIT 1;"
       const [ [playLogQueryResult], [prefectureQueryResult] ] = await Promise.all([
-        (await this.connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
+        (await this.connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername), limit ]),
         (await this.connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
       ])
 
@@ -302,7 +304,10 @@ class Record {
         }).filter(r => !!r)
         res.send({
           status: status.ok,
-          body: responseArray,
+          body: {
+            players: responseArray,
+            stage: identifyStage((new Date()).toLocaleString('ja-JP')),
+          },
         })
       }else{
         res.send({

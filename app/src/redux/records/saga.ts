@@ -34,7 +34,7 @@ export function* getAverageRankingData(): Generator<unknown, void, any>{
 
 export function* getPlayerDetailData({payload}): Generator<unknown, void, any>{
   const { token } = yield select(getAccount)
-  const response = yield call(EnmaApi.getPlayerDetailData, {playerName: payload.playerName, token})
+  const response = yield call(EnmaApi.getPlayerDetailData, {...payload, token})
   const result = yield response.json()
   yield put(actions.setPlayerDetail(result.body))
 }

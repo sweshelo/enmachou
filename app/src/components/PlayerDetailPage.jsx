@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import { Link, useParams } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, PieChart, Pie, Cell, AreaChart, Area, ComposedChart, Bar, ZAxis, RectangleProps, Scatter } from 'recharts';
+import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line, PieChart, Pie, Cell, AreaChart, Area, ComposedChart, Bar, ZAxis, RectangleProps, Scatter, BarChart } from 'recharts';
 import actions from '../redux/records/actions.ts';
 import Map from './Map';
 import './PlayerPage.css';
@@ -11,8 +11,8 @@ import { Spin } from 'antd';
 import {TimeframeChart} from './Statistics';
 import {Achievement, AverageGraph, DetailBoard, OnlineIndicator, PlayLog} from './PlayerPage';
 
+const COLORS = ['#0088FE', '#55AAFF', '#00C49F', '#FFBB28', '#FF8042', '#F05040',];
 const StagePieCharts = ({data, log, toolTipFunc}) => {
-  const COLORS = ['#0088FE', '#55AAFF', '#00C49F', '#FFBB28', '#FF8042', '#F05040',];
   return(
     <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
       <Pie
@@ -36,13 +36,37 @@ const StagePieCharts = ({data, log, toolTipFunc}) => {
   )
 }
 
+const StageBarCharts = ({data, log, toolTipFunc}) => {
+  return(
+    <BarChart
+      data={data}
+      width={Math.min(window.innerWidth - 20, 600)} height={160}
+      margin={{
+        top: 15,
+        right: 20,
+        left: 20,
+        bottom: 5,
+      }}
+    >
+      <XAxis dataKey="name" fontSize={'12px'} />
+      <YAxis width={15}  fontSize={'12px'}/>
+      <Bar dataKey={"value"}>
+        {log.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % 20]} />
+        ))}
+      </Bar>
+      <Tooltip formatter={toolTipFunc} />
+    </BarChart>
+  )
+}
+
 const PlayerDetailPage = () => {
   const { playerDetails } = useSelector((state) => state.recordsReducer)
   const { playername } = useParams()
   const playerDetail = playerDetails[playername]
   const dispatch = useDispatch()
   useEffect(() => {
-    dispatch(actions.getPlayerDetail(playername))
+    dispatch(actions.getPlayerDetail(playername, 10000))
   }, [])
 
   const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
@@ -63,8 +87,16 @@ const PlayerDetailPage = () => {
       }
       return acc;
     }, []);
+    console.log(eachStageLog)
     return(
       <>
+        <p className='description medium'>
+          ステージ別の詳細データは公式ランキング上の<br />
+          『最終更新』を全面的に信頼して算出されます。<br />
+          従ってステージ選出バグや時間差によって<br />
+          別のステージが選出されている場合も<br />
+          スケジュール上のステージが採用されます。
+        </p>
         <p className='title-paragraph'>ステージ別プレイ比率</p>
         <StagePieCharts
           data={eachStageLog.map((item) => ({name: item.stage, value: item.records.length}))}
@@ -75,11 +107,20 @@ const PlayerDetailPage = () => {
         <StagePieCharts
           data={eachStageLog.map((item) => ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0)}))}
           log={eachStageLog}
-          toolTipFunc={(value) => `${value.toFixed(2)}P`}
+          toolTipFunc={(value) => `${value}P`}
         />
         <p className='title-paragraph'>ステージ別貢献度平均</p>
         <StagePieCharts
           data={eachStageLog.map((item) => ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += item.diff }, 0) / item.records.length }))}
+          log={eachStageLog}
+          toolTipFunc={(value) => `${value.toFixed(2)}P`}
+        />
+        <p className='title-paragraph'>ステージ別貢献度平均差分</p>
+        <p className='description medium'>
+          このグラフはステージ毎の平均貢献度と有効平均貢献ポイントとの差を表示しています
+        </p>
+        <StageBarCharts
+          data={eachStageLog.map((item) => ({name: item.stage, value: item.records.reduce((acc, item) => { return acc += (item.diff) }, 0) / item.records.length - playerDetail?.effective_average }))}
           log={eachStageLog}
           toolTipFunc={(value) => `${value.toFixed(2)}P`}
         />
@@ -155,23 +196,79 @@ const PlayerDetailPage = () => {
           data={result}
           stackOffset="expand"
           margin={{
-            top: 10,
-            right: 30,
-            left: 0,
-            bottom: 0,
+            top: 20,
+            right: 20,
+            left: 20,
+            bottom: 20,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" fontSize={10}/>
-          <YAxis tickFormatter={(decimal) => `${decimal * 100}%`} fontSize={10}/>
+          <YAxis tickFormatter={(decimal) => `${decimal * 100}%`} fontSize={10} width={20}/>
           {
             charaChartMock.map((chara, index) => {
               return listedChara.includes(chara.name) ? (<Area type={"monotone"} dataKey={chara.name} stackId={1} stroke={chara.color} fill={chara.color} />) : null
             })
           }
           <Tooltip />
-          <Legend />
+          <Legend fontSize={10}/>
         </AreaChart>
+      </>
+    )
+  }
+
+  const RankingChart = () => {
+    return(
+      <>
+        <p className='title-paragraph'>ランキング順位変遷</p>
+        <LineChart
+          width={Math.min(window.innerWidth - 20, 600)}
+          height={160}
+          data={playerDetail?.log}
+          margin={{
+            top: 20,
+            right: 20,
+            left: 20,
+            bottom: 20,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="datetime.date" fontSize={10} reversed={true} tickFormatter={(r) => {
+            const date = new Date(r);
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+            }}/>
+          <YAxis dataKey="ranking" fontSize={10} width={15} reversed={true} domain={[1, 100]}/>
+          <Tooltip />
+          <Legend fontSize={10}/>
+          <Line type="monotone" dataKey="ranking" stroke="#82ca9d" dot={false}/>
+        </LineChart>
+      </>
+    )
+  }
+
+  const AchievementsTable = () => {
+    const achievements = Array.from(new Set(playerDetail?.log.map(l => l.achievement)))
+    const dateFormatter = (dateString) => {
+      const date = new Date(dateString)
+      return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+    }
+
+    return(
+      <>
+        <p className='title-paragraph'>称号変遷</p>
+        <p className='description medium'>
+          各称号が初めてランキング上に掲載された日時が表示されます
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <td>日時</td><td>称号名</td>
+            </tr>
+          </thead>
+          <tbody>
+            {achievements.map(achievement => <tr><td>{dateFormatter(playerDetail?.log.find(log => log.achievement === achievement).datetime.date)}</td><td>{achievement}</td></tr>)}
+          </tbody>
+        </table>
       </>
     )
   }
@@ -327,10 +424,12 @@ const PlayerDetailPage = () => {
               <DetailEachStage />
               <DetailEachHour />
               <CharaChart />
+              <RankingChart />
+              <AchievementsTable />
             </div>
             <div id="table-wrapper">
               <div>
-                <AverageGraph log={playerDetail?.log?.slice(-300) || []} average={playerDetail?.effective_average}/>
+                <AverageGraph log={playerDetail?.log?.slice(-1000) || []} average={playerDetail?.effective_average}/>
                 <PlayLog log={playerDetail?.log || []} />
               </div>
             </div>

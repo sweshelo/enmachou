@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import { Link, useParams } from 'react-router-dom';
@@ -224,8 +224,17 @@ const PlayerPage = () => {
   const playerDetail = playerDetails[playername]
   const dispatch = useDispatch()
   useEffect(() => {
-    dispatch(actions.getPlayerDetail(playername))
+    playerDetail || dispatch(actions.getPlayerDetail(playername))
   }, [dispatch])
+
+  const PrefectureMap = useMemo(() => {
+    return playerDetail?.prefectures.length > 0 && (
+      <div id="prefectures">
+        <p className="title-paragraph">このユーザの制県度</p>
+        <Map visited={[...playerDetail?.prefectures]} />
+      </div>
+    )
+  }, [playerDetail, dispatch])
 
   const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
   const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date(r.datetime?.date) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
@@ -262,19 +271,14 @@ const PlayerPage = () => {
               <PlayLog log={playerDetail?.log || []} isHiddenDate={playerDetail?.isHiddenDate} isHiddenTime={playerDetail.isHiddenTime} />
             </div>
           </div>
-          { playerDetail?.prefectures.length > 0 && (
-            <div id="prefectures">
-              <p className="title-paragraph">このユーザの制県度</p>
-              <Map visited={[...playerDetail?.prefectures]} />
-            </div>
-          ) }
+          {PrefectureMap}
         </div>
       ) : (
         <>
           <p style={{
             position: 'absolute',
             top: '50vh',
-            }}>
+          }}>
             <Spin /> 読み込み中…
           </p>
         </>
