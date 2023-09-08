@@ -429,6 +429,7 @@ class Record {
               '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
               '11': { name: 'マラリヤ', count: 0, color: 'purple' },
               '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
+              '13':{ name: 'ジョウカ', count: 0, color: 'black' },
             }
             data[dateString].ranking = {
               //'0': { name: null, count: null, color: null },
@@ -444,6 +445,7 @@ class Record {
               '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
               '11': { name: 'マラリヤ', count: 0, color: 'purple' },
               '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
+              '13':{ name: 'ジョウカ', count: 0, color: 'black' },
             }
             data[dateString].timeframe = [...Array(24)].map(() => 0)
             countForRanking = 0
