@@ -147,7 +147,7 @@ class Record {
         // 有効平均貢献度類
         const [ playerInfoResult ] = await (await this.connection).execute('SELECT * FROM players WHERE player_name = ?', [ toFullWidth(req.params.playername) ])
         const playerInfo = (playerInfoResult as Players[]).length > 0 ? playerInfoResult[0] as Players : null
-        const [ userAccountResult ] = await (await this.connection).execute(getUserAccountFromUsersQuery, [ playerInfo.player_id ])
+        const [ userAccountResult ] = await (await this.connection).execute(getUserAccountFromUsersQuery, [ playerInfo?.player_id || ''])
         const userAccount = (userAccountResult as User[]).length > 0 ? userAccountResult[0] as User : null
         const isAuthorized = userAccount?.user_id === authorizedUserId
         const shouldHideDate = !isAuthorized && (userAccount?.is_hide_date === -1)
