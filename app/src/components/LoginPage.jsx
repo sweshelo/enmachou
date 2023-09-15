@@ -31,12 +31,20 @@ export const Login = () => {
   return(
     <div id="login" style={pageStyle}>
       <h2>ログイン</h2>
-      <p className='medium'>ログインすることで閻魔帳の設定を変更できるようになります</p>
+      <p className='medium'>
+        ログインすることで閻魔帳の設定を変更できるようになります
+      </p>
+      <p className='medium description' style={{textAlign: 'left'}}>
+        ※ 新規登録(初めてログイン)する場合は<br />次の要件を満たす必要があります<br />
+        ・<a href="https://misskey.sweshelo.jp/@enma" className="link">@enma@misskey.sweshelo.jp</a>をフォローしている<br />
+        ・Misskeyのアカウント名がCCJのプレイヤー名の一部と一致している<br />
+        ・Misskey上に10Note以上投稿している<br />
+        ・<span style={{color: 'red'}}>(misskey.ioの場合)アカウントが2023年8月21日以前に作られている</span>
+      </p>
       <div className='misskey-server-button'>
         <Button style={{width: '90%'}} href={generateMiAuthURL('misskey.io')}>
           <img src='img/misskey-io.jpg' height={'22px'}/> misskey.ioでログイン
         </Button>
-        <p className='medium' style={{color: 'red'}}>※misskey.ioは2023年8月21日以前に作られたアカウントのみログインできます</p>
       </div>
       <div className='misskey-server-button'>
         <Button style={{width: '90%'}} href={generateMiAuthURL('misskey.sweshelo.jp')}>
@@ -49,6 +57,11 @@ export const Login = () => {
           <img src='img/misskey.png' height={'22px'}/> その他のMisskeyサーバでログイン
         </Button>
       </div>
+      <h2>Misskeyに登録</h2>
+      <p className='medium'>
+        Misskeyは分散型SNSのネットワーク『Fediverse』を構築するソフトウェアの1つで、日本においても100を超えるサーバが運用されています。<br /><br />
+        Misskeyサーバを探す: <a style={{color: 'blue'}} className="link" href="https://join.misskey.page/ja-JP/instances">https://join.misskey.page/ja-JP/instances</a>
+      </p>
     </div>
   )
 }
