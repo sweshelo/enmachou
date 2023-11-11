@@ -160,11 +160,11 @@ const PlayerDetailPage = () => {
       { name: '紅刃', count: 0, color: 'crimson' },
       { name: '首塚ボタン', count: 0, color: 'orchid' },
       { name: 'クルル', count: 0, color: 'green' },
-      { name: null, count: null },
+      { name: 'ミロク', count: 0, color: 'chartreuse' },
       { name: '最愛チアモ', count: 0, color: 'lightpink' },
       { name: 'マラリヤ', count: 0, color: 'purple' },
       { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
-      { name: 'ジョウカ', count: 0, color: 'black' },
+      { name: 'ジョウカ', count: 0, color: 'skyblue' },
     ]
     const listedChara = []
 

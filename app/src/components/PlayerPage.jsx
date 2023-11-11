@@ -88,14 +88,28 @@ export const DetailBoard = (props) => {
   )
 }
 
+const stageInfo = (name) => {
+  switch(name){
+    case 'ウラシブヤ': return { name: 'シブヤ1', color: 'normal' }
+    case 'ウラシブヤ２': return { name: 'シブヤ2', color: 'normal' }
+    case 'ウラシブヤ３': return { name: 'シブヤ3', color: 'normal' }
+    case 'ウラシブヤ（ハロウィンver.）': return { name: 'ハロシブ', color: 'event' }
+    case 'ウラオオサカ': return { name: 'オオサカ1', color: 'normal' }
+    case 'ウラオオサカ２': return { name: 'オオサカ2', color: 'normal' }
+    case 'ウラオキナワ': return { name: 'オキナワ1', color: 'normal' }
+    case 'ウラオキナワ２': return { name: 'オキナワ2', color: 'normal' }
+  }
+}
+
 export const PlayLog = (props) => {
   const [ isLimit10, setLimit10 ] = useState(true)
   const [ focusRecord, setFocusRecord ] = useState(null)
 
   const StageMark = ({stage}) => {
+    const { name, color } = stageInfo(stage)
     return(
-      <span className='stage-mark'>
-        {stage.split('ウラ')}
+      <span className={`stage-mark-${color}`}>
+        {name}
       </span>
     )
   }
