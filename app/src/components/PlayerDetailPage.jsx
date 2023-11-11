@@ -14,7 +14,7 @@ import {Achievement, AverageGraph, DetailBoard, OnlineIndicator, PlayLog} from '
 const COLORS = ['#0088FE', '#55AAFF', '#00C49F', '#FFBB28', '#FF8042', '#F05040',];
 const StagePieCharts = ({data, log, toolTipFunc}) => {
   return(
-    <PieChart width={Math.min(window.innerWidth - 20, 600)} height={160}>
+    <PieChart width={Math.min(window.innerWidth - 20, 600)} height={190}>
       <Pie
         data={data}
         cx="50%"

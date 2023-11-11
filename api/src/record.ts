@@ -58,7 +58,6 @@ class Record {
       const decodedToken = req.headers.authorization ? jwt.verify(req.headers.authorization, this.publicKey) : null
       const authorizedUserId = decodedToken ? decodedToken['user'] : null
       const limit = req.query.limit ? Number(req.query.limit) : 300
-      console.log(req.query.limit, limit)
 
       if( toFullWidth(req.params.playername) === 'プレーヤー' ){
         const response = {
