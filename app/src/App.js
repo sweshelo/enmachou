@@ -40,7 +40,7 @@ function App() {
       <div className="App">
         <header>
           <h1 className='ccj-font'><Link to='/'>閻魔帳</Link></h1>
-          <span>v1.0.2 - @sweshelo</span>
+          <span>v1.1.0 - @sweshelo</span>
         </header>
         <div id='container'>
           <DrawerMenu />
