@@ -90,17 +90,89 @@ export const datetimeToTimeframe = (datetimeString: string, hideDetailPlayTime: 
 // ステージ特定
 export const identifyStage = (targetDate: string) => {
   const schedule = [
-    { start: new Date('7/11/2023 10:00'), end: new Date('7/18/2023 9:59'), evenHour: 'ウラオオサカ２', oddHour: 'ウラシブヤ３' },
-    { start: new Date('7/18/2023 10:00'), end: new Date('7/25/2023 9:59'), evenHour: 'ウラシブヤ', oddHour: 'ウラオオサカ' },
-    { start: new Date('7/25/2023 10:00'), end: new Date('8/1/2023 9:59'), evenHour: 'ウラシブヤ２', oddHour: 'ウラオオサカ２' },
-    { start: new Date('8/1/2023 10:00'), end: new Date('8/8/2023 9:59'), evenHour: 'ウラシブヤ３', oddHour: 'ウラシブヤ' },
-    { start: new Date('8/8/2023 10:00'), end: new Date('8/15/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオキナワ' },
-    { start: new Date('8/15/2023 10:00'), end: new Date('8/22/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ' },
-    { start: new Date('8/22/2023 10:00'), end: new Date('8/29/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラシブヤ２' },
-    { start: new Date('8/29/2023 10:00'), end: new Date('9/5/2023 9:59'), evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ２' },
+    { start: '7/11/2023 10:00', end: '7/18/2023 9:59', evenHour: 'ウラオオサカ２', oddHour: 'ウラシブヤ３' },
+    { start: '7/18/2023 10:00', end: '7/25/2023 9:59', evenHour: 'ウラシブヤ', oddHour: 'ウラオオサカ' },
+    { start: '7/25/2023 10:00', end: '8/1/2023 9:59', evenHour: 'ウラシブヤ２', oddHour: 'ウラオオサカ２' },
+    { start: '8/1/2023 10:00', end: '8/8/2023 9:59', evenHour: 'ウラシブヤ３', oddHour: 'ウラシブヤ' },
+    { start: '8/8/2023 10:00', end: '8/15/2023 9:59', evenHour: 'ウラオキナワ', oddHour: 'ウラオキナワ' },
+    { start: '8/15/2023 10:00', end: '8/22/2023 9:59', evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ' },
+    { start: '8/22/2023 10:00', end: '8/29/2023 9:59', evenHour: 'ウラオキナワ', oddHour: 'ウラシブヤ２' },
+    { start: '8/29/2023 10:00', end: '9/5/2023 9:59', evenHour: 'ウラオキナワ', oddHour: 'ウラオオサカ２' },
+    {
+      start: "2023-11-14T01:00:00.000Z",
+      end: "2023-11-21T00:59:00.000Z",
+      oddHour: "ウラオキナワ２",
+      evenHour: "ウラオキナワ２"
+    },
+    {
+      start: "2023-11-21T01:00:00.000Z",
+      end: "2023-11-28T00:59:00.000Z",
+      oddHour: "ウラシブヤ３",
+      evenHour: "ウラオキナワ２"
+    },
+    {
+      start: "2023-10-31T01:00:00.000Z",
+      end: "2023-11-07T00:59:00.000Z",
+      oddHour: "ウラシブヤ（ハロウィンver.）",
+      evenHour: "ウラオオサカ２"
+    },
+    {
+      start: "2023-11-07T01:00:00.000Z",
+      end: "2023-11-14T00:59:00.000Z",
+      oddHour: "ウラオキナワ",
+      evenHour: "ウラシブヤ２"
+    },
+    {
+      start: "2023-10-03T01:00:00.000Z",
+      end: "2023-10-10T00:59:00.000Z",
+      oddHour: "ウラシブヤ",
+      evenHour: "ウラオオサカ"
+    },
+    {
+      start: "2023-10-10T01:00:00.000Z",
+      end: "2023-10-17T00:59:00.000Z",
+      oddHour: "ウラオオサカ２",
+      evenHour: "ウラシブヤ２"
+    },
+    {
+      start: "2023-10-17T01:00:00.000Z",
+      end: "2023-10-24T00:59:00.000Z",
+      oddHour: "ウラオキナワ",
+      evenHour: "ウラシブヤ３"
+    },
+    {
+      start: "2023-10-24T01:00:00.000Z",
+      end: "2023-10-31T00:59:00.000Z",
+      oddHour: "ウラオオサカ",
+      evenHour: "ウラシブヤ（ハロウィンver.）"
+    },
+    {
+      start: "2023-09-05T01:00:00.000Z",
+      end: "2023-09-12T00:59:00.000Z",
+      oddHour: "ウラオオサカ",
+      evenHour: "ウラシブヤ３"
+    },
+    {
+      start: "2023-09-12T01:00:00.000Z",
+      end: "2023-09-19T00:59:00.000Z",
+      oddHour: "ウラオキナワ",
+      evenHour: "ウラシブヤ"
+    },
+    {
+      start: "2023-09-19T01:00:00.000Z",
+      end: "2023-09-26T00:59:00.000Z",
+      oddHour: "ウラシブヤ２",
+      evenHour: "ウラオオサカ２"
+    },
+    {
+      start: "2023-09-26T01:00:00.000Z",
+      end: "2023-10-03T00:59:00.000Z",
+      oddHour: "ウラシブヤ３",
+      evenHour: "ウラオキナワ"
+    }
   ]
 
-  const foundRecord = schedule.find(record => new Date(targetDate) >= record.start && new Date(targetDate) <= record.end)
+  const foundRecord = schedule.find(record => new Date(targetDate) >= new Date(record.start) && new Date(targetDate) <= new Date(record.end))
   const isEvenHour = new Date(targetDate).getHours() % 2 === 0
   return foundRecord ? isEvenHour ? foundRecord.evenHour : foundRecord.oddHour : null
 }

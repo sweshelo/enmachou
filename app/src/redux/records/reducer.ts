@@ -20,6 +20,7 @@ type State = {
     [key: string]: PlayerDetail | null
   } | null;
   stats: Stats | null;
+  currentStage: string;
 }
 
 const initialState: State = {
@@ -31,12 +32,13 @@ const initialState: State = {
   isLoading: true,
   playerDetails: {},
   stats: null,
+  currentStage: '',
 }
 
 const recordsReducer = (state = initialState, action: Action) => {
   switch(action.type){
     case actions.SET_ONLINEPLAYER:
-      return { ...state, onlinePlayer: action.payload }
+      return { ...state, onlinePlayer: action.payload.players, currentStage: action.payload.stage }
     case actions.SET_AS_LOADING:
       return { ...state, isLoading: true }
     case actions.SET_AS_LOADED:
@@ -48,7 +50,6 @@ const recordsReducer = (state = initialState, action: Action) => {
     case actions.SET_AVERAGE_RANKING:
       return { ...state, AverageRanking: action.payload }
     case actions.SET_PLAYER_DETAIL:
-      console.log(action.payload)
       if (!action.payload) return {...state}
       return {
         ...state,

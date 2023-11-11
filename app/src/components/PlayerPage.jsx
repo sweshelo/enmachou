@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import ReactDOMServer from 'react-dom/server';
 import { Link, useParams } from 'react-router-dom';
@@ -88,14 +88,28 @@ export const DetailBoard = (props) => {
   )
 }
 
+const stageInfo = (name) => {
+  switch(name){
+    case 'ウラシブヤ': return { name: 'シブヤ1', color: 'normal' }
+    case 'ウラシブヤ２': return { name: 'シブヤ2', color: 'normal' }
+    case 'ウラシブヤ３': return { name: 'シブヤ3', color: 'normal' }
+    case 'ウラシブヤ（ハロウィンver.）': return { name: 'ハロシブ', color: 'event' }
+    case 'ウラオオサカ': return { name: 'オオサカ1', color: 'normal' }
+    case 'ウラオオサカ２': return { name: 'オオサカ2', color: 'normal' }
+    case 'ウラオキナワ': return { name: 'オキナワ1', color: 'normal' }
+    case 'ウラオキナワ２': return { name: 'オキナワ2', color: 'normal' }
+  }
+}
+
 export const PlayLog = (props) => {
   const [ isLimit10, setLimit10 ] = useState(true)
   const [ focusRecord, setFocusRecord ] = useState(null)
 
   const StageMark = ({stage}) => {
+    const { name, color } = stageInfo(stage)
     return(
-      <span className='stage-mark'>
-        {stage.split('ウラ')}
+      <span className={`stage-mark-${color}`}>
+        {name}
       </span>
     )
   }
@@ -224,8 +238,17 @@ const PlayerPage = () => {
   const playerDetail = playerDetails[playername]
   const dispatch = useDispatch()
   useEffect(() => {
-    dispatch(actions.getPlayerDetail(playername))
+    playerDetail || dispatch(actions.getPlayerDetail(playername))
   }, [dispatch])
+
+  const PrefectureMap = useMemo(() => {
+    return playerDetail?.prefectures.length > 0 && (
+      <div id="prefectures">
+        <p className="title-paragraph">このユーザの制県度</p>
+        <Map visited={[...playerDetail?.prefectures]} />
+      </div>
+    )
+  }, [playerDetail, dispatch])
 
   const pointDiffArray = playerDetail?.log?.map( r => r.elapsed < 600 ? r.diff : null).filter(r => r > 0) || [];
   const pointAfter0506DiffArray = playerDetail?.log?.map(r => r.elapsed < 600 && new Date(r.datetime?.date) >= new Date('2023-05-06 00:00:00') ? r.diff : null)
@@ -262,19 +285,14 @@ const PlayerPage = () => {
               <PlayLog log={playerDetail?.log || []} isHiddenDate={playerDetail?.isHiddenDate} isHiddenTime={playerDetail.isHiddenTime} />
             </div>
           </div>
-          { playerDetail?.prefectures.length > 0 && (
-            <div id="prefectures">
-              <p className="title-paragraph">このユーザの制県度</p>
-              <Map visited={[...playerDetail?.prefectures]} />
-            </div>
-          ) }
+          {PrefectureMap}
         </div>
       ) : (
         <>
           <p style={{
             position: 'absolute',
             top: '50vh',
-            }}>
+          }}>
             <Spin /> 読み込み中…
           </p>
         </>

@@ -52,10 +52,11 @@ const actions = {
   finishLoading: () => ({
     type: actions.SET_AS_LOADED
   }),
-  getPlayerDetail: (playerName: string) => ({
+  getPlayerDetail: (playerName: string, limit?: number) => ({
     type: actions.GET_PLAYER_DETAIL,
     payload: {
-      playerName
+      playerName,
+      limit,
     }
   }),
   setPlayerDetail: (payload: PlayerDetail) => ({

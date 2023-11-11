@@ -156,8 +156,16 @@ tr.focus-record{
   background-color: #bbb;
 }
 
-.stage-mark{
+.stage-mark-normal{
   border: solid 2px #aea;
+  border-radius: 3px;
+  font-size: 8px;
+  margin: 0px 4px;
+  padding: 2px;
+}
+
+.stage-mark-event{
+  border: solid 2px orange;
   border-radius: 3px;
   font-size: 8px;
   margin: 0px 4px;

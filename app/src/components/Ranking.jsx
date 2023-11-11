@@ -100,17 +100,17 @@ const Ranking = () => {
       { name: '紅刃', count: 0, color: 'crimson' },
       { name: '首塚ボタン', count: 0, color: 'orchid' },
       { name: 'クルル', count: 0, color: 'green' },
-      { name: null, count: null },
+      { name: 'ミロク', count: 0, color: 'chartreuse' },
       { name: '最愛チアモ', count: 0, color: 'lightpink' },
       { name: 'マラリヤ', count: 0, color: 'purple' },
       { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
-      { name: 'ジョウカ', count: 0, color: 'black' },
+      { name: 'ジョウカ', count: 0, color: 'skyblue' },
     ]
     ranking?.standardRanking?.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
     setCharaChartData(charaChartMock)
   }, [ranking])
 
-  const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '8', '10', '11', '12', '13' ]
+  const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13' ]
   const charaFilterClickHandler = (index) => {
     if (charaIndexTable[index] === filterChara) {
       setFilter(!isFiltered)
