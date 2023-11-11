@@ -164,6 +164,7 @@ const PlayerDetailPage = () => {
       { name: '最愛チアモ', count: 0, color: 'lightpink' },
       { name: 'マラリヤ', count: 0, color: 'purple' },
       { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
+      { name: 'ジョウカ', count: 0, color: 'black' },
     ]
     const listedChara = []
 
