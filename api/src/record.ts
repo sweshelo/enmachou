@@ -291,30 +291,22 @@ class Record {
       const [ result ] = await (await this.connection).execute(getOnlineUserFromUsersQuery, [ nMinutesAgoTime.toLocaleString('sv-SE', { timeZone: 'Asia/Tokyo' }) ])
       const onlinePlayers = result as TimelineForOnlinePlayer[]
 
-      if(onlinePlayers.length > 0){
-        const usernameArray: string[] = []
-        const responseArray = onlinePlayers.map((user: TimelineForOnlinePlayer) => {
-          if(usernameArray.includes(user.player_name)){
-            return null
-          }else{
-            usernameArray.push(user.player_name)
-            return user
-          }
-        }).filter(r => !!r)
-        res.send({
-          status: status.ok,
-          body: {
-            players: responseArray,
-            stage: identifyStage((new Date()).toLocaleString('ja-JP')),
-          },
-        })
-      }else{
-        res.send({
-          status: status.undefined,
-          body: [],
-          message: 'データがありません。',
-        })
-      }
+      const usernameArray: string[] = []
+      const responseArray = onlinePlayers.map((user: TimelineForOnlinePlayer) => {
+        if(usernameArray.includes(user.player_name)){
+          return null
+        }else{
+          usernameArray.push(user.player_name)
+          return user
+        }
+      }).filter(r => !!r)
+      res.send({
+        status: status.ok,
+        body: {
+          players: responseArray,
+          stage: identifyStage((new Date()).toLocaleString('ja-JP')),
+        },
+      })
     }catch(e){
       res.send({
         status: status.error,
