@@ -9,6 +9,9 @@ export function* getOnlinePlayer(): Generator<unknown, void, any>{
   const { token } = yield select(getAccount)
   const response = yield call(EnmaApi.getOnlinePlayerData, token)
   const result = yield response.json()
+  if (result.status === 'error') {
+    alert(result.message)
+  }
   yield put(actions.setOnlinePlayerList(result.body))
   yield put(actions.finishLoading())
 }
