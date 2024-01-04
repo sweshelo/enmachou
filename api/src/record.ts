@@ -29,7 +29,7 @@ class Record {
   async getRanking(req: Request, res: Response){
     try{
       if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
-      const getLatestRankingFromTimelineQuery = "SELECT ranking, player_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
+      const getLatestRankingFromTimelineQuery = "SELECT ranking, player_name, point, chara FROM (SELECT * FROM ranking ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
       const [ result ] = await (await this.connection).execute(getLatestRankingFromTimelineQuery)
       if (result && Array.isArray(result) && result.length > 0){
         res.send({
@@ -59,8 +59,16 @@ class Record {
       const authorizedUserId = decodedToken ? decodedToken['user'] : null
       const limit = req.query.limit ? Number(req.query.limit) : 300
 
+      // ユーザ認証
+      const getUserAccountFromUsersQuery = "SELECT * FROM users WHERE user_id = ? LIMIT 1;"
+      const [ userAccountResult ] = await (await this.connection).execute(getUserAccountFromUsersQuery, [ authorizedUserId || ''])
+      const userAccount = (userAccountResult as User[]).length > 0 ? userAccountResult[0] as User : null
+      const isGettingSelfData = userAccount?.user_id === authorizedUserId
+      const isModerator = userAccount?.permission > 1
+
       if( toFullWidth(req.params.playername) === 'プレーヤー' ){
         const response = {
+          'isModerator': isModerator,
           'player_name': toFullWidth(req.params.playername),
           'achievement': '',
           'chara': null,
@@ -83,7 +91,6 @@ class Record {
 
       const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at DESC LIMIT ?;"
       const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
-      const getUserAccountFromUsersQuery = "SELECT * FROM users WHERE player_id = ? LIMIT 1;"
       const [ [playLogQueryResult], [prefectureQueryResult] ] = await Promise.all([
         (await this.connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername), limit ]),
         (await this.connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
@@ -148,15 +155,13 @@ class Record {
         // 有効平均貢献度類
         const [ playerInfoResult ] = await (await this.connection).execute('SELECT * FROM players WHERE player_name = ?', [ toFullWidth(req.params.playername) ])
         const playerInfo = (playerInfoResult as Players[]).length > 0 ? playerInfoResult[0] as Players : null
-        const [ userAccountResult ] = await (await this.connection).execute(getUserAccountFromUsersQuery, [ playerInfo?.player_id || ''])
-        const userAccount = (userAccountResult as User[]).length > 0 ? userAccountResult[0] as User : null
-        const isAuthorized = userAccount?.user_id === authorizedUserId
-        const shouldHideDate = !isAuthorized && (userAccount?.is_hide_date === -1)
-        const shouldHideTime = userAccount ? !isAuthorized && (userAccount.is_hide_time === -1) : true
+        const shouldHideDate = isModerator ? false : !isGettingSelfData && (userAccount?.is_hide_date === -1)
+        const shouldHideTime = isModerator ? false : userAccount ? !isGettingSelfData && (userAccount.is_hide_time === -1) : true
 
         // 増分を計算する
         const latestRecord = playLogResult[0]
         const response = {
+          'isModerator': isModerator,
           'player_name': toFullWidth(req.params.playername),
           'achievement': latestRecord.achievement,
           'chara': latestRecord.chara,

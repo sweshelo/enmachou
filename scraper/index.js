@@ -124,7 +124,7 @@ AND t.created_at = (
       page.updatedAt
     ]
   })
-  const rawRankingData = await Promise.all(rawRankingPromisses)
+  const rawRankingData = (await Promise.all(rawRankingPromisses)).filter((record) => record[5] > 0)
   console.log('== GENERATED rawRankingData')
 
   const insertIntoTimelineQuery = "INSERT INTO timeline (player_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id, updated_at ) VALUES ?;";
