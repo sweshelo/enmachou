@@ -223,11 +223,13 @@ export const PlayLogForGuage = (props) => {
               const date = props.isHiddenDate ? null : new Date(log.datetime.date)
               const displayDate = props.isHiddenDate ? '非表示' : `${date.getMonth() + 1}/${date.getDate()}`
               const displayTime = props.isHiddenDate ? '' : props.isHiddenTime ? log.datetime.timeframe : `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+              const gaugeDiff = index === props.log.length - 1 ? null : log.diff - props.log[index + 1].diff
+              const gaugeDiffText = gaugeDiff > 0 ? `+${gaugeDiff}` : gaugeDiff < 0 ? `${gaugeDiff}` : `±0`
               return (
                 <>
                   <tr
                     key={`timeline-${index}`}
-                    className={`${(focusRecord == log.timeline_id) ? 'focus-record' : ''}`}
+                    className={`${(Math.abs(gaugeDiff) > 30) ? 'invalid-record' : ''} ${(focusRecord == log.timeline_id) ? 'focus-record' : ''}`}
                     onClick={() => {
                       setFocusRecord(focusRecord === log.timeline_id ? null : log.timeline_id)
                     }}
@@ -235,7 +237,7 @@ export const PlayLogForGuage = (props) => {
                     <td className="datetime">{`${displayDate} ${displayTime}`}{log.stage && <StageMark stage={log.stage} />}</td>
                     <td style={{ margin: 0, padding: 0 }}><img height={35} src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${log.chara}.png`}/></td>
                     <td className="diff">{log.diff - 1300}</td>
-                    <td className="diff">{index === props.log.length - 1 ? null : log.diff - props.log[index + 1].diff}</td>
+                    <td className="diff">{gaugeDiffText}</td>
                   </tr>
                   {focusRecord === log.timeline_id && (
                     <tr>
