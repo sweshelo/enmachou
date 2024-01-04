@@ -227,7 +227,7 @@ export const PlayLogForGuage = (props) => {
                 <>
                   <tr
                     key={`timeline-${index}`}
-                    className={`${(log.elapsed >= 600 || log.diff === null) ? 'invalid-record' : ''} ${(focusRecord == log.timeline_id) ? 'focus-record' : ''}`}
+                    className={`${(focusRecord == log.timeline_id) ? 'focus-record' : ''}`}
                     onClick={() => {
                       setFocusRecord(focusRecord === log.timeline_id ? null : log.timeline_id)
                     }}
