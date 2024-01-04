@@ -39,7 +39,7 @@ export function* getPlayerDetailData({payload}): Generator<unknown, void, any>{
   const { token } = yield select(getAccount)
   const response = yield call(EnmaApi.getPlayerDetailData, {...payload, token})
   const result = yield response.json()
-  if(result.status === 'error') alert(result.message)
+  if(result.status !== 'ok') alert(result.message)
   yield put(actions.setPlayerDetail(result.body))
 }
 
