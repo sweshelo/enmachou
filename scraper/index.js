@@ -76,11 +76,12 @@ const main = async (forRanking) => {
   console.log('== GOT Official Ranking')
   console.log(`   Updated at ${page.updatedAt} <Official>`)
   console.log(`   Updated at ${new Date(lastUpdatedAtResult[0].updated_at)} <DB>`)
+  /*
   if (new Date(lastUpdatedAtResult[0].updated_at).getTime() === page.updatedAt.getTime()) {
     console.log(`** Escape.`)
     processing = false
     return
-  }
+  }*/
 
   // 残りの３ページを取得
   const fetchPromisses = [1, 2, 3].map(index => fetchRankingPage(index))
@@ -98,21 +99,12 @@ const main = async (forRanking) => {
 
   // IN句で用いるplayer_name配列
   const playerNameArray = rankingData.map(r => r.playerName !== 'プレーヤー' ? r.playerName : null).filter((r) => !!r)
-  const getLatestRecordEachPlayerFromTimeline = `
-SELECT t.*
-FROM timeline t
-WHERE t.player_name IN (${playerNameArray.map(() => '?').join(',')})
-AND t.created_at = (
-    SELECT MAX(created_at)
-    FROM timeline
-    WHERE player_name = t.player_name
-);`
+  const getLatestRecordEachPlayerFromTimeline = `SELECT * FROM players;`
   const [latestRecords] = await (await connection).execute(getLatestRecordEachPlayerFromTimeline, playerNameArray)
   console.log(`== GOT LatestRecords`)
 
   if (forRanking) {
     const rawRankingPromisses = rankingData.map(async (record) => {
-      const playerLatestRecord = latestRecords.find(r => r.player_name === record.playerName)
       return [
         record.playerName,
         record.ranking,
@@ -122,14 +114,26 @@ AND t.created_at = (
         'standard',
       ]
     })
-    const rawRankingData = (await Promise.all(rawRankingPromisses)).filter((record) => record[5] > 0)
+    const rawRankingData = (await Promise.all(rawRankingPromisses))
     console.log('== GENERATED rawRankingData')
 
-    const insertIntoRankingQuery = "INSERT INTO ranking (player_name, ranking, chara, point, updated_at, ranking_type ) VALUES ?;";
+    const insertIntoRankingQuery = "INSERT INTO ranking (player_name, ranking, chara, point, created_at, ranking_type ) VALUES ?;";
     const [result, error] = await (await connection).query(insertIntoRankingQuery, [rawRankingData])
+
   } else {
     const rawRankingPromisses = rankingData.map(async (record) => {
       const playerLatestRecord = latestRecords.find(r => r.player_name === record.playerName)
+      if(!playerLatestRecord){
+        await (await connection).query("INSERT INTO players (player_name, ranking, achievement, chara, point, effective_average, deviation_value) VALUES (?)", [[
+          record.playerName,
+          record.ranking,
+          record.achievement,
+          record.chara,
+          record.point,
+          null,
+          null,
+        ]])
+      }
       return [
         record.playerName,
         record.ranking,
@@ -137,17 +141,23 @@ AND t.created_at = (
         record.chara,
         record.point,
         playerLatestRecord ? record.point - playerLatestRecord.point : null,
-        playerLatestRecord ? (new Date() - new Date(playerLatestRecord.created_at)) / 1000 : null,
+        playerLatestRecord ? (new Date() - new Date(playerLatestRecord.updated_at)) / 1000 : null,
         playerLatestRecord ? playerLatestRecord.timeline_id : null,
         page.updatedAt,
         'RANK_GAUGE_AS_POINTS',
       ]
     })
-    const rawRankingData = (await Promise.all(rawRankingPromisses)).filter((record) => record[5] > 0)
+    const rawRankingData = (await Promise.all(rawRankingPromisses))
     console.log('== GENERATED rawRankingData')
 
     const insertIntoTimelineQuery = "INSERT INTO timeline (player_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id, updated_at, exception ) VALUES ?;";
-    const [result, error] = await (await connection).query(insertIntoTimelineQuery, [rawRankingData])
+    const [result, error] = await (await connection).query(insertIntoTimelineQuery, [rawRankingData.filter((record) => record[5] > 0)])
+
+    // Update
+    const updatePlayersUpdatedQuery = "UPDATE players SET updated_at = NOW(), point = ? WHERE player_name = ?;";
+    rawRankingData.forEach(async(r) => {
+      await (await connection).query(updatePlayersUpdatedQuery, [r[4], r[0]])
+    })
   }
 
   console.log('** All Done.')
@@ -265,6 +275,7 @@ const present_campaign_2 = async () => {
   })
 }
 
+main(true)
 setInterval(() => {
   const date = new Date()
   if (!processing && (date.getHours() <= 0 || date.getHours() >= 7)) {
