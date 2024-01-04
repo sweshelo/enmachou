@@ -567,8 +567,10 @@ class Record {
         top: gaugeRanking[0].diff - RANK_S_CONSTANTS,
         border: gaugeRanking[3].diff - RANK_S_CONSTANTS,
         players: (gaugeRanking as Timeline[]).map((r) => ({
-          playername: r.player_name,
+          player_name: r.player_name,
+          chara: r.chara,
           gauge: r.diff - RANK_S_CONSTANTS,
+          updated_at: r.updated_at,
         }))
       }
       res.send({

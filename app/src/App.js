@@ -22,6 +22,7 @@ import PlayerDetailPage from './components/PlayerDetailPage';
 import AverageRanking from './components/AverageRanking';
 import {Settings} from './components/Settings';
 import { useDispatch } from 'react-redux';
+import GaugeRanking from './components/GaugeRanking';
 
 function App() {
 
@@ -63,6 +64,7 @@ function App() {
               <Route path='/login' element={<Login />} />
               <Route path='/miauth' element={<MiAuth />} />
               <Route path='/settings' element={<Settings />} />
+              <Route path='/secret' element={<GaugeRanking />} />
             </Routes>
           </main>
         </div>

@@ -26,7 +26,6 @@ const DrawerBody = () => {
     <>
       <ul>
         <li><Link to="/">月間ランキング</Link></li>
-        <li><Link to="/ranking/max">最高貢献ポイントランキング</Link></li>
         <li><Link to="/ranking/average">平均貢献ポイントランキング</Link></li>
         <li><Link to="/online">オンラインのプレイヤー</Link></li>
         <li><Link to="/stats">統計</Link></li>

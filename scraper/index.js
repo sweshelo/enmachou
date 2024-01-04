@@ -246,12 +246,11 @@ const present_campaign_2 = async() => {
   })
 }
 
-present_campaign_2()
 setInterval(() => {
   const date = new Date()
   if(!processing && (date.getHours() <= 0 || date.getHours() >= 7 )) {
     main()
-    present_campaign_2()
+    //present_campaign_2()
   }
   if(date.getHours() === 4 && date.getMinutes() < 2) calculateDeviationValue()
 }, 1000 * 120)
