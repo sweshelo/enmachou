@@ -263,7 +263,7 @@ export const PlayLogForGuage = (props) => {
 export const RankGaugeGraph = ({ log }) => {
   const { gaugeRanking } = useSelector((state) => state.recordsReducer)
   const userMax = Math.max(...log.map((r) => r.diff))
-  const graphMax = userMax <= 1300 ? 1300 : userMax <= 1400 ? 1400 : userMax < gaugeRanking.border + 1300 ? gaugeRanking.border + 1300 : gaugeRanking.top
+  const graphMax = userMax <= 1300 ? 1300 : userMax <= 1400 ? 1400 : userMax < gaugeRanking?.border + 1300 ? gaugeRanking?.border + 1300 : gaugeRanking?.top
   return (
     <div className="playlog">
       <p className="title-paragraph">ランクゲージの推移</p>
@@ -291,8 +291,8 @@ export const RankGaugeGraph = ({ log }) => {
           />
           <Legend />
           <Line type="monotone" dataKey="diff" stroke="#8884d8" activeDot={{ r: 8 }} name='Gauge' />
-          <ReferenceLine y={gaugeRanking.top + 1300} stroke='red' label='top'/>
-          <ReferenceLine y={gaugeRanking.border + 1300} stroke='blue' label='border'/>
+          <ReferenceLine y={gaugeRanking?.top + 1300} stroke='red' label='top'/>
+          <ReferenceLine y={gaugeRanking?.border + 1300} stroke='blue' label='border'/>
           <ReferenceLine y={1400} stroke='orange' label='Gauge Max.'/>
           <ReferenceLine y={1300} stroke='gold' label='Rank S'/>
         </LineChart>
@@ -403,7 +403,7 @@ const PlayerPage = () => {
           </div>
           <div id="table-wrapper">
             <div style={{ width: '100%' }}>
-              {playerDetail?.rankgauge_log && <RankGaugeGraph log={playerDetail?.rankgauge_log.map((r, index) => ({
+              {playerDetail?.rankgauge_log.length > 0 && <RankGaugeGraph log={playerDetail?.rankgauge_log.map((r, index) => ({
                 ...r,
                 date: new Date(r.datetime.date),
                 gaugeDiff: index === playerDetail.rankgauge_log.length - 1 ? null : playerDetail.rankgauge_log[index + 1].diff - r.diff
