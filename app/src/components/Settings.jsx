@@ -4,6 +4,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import actions from '../redux/account/actions.ts';
 import './Settings.css'
 import { Player } from './Player';
+import { Link } from 'react-router-dom';
 
 export const Settings = () => {
   const dispatch = useDispatch()
@@ -54,7 +55,7 @@ export const Settings = () => {
           </Button>
         </div>
         <div style={{ margin: '40px' }}>
-          <a href="/secret">ひみつのページ</a>
+          <Link to="/secret">ひみつのページ</Link>
         </div>
       </div>
     </>

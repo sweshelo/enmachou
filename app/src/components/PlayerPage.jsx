@@ -223,19 +223,21 @@ export const PlayLogForGuage = (props) => {
               const date = props.isHiddenDate ? null : new Date(log.datetime.date)
               const displayDate = props.isHiddenDate ? '非表示' : `${date.getMonth() + 1}/${date.getDate()}`
               const displayTime = props.isHiddenDate ? '' : props.isHiddenTime ? log.datetime.timeframe : `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+              const gaugeDiff = index === props.log.length - 1 ? null : log.diff - props.log[index + 1].diff
+              const gaugeDiffText = gaugeDiff > 0 ? `+${gaugeDiff}` : gaugeDiff < 0 ? `${gaugeDiff}` : `±0`
               return (
                 <>
                   <tr
                     key={`timeline-${index}`}
-                    className={`${(log.elapsed >= 600 || log.diff === null) ? 'invalid-record' : ''} ${(focusRecord == log.timeline_id) ? 'focus-record' : ''}`}
+                    className={`${(Math.abs(gaugeDiff) > 30) ? 'invalid-record' : ''} ${(focusRecord == log.timeline_id) ? 'focus-record' : ''}`}
                     onClick={() => {
                       setFocusRecord(focusRecord === log.timeline_id ? null : log.timeline_id)
                     }}
                   >
                     <td className="datetime">{`${displayDate} ${displayTime}`}{log.stage && <StageMark stage={log.stage} />}</td>
-                    <td style={{ margin: 0, padding: 0 }}><img height={35} src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${log.chara}.png`}/></td>
+                    <td style={{ margin: 0, padding: 0 }}><img height={35} src={`https://p.eagate.573.jp/game/chase2jokers/ccj/images/ranking/icon/ranking_icon_${log.chara}.png`} /></td>
                     <td className="diff">{log.diff - 1300}</td>
-                    <td className="diff">{index === props.log.length - 1 ? null : log.diff - props.log[index + 1].diff}</td>
+                    <td className="diff">{gaugeDiffText}</td>
                   </tr>
                   {focusRecord === log.timeline_id && (
                     <tr>
@@ -256,6 +258,47 @@ export const PlayLogForGuage = (props) => {
       </table>
     </div>
   ) : null
+}
+
+export const RankGaugeGraph = ({ log }) => {
+  const { gaugeRanking } = useSelector((state) => state.recordsReducer)
+  const userMax = Math.max(...log.map((r) => r.diff))
+  const graphMax = userMax <= 1300 ? 1300 : userMax <= 1400 ? 1400 : userMax < gaugeRanking.border + 1300 ? gaugeRanking.border + 1300 : gaugeRanking.top
+  return (
+    <div className="playlog">
+      <p className="title-paragraph">ランクゲージの推移</p>
+      <div className='centerize'>
+        <LineChart
+          id='chart'
+          width={Math.min(window.innerWidth - 20, 600)}
+          height={300}
+          data={log}
+          margin={{
+            top: 15,
+            right: 25,
+            left: 25,
+            bottom: 0,
+          }}
+        >
+          <CartesianGrid strokeDasharray="2 2" />
+          <XAxis dataKey="date" fontSize={10} height={15} tickFormatter={(value, index) => {
+            return `${value.getMonth() + 1}/${value.getDate()} ${value.getHours()}:${value.getMinutes()}`
+          }} />
+          <YAxis width={5} fontSize={10} domain={[Math.min(...log.map((r) => r.diff)) - 5, graphMax]} />
+          <Tooltip
+            formatter={(value, name) => [value - 1300, "Gauge"]}
+            labelFormatter={(value) => `${value.getMonth() + 1}/${value.getDate()} ${value.getHours()}:${value.getMinutes()}`}
+          />
+          <Legend />
+          <Line type="monotone" dataKey="diff" stroke="#8884d8" activeDot={{ r: 8 }} name='Gauge' />
+          <ReferenceLine y={gaugeRanking.top + 1300} stroke='red' label='top'/>
+          <ReferenceLine y={gaugeRanking.border + 1300} stroke='blue' label='border'/>
+          <ReferenceLine y={1400} stroke='orange' label='Gauge Max.'/>
+          <ReferenceLine y={1300} stroke='gold' label='Rank S'/>
+        </LineChart>
+      </div>
+    </div>
+  )
 }
 
 export const AverageGraph = (props) => {
@@ -360,6 +403,11 @@ const PlayerPage = () => {
           </div>
           <div id="table-wrapper">
             <div style={{ width: '100%' }}>
+              {playerDetail?.rankgauge_log && <RankGaugeGraph log={playerDetail?.rankgauge_log.map((r, index) => ({
+                ...r,
+                date: new Date(r.datetime.date),
+                gaugeDiff: index === playerDetail.rankgauge_log.length - 1 ? null : playerDetail.rankgauge_log[index + 1].diff - r.diff
+              })).filter((r) => r.gaugeDiff && Math.abs(r.gaugeDiff) < 30) || []} />}
               <PlayLogForGuage log={playerDetail?.rankgauge_log || []} isHiddenDate={playerDetail?.isHiddenDate} isHiddenTime={playerDetail.isHiddenTime} />
               {!playerDetail.isHiddenDate && <AverageGraph log={playerDetail?.log?.slice(-300) || []} average={playerDetail?.effective_average} />}
               <PlayLog log={playerDetail?.log || []} isHiddenDate={playerDetail?.isHiddenDate} isHiddenTime={playerDetail.isHiddenTime} />
