@@ -65,7 +65,7 @@ export const DrawerMenu = () => {
     )
     : (
       <div>
-        <button onClick={toggleDrawer} id="drawer-toggle" />
+        <img src="/logo192.png" onClick={toggleDrawer} id="drawer-toggle" />
         <Drawer
           open={isOpen}
           onClose={toggleDrawer}

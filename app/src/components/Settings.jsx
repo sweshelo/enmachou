@@ -53,6 +53,9 @@ export const Settings = () => {
             Logout
           </Button>
         </div>
+        <div style={{ margin: '40px' }}>
+          <a href="/secret">ひみつのページ</a>
+        </div>
       </div>
     </>
   )

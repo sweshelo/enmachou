@@ -26,7 +26,7 @@ type State = {
   } | null;
   stats: Stats | null;
   currentStage: string;
-  guageRanking: {
+  gaugeRanking: {
     top: number,
     border: number,
     players: PlayerGuage[],
@@ -43,7 +43,7 @@ const initialState: State = {
   playerDetails: {},
   stats: null,
   currentStage: '',
-  guageRanking: {
+  gaugeRanking: {
     top: -1,
     border: -1,
     players: [],
