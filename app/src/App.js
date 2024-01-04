@@ -21,10 +21,13 @@ import PlayerPage from './components/PlayerPage';
 import PlayerDetailPage from './components/PlayerDetailPage';
 import AverageRanking from './components/AverageRanking';
 import {Settings} from './components/Settings';
+import { useDispatch } from 'react-redux';
 
 function App() {
 
   const [ cookie, setCookie ] = useCookies(['tracker'])
+  const dispatch = useDispatch()
+
   useState(()=>{
     if(!cookie.tracker){
       fetch(config.baseEndpoint + '/api/tracker', {method:'POST'}).then(r => r.json()).then(
@@ -33,6 +36,7 @@ function App() {
         })
       )
     }
+    dispatch({type: 'GET_GAUGE_RANKING'})
   }, [])
 
   return (

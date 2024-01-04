@@ -48,6 +48,7 @@ app.get('/api/online/:threshold?', (req: Request<OnlineRequestBody>, res) => rec
 app.get('/api/stats', (req, res) => record.statistics(req, res))
 app.get('/api/matching/:timelineId', (req, res) => record.getMatching(req, res))
 app.get('/api/presents', (req, res) => presents.getPresents(req, res))
+app.get('/api/gauge-ranking', (req, res) => record.getEstOniRanker(req, res))
 
 app.post('/api/signup', (req: Request<CreateAccountBody>, res) => account.createAccount(req, res))
 app.post('/api/login', (req, res) => {(account.login(req, res))})

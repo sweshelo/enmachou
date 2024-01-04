@@ -183,7 +183,7 @@ export const AverageGraph = (props) => {
   const [ average, setAverage ] = useState([])
   useEffect(() => {
     const calc = {}
-    props.log.forEach((r) => {
+    props.log.filter((r) => !r.exception).forEach((r) => {
       if(r.elapsed > 600) return
       const date = new Date(r.datetime.date)
       const dateKey = `${date.getMonth() + 1}/${date.getDate()}`

@@ -17,6 +17,8 @@ const actions = {
   SET_MATCHING: 'SET_MATCHING',
   GET_AVERAGE_RANKING: 'GET_AVERAGE_RANKING',
   SET_AVERAGE_RANKING: 'SET_AVERAGE_RANKING',
+  GET_GAUGE_RANKING: 'GET_GAUGE_RANKING',
+  SET_GAUGE_RANKING: 'SET_GAUGE_RANKING',
 
   getRankingPlayerList: () => ({
     type: actions.GET_RANKING
@@ -78,6 +80,13 @@ const actions = {
   }),
   setMatching: (payload: any) => ({
     type: actions.SET_MATCHING,
+    payload
+  }),
+  getGaugeRanking: () => ({
+    type: actions.GET_GAUGE_RANKING,
+  }),
+  setGaugeRanking: (payload: any) => ({
+    type: actions.SET_GAUGE_RANKING,
     payload
   })
 }

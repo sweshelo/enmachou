@@ -54,6 +54,13 @@ export function* getMatchingData({payload}): Generator<unknown, void, any>{
   yield put(actions.setMatching(result.body))
 }
 
+function* getGaugeRanking(): Generator<unknown, void, any>{
+  const { token } = yield select(getAccount)
+  const response = yield call(EnmaApi.getGuageRanking, {token})
+  const result = yield response.json()
+  yield put(actions.setGaugeRanking(result.body))
+}
+
 export default function* recordsSaga(): Generator<any, any, any>{
   yield all([
     takeEvery(actions.GET_RANKING, getRankingData),
@@ -63,5 +70,6 @@ export default function* recordsSaga(): Generator<any, any, any>{
     takeEvery(actions.GET_PLAYER_DETAIL, getPlayerDetailData),
     takeEvery(actions.GET_STATS, getStatsData),
     takeEvery(actions.GET_MATCHING, getMatchingData),
+    takeEvery(actions.GET_GAUGE_RANKING, getGaugeRanking),
   ])
 }
