@@ -36,4 +36,5 @@ export type User = {
   is_hide_time: number
   online_threshold: number
   is_authorized: boolean
+  permission: number
 }

@@ -121,13 +121,14 @@ AND t.created_at = (
       playerLatestRecord ? record.point - playerLatestRecord.point : null,
       playerLatestRecord ? (new Date() - new Date(playerLatestRecord.created_at)) / 1000 : null,
       playerLatestRecord ? playerLatestRecord.timeline_id : null,
-      page.updatedAt
+      page.updatedAt,
+      'RANK_GAUGE_AS_POINTS',
     ]
   })
-  const rawRankingData = await Promise.all(rawRankingPromisses)
+  const rawRankingData = (await Promise.all(rawRankingPromisses)).filter((record) => record[5] > 0)
   console.log('== GENERATED rawRankingData')
 
-  const insertIntoTimelineQuery = "INSERT INTO timeline (player_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id, updated_at ) VALUES ?;";
+  const insertIntoTimelineQuery = "INSERT INTO timeline (player_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id, updated_at, exception ) VALUES ?;";
   const [ result, error ] = await (await connection).query(insertIntoTimelineQuery, [rawRankingData])
 
   console.log('** All Done.')
@@ -245,12 +246,11 @@ const present_campaign_2 = async() => {
   })
 }
 
-present_campaign_2()
 setInterval(() => {
   const date = new Date()
   if(!processing && (date.getHours() <= 0 || date.getHours() >= 7 )) {
     main()
-    present_campaign_2()
+    //present_campaign_2()
   }
   if(date.getHours() === 4 && date.getMinutes() < 2) calculateDeviationValue()
 }, 1000 * 120)

@@ -29,7 +29,7 @@ class Record {
   async getRanking(req: Request, res: Response){
     try{
       if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
-      const getLatestRankingFromTimelineQuery = "SELECT ranking, player_name, point, chara FROM (SELECT * FROM timeline ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
+      const getLatestRankingFromTimelineQuery = "SELECT ranking, player_name, point, chara FROM (SELECT * FROM ranking ORDER BY created_at DESC LIMIT 100) AS t ORDER BY ranking;"
       const [ result ] = await (await this.connection).execute(getLatestRankingFromTimelineQuery)
       if (result && Array.isArray(result) && result.length > 0){
         res.send({
@@ -59,8 +59,17 @@ class Record {
       const authorizedUserId = decodedToken ? decodedToken['user'] : null
       const limit = req.query.limit ? Number(req.query.limit) : 300
 
+      // ユーザ認証
+      const getUserAccountFromUsersQuery = "SELECT * FROM users WHERE user_id = ? LIMIT 1;"
+      const [ userAccountResult ] = await (await this.connection).execute(getUserAccountFromUsersQuery, [ authorizedUserId || ''])
+      const userAccount = (userAccountResult as User[]).length > 0 ? userAccountResult[0] as User : null
+      const isGettingSelfData = userAccount?.user_id === authorizedUserId
+      const isModerator = userAccount?.permission > 1
+      const isLoggedIn = authorizedUserId ? true : false
+
       if( toFullWidth(req.params.playername) === 'プレーヤー' ){
         const response = {
+          'isModerator': isModerator,
           'player_name': toFullWidth(req.params.playername),
           'achievement': '',
           'chara': null,
@@ -81,12 +90,13 @@ class Record {
         return
       }
 
-      const getUserTimelineFromTimelineQuery = "SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 ORDER BY created_at DESC LIMIT ?;"
+      const getUserTimelineFromTimelineQuery = `SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 AND created_at < '2024-01-01 00:00:00' ORDER BY created_at DESC LIMIT ?;`
+      const getUserTimelineFromTilelineForRankGaugeQuery = `SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 AND created_at >= '2024-01-01 00:00:00' ORDER BY created_at DESC;`
       const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
-      const getUserAccountFromUsersQuery = "SELECT * FROM users WHERE player_id = ? LIMIT 1;"
-      const [ [playLogQueryResult], [prefectureQueryResult] ] = await Promise.all([
+      const [ [playLogQueryResult], [prefectureQueryResult], [playLogForRankGaugeResult] ] = await Promise.all([
         (await this.connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername), limit ]),
         (await this.connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
+        (await this.connection).execute(getUserTimelineFromTilelineForRankGaugeQuery, [ toFullWidth(req.params.playername) ]),
       ])
 
       const playLogResult = playLogQueryResult as Timeline[]
@@ -148,11 +158,8 @@ class Record {
         // 有効平均貢献度類
         const [ playerInfoResult ] = await (await this.connection).execute('SELECT * FROM players WHERE player_name = ?', [ toFullWidth(req.params.playername) ])
         const playerInfo = (playerInfoResult as Players[]).length > 0 ? playerInfoResult[0] as Players : null
-        const [ userAccountResult ] = await (await this.connection).execute(getUserAccountFromUsersQuery, [ playerInfo?.player_id || ''])
-        const userAccount = (userAccountResult as User[]).length > 0 ? userAccountResult[0] as User : null
-        const isAuthorized = userAccount?.user_id === authorizedUserId
-        const shouldHideDate = !isAuthorized && (userAccount?.is_hide_date === -1)
-        const shouldHideTime = userAccount ? !isAuthorized && (userAccount.is_hide_time === -1) : true
+        const shouldHideDate = isModerator ? false : !isGettingSelfData && (userAccount?.is_hide_date === -1)
+        const shouldHideTime = isModerator ? false : userAccount ? !isGettingSelfData && (userAccount.is_hide_time === -1) : true
 
         // 増分を計算する
         const latestRecord = playLogResult[0]
@@ -170,13 +177,22 @@ class Record {
             updated_at: undefined,
             created_at: undefined,
           }),
-          ).reverse(),
+          ),
+          'rankgauge_log': isLoggedIn ? (playLogForRankGaugeResult as Timeline[]).map((r) => ({
+            ...r,
+            datetime: shouldHideDate ? null : datetimeToTimeframe(r.updated_at ?? r.created_at, shouldHideDate),
+            stage: shouldHideTime ? null : identifyStage(r.updated_at ?? r.created_at),
+            updated_at: undefined,
+            created_at: undefined,
+          })) : [],
           'prefectures': prefectureAchievementTable.map(p => achievementArray.includes(toFullWidth(p.achievement)) ? p.name : null).filter(n => n),
           'effective_average': playerInfo ? playerInfo.effective_average : null,
           'deviation_value': playerInfo ? playerInfo.deviation_value : null,
           'isPublicDetail': !(shouldHideDate || shouldHideTime),
           'isHiddenDate': shouldHideDate,
           'isHiddenTime': shouldHideTime,
+          'isModerator': isModerator,
+          'isGettingSelfData': isGettingSelfData,
         }
 
         res.send({
@@ -531,6 +547,40 @@ class Record {
       res.send({
         status: status.error,
         message: e.message
+      })
+    }
+  }
+
+  async getEstOniRanker(req: Request, res: Response) {
+    try{
+
+      if (req.cookies.tracker) Logger.createLog(req.cookies.tracker, req.originalUrl, this.connection)
+      const decodedToken = req.headers.authorization ? jwt.verify(req.headers.authorization, this.publicKey) : null
+      const authorizedUserId = decodedToken ? decodedToken['user'] : null
+      const isLoggedIn = authorizedUserId ? true : false
+
+      if (!isLoggedIn) throw new Error()
+
+      const [ gaugeRanking ] = await (await (this.connection)).execute("SELECT * FROM ( SELECT *, ROW_NUMBER() OVER (PARTITION BY player_name ORDER BY created_at DESC) as rn FROM timeline WHERE created_at >= '2024-01-01' AND exception = 'RANK_GAUGE_AS_POINTS' AND diff > 0 AND elapsed BETWEEN 60 AND 600) AS sub WHERE sub.rn = 1 order by diff desc;")
+      const RANK_S_CONSTANTS = 1300
+      const response = {
+        top: gaugeRanking[0].diff - RANK_S_CONSTANTS,
+        border: gaugeRanking[3].diff - RANK_S_CONSTANTS,
+        players: (gaugeRanking as Timeline[]).map((r) => ({
+          player_name: r.player_name,
+          chara: r.chara,
+          gauge: r.diff - RANK_S_CONSTANTS,
+          updated_at: r.updated_at,
+        }))
+      }
+      res.send({
+        status: status.ok,
+        body: response
+      })
+    }catch(e){
+      res.send({
+        status: status.error,
+        message: e.message,
       })
     }
   }

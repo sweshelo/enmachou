@@ -71,6 +71,9 @@ class EnmaApi {
       isHiddenTime: payload.isHiddenTime,
     }, payload.token)
   }
+  static getGuageRanking(payload: {token: string}){
+    return EnmaApi.httpGet(`gauge-ranking`, payload.token)
+  }
 }
 
 export { EnmaApi }

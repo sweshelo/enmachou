@@ -6,6 +6,11 @@ type Action = {
   payload: any;
 }
 
+type PlayerGuage = {
+  playername: string
+  guage: number
+}
+
 type State = {
   onlinePlayer: Player[];
   standardRanking: Player[];
@@ -21,6 +26,11 @@ type State = {
   } | null;
   stats: Stats | null;
   currentStage: string;
+  gaugeRanking: {
+    top: number,
+    border: number,
+    players: PlayerGuage[],
+  }
 }
 
 const initialState: State = {
@@ -33,6 +43,11 @@ const initialState: State = {
   playerDetails: {},
   stats: null,
   currentStage: '',
+  gaugeRanking: {
+    top: -1,
+    border: -1,
+    players: [],
+  }
 }
 
 const recordsReducer = (state = initialState, action: Action) => {
@@ -62,6 +77,8 @@ const recordsReducer = (state = initialState, action: Action) => {
       return { ...state, stats: action.payload }
     case actions.SET_MATCHING:
       return { ...state, matching: action.payload }
+    case actions.SET_GAUGE_RANKING:
+      return { ...state, gaugeRanking: action.payload }
     default:
       return { ...state }
   }

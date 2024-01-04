@@ -21,10 +21,14 @@ import PlayerPage from './components/PlayerPage';
 import PlayerDetailPage from './components/PlayerDetailPage';
 import AverageRanking from './components/AverageRanking';
 import {Settings} from './components/Settings';
+import { useDispatch } from 'react-redux';
+import GaugeRanking from './components/GaugeRanking';
 
 function App() {
 
   const [ cookie, setCookie ] = useCookies(['tracker'])
+  const dispatch = useDispatch()
+
   useState(()=>{
     if(!cookie.tracker){
       fetch(config.baseEndpoint + '/api/tracker', {method:'POST'}).then(r => r.json()).then(
@@ -33,6 +37,7 @@ function App() {
         })
       )
     }
+    dispatch({type: 'GET_GAUGE_RANKING'})
   }, [])
 
   return (
@@ -40,7 +45,7 @@ function App() {
       <div className="App">
         <header>
           <h1 className='ccj-font'><Link to='/'>閻魔帳</Link></h1>
-          <span>v1.1.2 - @sweshelo</span>
+          <span>v1.2.0 - @sweshelo</span>
         </header>
         <div id='container'>
           <DrawerMenu />
@@ -59,6 +64,7 @@ function App() {
               <Route path='/login' element={<Login />} />
               <Route path='/miauth' element={<MiAuth />} />
               <Route path='/settings' element={<Settings />} />
+              <Route path='/secret' element={<GaugeRanking />} />
             </Routes>
           </main>
         </div>
