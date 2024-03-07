@@ -90,35 +90,36 @@ const Ranking = () => {
   }, [])
 
   useEffect(() => {
-    const charaChartMock = [
-      { name: null, count: null },
-      { name: '赤鬼カギコ', count: 0, color: 'deeppink' },
-      { name: '悪亜チノン', count: 0, color: 'deepskyblue' },
-      { name: '不死ミヨミ', count: 0, color: 'gold' },
-      { name: 'パイン', count: 0, color: 'yellow' },
-      { name: '首塚ツバキ', count: 0, color: 'gainsboro' },
-      { name: '紅刃', count: 0, color: 'crimson' },
-      { name: '首塚ボタン', count: 0, color: 'orchid' },
-      { name: 'クルル', count: 0, color: 'green' },
-      { name: 'ミロク', count: 0, color: 'chartreuse' },
-      { name: '最愛チアモ', count: 0, color: 'lightpink' },
-      { name: 'マラリヤ', count: 0, color: 'purple' },
-      { name: 'ツバキ【廻】', count: 0, color: 'indigo' },
-      { name: 'ジョウカ', count: 0, color: 'skyblue' },
-      { name: 'ジャスイ', count: 0, color: 'wheat' },
-    ]
+    const charaChartMock = {
+      '1': { name: '赤鬼カギコ', count: 0, color: 'deeppink' },
+      '2': { name: '悪亜チノン', count: 0, color: 'deepskyblue' },
+      '3': { name: '不死ミヨミ', count: 0, color: 'gold' },
+      '4': { name: 'パイン', count: 0, color: 'yellow' },
+      '5': { name: '首塚ツバキ', count: 0, color: 'gainsboro' },
+      '6': { name: '紅刃', count: 0, color: 'crimson' },
+      '7': { name: '首塚ボタン', count: 0, color: 'orchid' },
+      '8': { name: 'クルル', count: 0, color: 'green' },
+      '9': { name: 'ミロク', count: 0, color: 'chartreuse' },
+      '10':{ name: '最愛チアモ', count: 0, color: 'lightpink' },
+      '11':{ name: 'マラリヤ', count: 0, color: 'purple' },
+      '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
+      '13':{ name: 'ジョウカ', count: 0, color: 'skyblue' },
+      '14':{ name: 'ジャスイ', count: 0, color: 'wheat' },
+      '101':{ name: 'カギコ[サカサマ]', count: 0, color: 'deeppink' },
+    }
     ranking?.standardRanking?.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
-    setCharaChartData(charaChartMock)
+    setCharaChartData(Object.fromEntries(
+      Object.entries(charaChartMock).filter(([_, value]) => value.count > 0)
+    ))
   }, [ranking])
 
-  const charaIndexTable = [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14' ]
   const charaFilterClickHandler = (index) => {
-    if (charaIndexTable[index] === filterChara) {
+    if (Object.keys(charaChartData)[index] === filterChara) {
       setFilter(!isFiltered)
     }else{
       setFilter(true)
     }
-    setFilterChara( charaIndexTable[index] )
+    setFilterChara(Object.keys(charaChartData)[index])
   }
 
   return (
@@ -133,7 +134,7 @@ const Ranking = () => {
         <h2 className="page-title rainbow-grad-back">月間ランキング</h2>
         <p className="title-paragraph">現在のキャラクター構成比率</p>
         <div className="centerize">
-          <CharaChart data={charaChartData.filter((c) => c.count && c.count > 0)} clickHandler={charaFilterClickHandler} />
+          <CharaChart data={Object.values(charaChartData).filter((c) => c.count && c.count > 0)} clickHandler={charaFilterClickHandler} />
         </div>
         {ranking?.standardRanking?.filter(r => (isFiltered ? r.chara === filterChara : true)).map((r, index) => <Player key={index} name={r.player_name} chara={r.chara} header={`${r.ranking}位 - ${r.point}P`} isLink={true}/>)}
       </div>
