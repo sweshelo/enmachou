@@ -36,7 +36,7 @@ function now() {
 
 // const
 const baseUrl = `https://p.eagate.573.jp/game/chase2jokers/ccj/ranking/index.html`
-const regExp = /ranking_icon_([0-9]{1,2}).png/;
+const regExp = /ranking_icon_([0-9]+).png/;
 
 const fetchRankingPage = async (pageIndex) => {
   const page = await fetch(`${baseUrl}?page=${pageIndex}&rid=${now().substring(0, 6)}`)
