@@ -144,14 +144,14 @@ const main = async (forRanking) => {
         playerLatestRecord ? (new Date() - new Date(playerLatestRecord.updated_at)) / 1000 : null,
         playerLatestRecord ? playerLatestRecord.timeline_id : null,
         page.updatedAt,
-        'RANK_GAUGE_AS_POINTS',
+        null,
       ]
     })
     const rawRankingData = (await Promise.all(rawRankingPromisses))
     console.log('== GENERATED rawRankingData')
 
     const insertIntoTimelineQuery = "INSERT INTO timeline (player_name, ranking, achievement, chara, point, diff, elapsed, last_timeline_id, updated_at, exception ) VALUES ?;";
-    const [result, error] = await (await connection).query(insertIntoTimelineQuery, [rawRankingData.filter((record) => record[5] > 0)])
+    const [result, error] = await (await connection).query(insertIntoTimelineQuery, [rawRankingData.filter((record) => record[5] != 0)])
 
     // Update
     const updatePlayersUpdatedQuery = "UPDATE players SET updated_at = NOW(), point = ? WHERE player_name = ?;";

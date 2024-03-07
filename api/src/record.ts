@@ -90,8 +90,8 @@ class Record {
         return
       }
 
-      const getUserTimelineFromTimelineQuery = `SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 AND created_at < '2024-01-01 00:00:00' ORDER BY created_at DESC LIMIT ?;`
-      const getUserTimelineFromTilelineForRankGaugeQuery = `SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 AND created_at >= '2024-01-01 00:00:00' ORDER BY created_at DESC;`
+      const getUserTimelineFromTimelineQuery = `SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 AND exception is null ORDER BY created_at DESC LIMIT ?;`
+      const getUserTimelineFromTilelineForRankGaugeQuery = `SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 AND exception = 'RANK_GAUGE_AS_POINTS' ORDER BY created_at DESC;`
       const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
       const [ [playLogQueryResult], [prefectureQueryResult], [playLogForRankGaugeResult] ] = await Promise.all([
         (await this.connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername), limit ]),
@@ -442,6 +442,7 @@ class Record {
               '11': { name: 'マラリヤ', count: 0, color: 'purple' },
               '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
               '13':{ name: 'ジョウカ', count: 0, color: 'black' },
+              '14':{ name: 'ジャスイ', count: 0, color: 'wheat' },
             }
             data[dateString].ranking = {
               //'0': { name: null, count: null, color: null },
@@ -458,6 +459,7 @@ class Record {
               '11': { name: 'マラリヤ', count: 0, color: 'purple' },
               '12':{ name: 'ツバキ【廻】', count: 0, color: 'indigo' },
               '13':{ name: 'ジョウカ', count: 0, color: 'black' },
+              '14':{ name: 'ジャスイ', count: 0, color: 'wheat' },
             }
             data[dateString].timeframe = [...Array(24)].map(() => 0)
             countForRanking = 0
@@ -561,7 +563,7 @@ class Record {
 
       if (!isLoggedIn) throw new Error()
 
-      const [ gaugeRanking ] = await (await (this.connection)).execute("SELECT * FROM ( SELECT *, ROW_NUMBER() OVER (PARTITION BY player_name ORDER BY created_at DESC) as rn FROM timeline WHERE created_at >= '2024-01-01' AND exception = 'RANK_GAUGE_AS_POINTS' AND diff > 0 AND elapsed BETWEEN 60 AND 600) AS sub WHERE sub.rn = 1 order by diff desc;")
+      const [ gaugeRanking ] = await (await (this.connection)).execute("SELECT * FROM ( SELECT *, ROW_NUMBER() OVER (PARTITION BY player_name ORDER BY created_at DESC) as rn FROM timeline WHERE created_at >= '2024-01-01' AND exception = 'RANK_GAUGE_AS_POINTS' AND diff > 0 AND elapsed BETWEEN 60 AND 600 AND player_name <> 'プレーヤー') AS sub WHERE sub.rn = 1 order by diff desc;")
       const RANK_S_CONSTANTS = 1300
       const response = {
         top: gaugeRanking[0].diff - RANK_S_CONSTANTS,
