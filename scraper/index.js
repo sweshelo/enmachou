@@ -154,7 +154,7 @@ const main = async (forRanking) => {
     const [result, error] = await (await connection).query(insertIntoTimelineQuery, [rawRankingData.filter((record) => record[5] != 0)])
 
     // Update
-    const updatePlayersUpdatedQuery = "UPDATE players SET updated_at = NOW(), point = ? WHERE player_name = ?;";
+    const updatePlayersUpdatedQuery = "UPDATE players SET updated_at = NOW(), point = ? WHERE player_name COLLATE utf8mb4_bin = ?;";
     rawRankingData.forEach(async(r) => {
       await (await connection).query(updatePlayersUpdatedQuery, [r[4], r[0]])
     })
@@ -228,12 +228,12 @@ const calculateDeviationValue = async () => {
 
   // データベースに格納する
   allPlayersData.map(async (player) => {
-    const [record] = await (await connection).execute('SELECT player_id FROM players WHERE player_name = ? LIMIT 1', [player.name])
+    const [record] = await (await connection).execute('SELECT player_id FROM players WHERE player_name COLLATE utf8mb4_bin = ? LIMIT 1', [player.name])
     const isExist = record.length > 0
     const deviationValue = (player.availAverage - averageOfAvailAverageOfAllPlayer) / standardDeviation * 10 + 50
     if (isExist) {
       const player_id = record[0].player_id
-      await (await connection).query('UPDATE players SET effective_average = ?, deviation_value = ?, updated_at = ? WHERE player_id = ?', [player.availAverage, deviationValue, new Date(), player_id])
+      await (await connection).query('UPDATE players SET effective_average = ?, deviation_value = ?, updated_at = ? WHERE player_id COLLATE utf8mb4_bin = ?', [player.availAverage, deviationValue, new Date(), player_id])
     } else {
       const [LatestRecordResult] = await (await connection).execute('SELECT * FROM timeline WHERE player_name = ? ORDER BY created_at DESC LIMIT 1', [player.name])
       const LatestRecord = LatestRecordResult[0]

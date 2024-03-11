@@ -90,9 +90,9 @@ class Record {
         return
       }
 
-      const getUserTimelineFromTimelineQuery = `SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 AND exception is null ORDER BY created_at DESC LIMIT ?;`
-      const getUserTimelineFromTilelineForRankGaugeQuery = `SELECT * FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー' AND diff > 0 AND exception = 'RANK_GAUGE_AS_POINTS' ORDER BY created_at DESC;`
-      const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name = ? AND player_name <> 'プレーヤー';"
+      const getUserTimelineFromTimelineQuery = `SELECT * FROM timeline WHERE player_name COLLATE utf8mb4_bin = ? AND player_name <> 'プレーヤー' AND diff > 0 AND exception is null ORDER BY created_at DESC LIMIT ?;`
+      const getUserTimelineFromTilelineForRankGaugeQuery = `SELECT * FROM timeline WHERE player_name COLLATE utf8mb4_bin = ? AND player_name <> 'プレーヤー' AND diff > 0 AND exception = 'RANK_GAUGE_AS_POINTS' ORDER BY created_at DESC;`
+      const getUserAchievementFromTimelineQuery = "SELECT DISTINCT achievement FROM timeline WHERE player_name COLLATE utf8mb4_bin = ? AND player_name <> 'プレーヤー';"
       const [ [playLogQueryResult], [prefectureQueryResult], [playLogForRankGaugeResult] ] = await Promise.all([
         (await this.connection).execute(getUserTimelineFromTimelineQuery, [ toFullWidth(req.params.playername), limit ]),
         (await this.connection).execute(getUserAchievementFromTimelineQuery, [ toFullWidth(req.params.playername) ]),
@@ -156,7 +156,7 @@ class Record {
         const achievementArray = prefectureResult.map(r => r.achievement)
 
         // 有効平均貢献度類
-        const [ playerInfoResult ] = await (await this.connection).execute('SELECT * FROM players WHERE player_name = ?', [ toFullWidth(req.params.playername) ])
+        const [ playerInfoResult ] = await (await this.connection).execute('SELECT * FROM players WHERE player_name COLLATE utf8mb4_bin = ?', [ toFullWidth(req.params.playername) ])
         const playerInfo = (playerInfoResult as Players[]).length > 0 ? playerInfoResult[0] as Players : null
         const shouldHideDate = isModerator ? false : !isGettingSelfData && (userAccount?.is_hide_date === -1)
         const shouldHideTime = isModerator ? false : userAccount ? !isGettingSelfData && (userAccount.is_hide_time === -1) : true
