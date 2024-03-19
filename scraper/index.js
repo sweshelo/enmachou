@@ -199,47 +199,51 @@ const calculateDeviationValue = async () => {
   const allPlayersName = allPlayersNameResult.map(r => r.player_name)
   console.log(`  ** Done. ${allPlayersName.length} players found. Index 0 is '${allPlayersName[0]}'.`)
 
+  const today = new Date();
+  const daysAgo = new Date(today.getTime() - (120 * 24 * 60 * 60 * 1000));
+
   // プレイヤーのデータを取得する
   console.log('  ** GET records')
   const allPlayersRecordPromise = allPlayersName.map(async (playerName) => {
-    const [result] = await (await connection).execute('SELECT diff FROM timeline WHERE player_name = ? AND elapsed < 600 AND diff BETWEEN 50 AND 500 ORDER BY created_at DESC LIMIT 110;', [playerName])
+    const [result] = await (await connection).execute('SELECT diff FROM timeline WHERE player_name = ? AND elapsed < 600 AND diff BETWEEN 50 AND 500 AND created_at > ? ORDER BY created_at DESC LIMIT 110;', [playerName, daysAgo])
     return result
   })
   const allPlayersRecord = await Promise.all(allPlayersRecordPromise)
-  console.log(`  ** Done. ${allPlayersRecord.length} players' records found. Index 0 is ${allPlayersRecord[0][0].diff} P.`)
+  console.log(`  ** Done. ${allPlayersRecord.length} players' records found. Index 0 is ${allPlayersRecord[0]} and this has ${allPlayersRecord[0].length} records.`)
 
   // 各プレイヤーの有効平均貢献ポイントを算出する
   const allPlayersData = allPlayersRecord.map((records, index) => {
-    return records.length < 110 ? null : ({
+    return ({
       name: allPlayersName[index],
       records,
-      availAverage: records.sort((a, b) => a.diff > b.diff).slice(5, -5).reduce((acc, value) => acc + value.diff, 0) / 100
+      availAverage: records.length >= 110 ? records.sort((a, b) => a.diff > b.diff).slice(5, -5).reduce((acc, value) => acc + value.diff, 0) / 100 : null,
     })
-  }).filter(r => r !== null)
+  })
   console.log(`  ** There are ${allPlayersData.length} players who has more than 110 records.`)
 
   // 全体の有効平均貢献ポイントの平均を算出する
-  const averageOfAvailAverageOfAllPlayer = allPlayersData.map((player) => player.availAverage).reduce((acc, value) => acc + value, 0) / allPlayersData.length
+  const filteredPlayersData = allPlayersData.filter(player => player.availAverage)
+  const averageOfAvailAverageOfAllPlayer = filteredPlayersData.map((player) => player.availAverage).reduce((acc, value) => acc + value, 0) / filteredPlayersData.length
 
   // 分散と偏差を算出する
-  const squaredDifferencesSum = allPlayersData.map((player) => player.availAverage).reduce((acc, value) => acc + Math.pow(value - averageOfAvailAverageOfAllPlayer, 2), 0)
-  const variance = squaredDifferencesSum / allPlayersData.length
+  const squaredDifferencesSum = filteredPlayersData.map((player) => player.availAverage).reduce((acc, value) => acc + Math.pow(value - averageOfAvailAverageOfAllPlayer, 2), 0)
+  const variance = squaredDifferencesSum / filteredPlayersData.length
   const standardDeviation = Math.sqrt(variance)
 
   // データベースに格納する
   allPlayersData.map(async (player) => {
     const [record] = await (await connection).execute('SELECT player_id FROM players WHERE player_name COLLATE utf8mb4_bin = ? LIMIT 1', [player.name])
     const isExist = record.length > 0
-    const deviationValue = (player.availAverage - averageOfAvailAverageOfAllPlayer) / standardDeviation * 10 + 50
+    const deviationValue = player.availAverage ? (player.availAverage - averageOfAvailAverageOfAllPlayer) / standardDeviation * 10 + 50 : null
     if (isExist) {
       const player_id = record[0].player_id
-      await (await connection).query('UPDATE players SET effective_average = ?, deviation_value = ?, updated_at = ? WHERE player_id COLLATE utf8mb4_bin = ?', [player.availAverage, deviationValue, new Date(), player_id])
+      await (await connection).query('UPDATE players SET effective_average = ?, deviation_value = ?, updated_at = ? WHERE player_id = ?', [player.availAverage, deviationValue, new Date(), player_id])
     } else {
-      const [LatestRecordResult] = await (await connection).execute('SELECT * FROM timeline WHERE player_name = ? ORDER BY created_at DESC LIMIT 1', [player.name])
+      const [LatestRecordResult] = await (await connection).execute('SELECT * FROM timeline WHERE player_name COLLATE utf8mb4_bin = ? ORDER BY created_at DESC LIMIT 1', [player.name])
       const LatestRecord = LatestRecordResult[0]
       await (await connection).query('INSERT INTO players (player_name, ranking, achievement, chara, point, effective_average, deviation_value) VALUES (?)', [[LatestRecord.player_name, LatestRecord.ranking, LatestRecord.achievement, LatestRecord.chara, LatestRecord.point, player.availAverage, deviationValue]])
     }
-    console.log(`${player.name} ${deviationValue.toFixed(3)}`)
+    console.log(`${player.name} ${deviationValue ? deviationValue.toFixed(3) : null}`)
   })
 }
 
