@@ -106,8 +106,10 @@ const Ranking = () => {
       '13':{ name: 'ジョウカ', count: 0, color: 'skyblue' },
       '14':{ name: 'ジャスイ', count: 0, color: 'wheat' },
       '101':{ name: 'カギコ[サカサマ]', count: 0, color: 'deeppink' },
+      '103':{ name: 'ミヨミ[サカサマ]', count: 0, color: 'gold' },
+      '113':{ name: 'ジョウカ[サカサマ]', count: 0, color: 'skyblue' },
     }
-    ranking?.standardRanking?.forEach((r) => charaChartMock[parseInt(r.chara || '0')].count++)
+    ranking?.standardRanking?.forEach((r) => charaChartMock[parseInt(r.chara || '0')]?.count++)
     setCharaChartData(Object.fromEntries(
       Object.entries(charaChartMock).filter(([_, value]) => value.count > 0)
     ))

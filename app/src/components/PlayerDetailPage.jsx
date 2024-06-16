@@ -166,6 +166,8 @@ const PlayerDetailPage = () => {
       '13':{ name: 'ジョウカ', count: 0, color: 'skyblue' },
       '14':{ name: 'ジャスイ', count: 0, color: 'wheat' },
       '101':{ name: 'カギコ[サカサマ]', count: 0, color: 'deeppink' },
+      '103':{ name: 'ミヨミ[サカサマ]', count: 0, color: 'gold' },
+      '113':{ name: 'ジョウカ[サカサマ]', count: 0, color: 'skyblue' },
     }
     const listedChara = []
 
