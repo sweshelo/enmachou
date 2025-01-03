@@ -1,3 +1,9 @@
+# このリポジトリはメンテナンスのためだけに維持されています。
+新しいバージョンの閻魔帳が開発中です。
+- UI: "Medusa" https://github.com/sweshelo/medusa
+- バックエンド: "Choco" https://github.com/sweshelo/choco
+- スマホ: "Persephone II" https://github.com/sweshelo/persephone-II
+
 # 閻魔帳
 閻魔帳はアーケードゲーム『チェイスチェイスジョーカーズ』の全国ランキングデータを自動収集し、各プレイの獲得貢献度を推定するアプリです。
 
